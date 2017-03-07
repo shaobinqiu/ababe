@@ -1,0 +1,14 @@
+{
+	"B":{
+		"Atomic no": 5,
+		"Atomic mass": 10.811,
+		"Atomic radius": 0.85},
+	"Cu":{
+		"Atomic no": 29,
+		"Atomic mass": 63.546,
+		"Atomic radius": 1.35},
+	"Ti":{
+		"Atomic no": 22,
+		"Atomic mass": 47.867,
+		"Atomic radius": 1.4}
+}
