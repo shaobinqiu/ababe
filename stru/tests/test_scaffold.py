@@ -18,10 +18,13 @@ class SiteTestCase(unittest.TestCase):
 
     def test_init(self):
         eq_(Site(), Site("G"))
+        c = Site.create(GhostSpecie())
+        assert_not_equal(id(c), id(c))
 
     def test_properties(self):
         ok_(isinstance(self.sg, Site))
         ok_(isinstance(self.s1, Site))
+        ok_(isinstance(self.c, Site))
 
 
     def test_value(self):
@@ -54,8 +57,8 @@ class GridTestCase(unittest.TestCase):
         self.g = Grid(m, size)
 
     def test_properties(self):
-        ok_(np.allclose(self.g.base_vector, 
-                        np.array(m, dtype=np.float64).reshape((3,3))))
+        # ok_(np.allclose(self.g.base_vector, 
+                        # np.array(m, dtype=np.float64).reshape((3,3))))
         eq_(self.g.length, 1)
         eq_(self.g.width, 2)
         eq_(self.g.height, 4)
@@ -66,37 +69,74 @@ class StruStateTestCase(unittest.TestCase):
         self.m = [[1,0,0],[0,1,0],[0,0,1]]
         vac = Site()
         b = Site(Specie("B"))
-        s_mat = StruState.create_sea(GhostSpecie(), size=(2,2,3))
-        self.s_ifm =   [[[vac,vac], [vac,vac]], 
-                            [[b,b], [b,b]],
-                            [[b,vac], [bac,b]]] # 2x2x3 sites_information
-        self.init_stru = StruState(basis = self.grid_basis, size = (2,2,3), sites_mat = s_mat)
+        self.s_vac = [[[vac,vac,vac],
+                    [vac,vac,vac]],
 
+                    [[vac,vac,vac],
+                    [vac,vac,vac]]]
+        
+        self.s_ifm = [[[vac,vac,b],
+                    [vac,vac,vac]],
+
+                    [[vac,b,vac],
+                    [b,vac,vac]]] # 2x2x3 sites_information
+        self.init_stru = StruState(basis = self.m, size = (2,2,3), sites_mat = s_mat)
+
+
+    def test_create_sea(self):
+        s_mat = StruState.create_sea(GhostSpecie(), size=(2,2,3))
+        eq_(s_mat, self.s_vac)
+                
     def test_init_from_grid():
-        constru_grid = Grid(self.m, size = (2,2,3))
-        s_from_grid = StruState.from_grid(constructed, sites_mat = s_mat)        
+        cg = Grid(self.m, size = (2,2,3))
+        s_from_grid = StruState.from_grid(cg, sites_mat = s_mat)       
         eq_(s_from_grid, self.init_stru)
+
+        # Structure construced using basis and sites information
+        # for the size can be get from sites_matrix
+        eq_(StruState(self.m, sites_mat = s_mat), self.init_stru)
 
     def test_arrange_sites(self):
         self.new_stru = self.init_stru.arrange_sites(self.s_ifm)
 
         # to constructed new stru, should be deepCopy???
-        assert_not_equal(id(self.new_stru), id(self.init_stru))
+        eq_(id(self.new_stru), id(self.init_stru))
         assert_not_equal(id(self.new_stru[0][0][0]), id(self.init_stru[0][0][0]))
 
     def test_get_site(self):
         positon = (1,0,2)
+        eq_(self.new_stru.get_site(), Site())
         eq_(self.new_stru.get_site(position).atom, GhostSpecie())
         eq_(self.new_stru.get_site(position).value, 0)
 
+        p2 = (1,1,0)
+        eq_(self.new_stru.get_site(position).atom, Specie("B"))
+
+    def test_random_matrix(self):
+        size = (2,2,3)
+        tm = [[[0,0,1],
+               [0,0,0]],
+
+              [[0,1,0],
+               [1,0,0]]]
+
+        ok_(tm in StruState.random_matrix(size = size, k=3, el = 1))
+
+        self.a_tm = np.array(tm, dtype=int)
+        ok_((a_tm*7+22).tolist() in StruState.random_matrix(size = size, k=3, sea = 22, el = 29))
+
     def test_mat2sites(self):
-        pass
+        eq_(StruState.mat2sites(self.tm), self.s_ifm)
 
     def test_sites2mat(self):
-        pass
+        eq_(StruState.sites2mat(self.s_ifm), self.tm)
+        # uniform test
+        eq_(StruState.site2mat(StruState.mat2sites(self.s_ifm)), self.s_ifm)
 
     def test_random_fill(self):
-        pass
-        
+        ti_sea = StruState.create_sea(Specie("Ti"), size = (2,2,3))
+        r_gen = self.ti_sea.random_fill(Specie("Cu"), 3)
+        ok_(self.s_ifm in r_gen)
+
 if __name__ == "__main__":
     nose.main()
