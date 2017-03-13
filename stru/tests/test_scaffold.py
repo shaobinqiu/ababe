@@ -1,142 +1,155 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
 
-from ababe.stru.scaffold import Grid, Site, StruState
+from ababe.stru.scaffold import SitesGrid, CStru
 from ababe.stru.element import GhostSpecie, Specie
 import numpy as np
 
 import unittest, nose
 from nose.tools import *
 
-class SiteTestCase(unittest.TestCase):
+class testSitesGrid:
 
     def setUp(self):
-        self.s1 = Site("Cu", value=1)
-        self.s2 = Site("Ti", value=None)
-        self.s3 = Site("B")
-        self.sg = Site("G")
+        g = GhostSpecie()
+        b = Specie("B")
+        self.sites   = [[[b, b],
+                    [g, g]],
 
-    def test_init(self):
-        eq_(Site(), Site("G"))
-        c = Site.create(GhostSpecie())
-        assert_not_equal(id(c), id(c))
-
-    def test_properties(self):
-        ok_(isinstance(self.sg, Site))
-        ok_(isinstance(self.s1, Site))
-        ok_(isinstance(self.c, Site))
-
-
-    def test_value(self):
-        eq_(self.s1.value, 1)
-        ok_(self.s2.value is None)
-        ok_(self.s3.value is None)
-
-        new_s1 = self.s1.copy()
-        eq_(new_s1.value, 1)
-        new_s1.value = 20
-        eq_(new_s1.value, 20)
-        eq_(self.s1.value, 1)
-
-    def test_atom(self):
-        s = self.s2
-        eq_(s.atom.symbol, "Ti")
-        eq_(s.atom.Z, 22)
-        g = self.sg
-        eq_(g.atom.Z, 0)
-        
-        # atom on site can be reset
-        g.atom = "Ti"
-        eq_(g.atom.Z, s.atom.Z)
-
-class GridTestCase(unittest.TestCase):
-
-    def setUp(self):
-        m = [[1,0,0],[0,1,0],[0,0,1]]
-        size = (1,2,4)
-        self.g = Grid(m, size)
+                   [[b, g],
+                    [g, b]]]
+        self.sg = SitesGrid(self.sites)
+        self.allg0 = SitesGrid.sea(2, 2, 2, GhostSpecie())
+        self.allg = SitesGrid.sea(4, 2, 2, GhostSpecie())
 
     def test_properties(self):
         # ok_(np.allclose(self.g.base_vector, 
                         # np.array(m, dtype=np.float64).reshape((3,3))))
-        eq_(self.g.length, 1)
-        eq_(self.g.width, 2)
-        eq_(self.g.height, 4)
+        eq_(self.allg.depth, 4)
+        eq_(self.allg.length, 2)
+        eq_(self.allg.width, 2)
+        eq_(self.sg.sites, self.sites)
 
-class StruStateTestCase(unittest.TestCase):
+    def test_get(self):
+        eq_(self.sg[0, 1, 1], GhostSpecie())
+        self.sg[0, 1, 1] = Specie("B")
+        eq_(self.sg[0, 1, 1], Specie("B"))
+
+    def test_equal(self):
+        other = SitesGrid.sea(4, 2, 2, Specie("Ti"))
+        assert_not_equal(other, self.allg)
+        assert_not_equal(None, self.allg)
+
+    def test_deepCopy(self):
+        g_copy = self.allg.deepCopy()
+        eq_(g_copy, self.allg)
+        assert_not_equal(id(g_copy), id(self.allg))
+        # assert_not_equal(id(g_copy[0, 0, 0]), id(g_copy[0, 0, 0]))
+
+    def test_hash(self):
+        pass
+
+    def test_to_array(self):
+        a = np.array([0]*8).reshape((2,2,2))
+        ok_(np.allclose(self.allg0.to_array(), a))
+        b = np.array([5,5,0,0,5,0,0,5]).reshape((2,2,2))
+        ok_(np.allclose(self.sg.to_array(), b))
+
+    def test_from_array(self):
+        arr = np.array([5,5,0,0,5,0,0,5]).reshape([2,2,2])
+        ss = SitesGrid.from_array(arr)
+        eq_(ss, self.sg)
+
+    def test_random_fill(self):
+        r = SitesGrid.random_fill(GhostSpecie(), (2,2,2), Specie("B"))
+        ok_(r.to_array().sum() in [5*x for x in range(9)])
+
+    def test_gen_speckle(self):
+        c = Specie("Cu")
+        t = Specie("Ti")
+        sites   = [[[c, c],
+                    [t, t]],
+
+                   [[c, t],
+                    [t, c]]]
+        self.sg = SitesGrid(sites)
+        gen = SitesGrid.gen_speckle(Specie("Cu"), (2,2,2), Specie("Ti"), 4)
+        from collections import Iterator
+        ok_(isinstance(gen, Iterator))
+        ok_(self.sg in gen)
+        eq_(next(gen).to_array().sum(), 204)
+        eq_(next(gen).to_array().sum(), 204)
+
+class testCStru:
 
     def setUp(self):
         self.m = [[1,0,0],[0,1,0],[0,0,1]]
-        vac = Site()
-        b = Site(Specie("B"))
-        self.s_vac = [[[vac,vac,vac],
-                    [vac,vac,vac]],
+        g = GhostSpecie()
+        b = Specie("B")
+        self.sites = [[[g, b], 
+                  [g, g]],
 
-                    [[vac,vac,vac],
-                    [vac,vac,vac]]]
-        
-        self.s_ifm = [[[vac,vac,b],
-                    [vac,vac,vac]],
+                 [[b, b],
+                  [b, g]]]
 
-                    [[vac,b,vac],
-                    [b,vac,vac]]] # 2x2x3 sites_information
-        self.init_stru = StruState(basis = self.m, size = (2,2,3), sites_mat = s_mat)
+        self.arr = np.array([0,5,0,0,5,5,5,0]).reshape([2,2,2])
+        self.sg = SitesGrid(self.sites)
+        self.s = CStru(self.m, self.sg)
+
+    def test_get_property(self):
+        eq_(self.s.basis, self.m)
+        # eq_(self.s.get_grid, self.sites)
+        # arr = [[[0, 5],
+        #         [0, 0]],
+
+        #        [[5, 5],
+        #         [5, 0]]]
+        # eq_(self.s.get_array(), arr)
+
+    def test_equal(self):
+        m_0 = [[1,1,1], [0,0,1], [1,0,0]]
+        g = GhostSpecie()
+        b = Specie("B")
+        sites_0 = [[[b, b],
+                    [g, g]],
+
+                   [[b, g],
+                    [g, b]]]
+        sg_0 = SitesGrid(sites_0)
+
+        diff_m = CStru(m_0, self.sg)
+        diff_s = CStru(self.m, sg_0)
+        eq_(self.s, self.s)
+        assert_not_equal(diff_m, self.s)
+        assert_not_equal(diff_s, self.s)
+
+    def test_from_array(self):
+        ss = CStru.from_array(self.m, self.arr)
+        eq_(ss, self.s)
+
+    def test_get_array(self):
+        ok_(np.allclose(self.s.get_array(), self.arr))
+
+    def test_gen_speckle(self):
+        c = Specie("Cu")
+        t = Specie("Ti")
+        sites   = [[[c, c],
+                    [t, t]],
+
+                   [[c, t],
+                    [t, c]]]
+        sg = SitesGrid(sites)
+        gen = CStru.gen_speckle(self.m, Specie("Cu"), (2,2,2), Specie("Ti"), 4)
+        from collections import Iterator
+        ok_(isinstance(gen, Iterator))
+        ok_(CStru(self.m, sg) in gen)
+        eq_(next(gen).get_array().sum(), 204)
+        eq_(next(gen).get_array().sum(), 204)
 
 
-    def test_create_sea(self):
-        s_mat = StruState.create_sea(GhostSpecie(), size=(2,2,3))
-        eq_(s_mat, self.s_vac)
-                
-    def test_init_from_grid():
-        cg = Grid(self.m, size = (2,2,3))
-        s_from_grid = StruState.from_grid(cg, sites_mat = s_mat)       
-        eq_(s_from_grid, self.init_stru)
-
-        # Structure construced using basis and sites information
-        # for the size can be get from sites_matrix
-        eq_(StruState(self.m, sites_mat = s_mat), self.init_stru)
-
-    def test_arrange_sites(self):
-        self.new_stru = self.init_stru.arrange_sites(self.s_ifm)
-
-        # to constructed new stru, should be deepCopy???
-        eq_(id(self.new_stru), id(self.init_stru))
-        assert_not_equal(id(self.new_stru[0][0][0]), id(self.init_stru[0][0][0]))
-
-    def test_get_site(self):
-        positon = (1,0,2)
-        eq_(self.new_stru.get_site(), Site())
-        eq_(self.new_stru.get_site(position).atom, GhostSpecie())
-        eq_(self.new_stru.get_site(position).value, 0)
-
-        p2 = (1,1,0)
-        eq_(self.new_stru.get_site(position).atom, Specie("B"))
-
-    def test_random_matrix(self):
-        size = (2,2,3)
-        tm = [[[0,0,1],
-               [0,0,0]],
-
-              [[0,1,0],
-               [1,0,0]]]
-
-        ok_(tm in StruState.random_matrix(size = size, k=3, el = 1))
-
-        self.a_tm = np.array(tm, dtype=int)
-        ok_((a_tm*7+22).tolist() in StruState.random_matrix(size = size, k=3, sea = 22, el = 29))
-
-    def test_mat2sites(self):
-        eq_(StruState.mat2sites(self.tm), self.s_ifm)
-
-    def test_sites2mat(self):
-        eq_(StruState.sites2mat(self.s_ifm), self.tm)
-        # uniform test
-        eq_(StruState.site2mat(StruState.mat2sites(self.s_ifm)), self.s_ifm)
-
-    def test_random_fill(self):
-        ti_sea = StruState.create_sea(Specie("Ti"), size = (2,2,3))
-        r_gen = self.ti_sea.random_fill(Specie("Cu"), 3)
-        ok_(self.s_ifm in r_gen)
+    # def test_create_random(self):
+    #     r = CStru.create_random(self.m, GhostSpecie(), (2,2,2), Specie("B"), 5)
+    #     eq_(r.get_array().sum(), 25)
 
 if __name__ == "__main__":
     nose.main()

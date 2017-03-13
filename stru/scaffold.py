@@ -5,79 +5,123 @@ import numpy as np
 # import collections
 
 from ababe.stru.element import Specie, GhostSpecie
+from itertools import combinations
 
-class Site(object):
-
-    def __init__(self, atom=GhostSpecie(), value=None):
-        if isinstance(atom, Specie):
-            self._atom = atom
-        elif atom == "G":
-            self._atom = GhostSpecie()
-        else: 
-            self._atom = Specie(atom)
-
-        self._value = value
-
-    @property
-    def value(self):
-        """
-        parameter for RL
-        """
-        return self._value
-
-    @value.setter
-    def value(self, v):
-        self._value = v
-
-    @property
-    def atom(self):
-        return self._atom
-
-    @atom.setter
-    def atom(self, sp):
-        if isinstance(sp, Specie):
-            self._atom = sp
-        elif sp == "G":
-            self._atom = GhostSpecie()
-        else: 
-            self._atom = Specie(sp)
-
-    def copy(self):
-        s = Site(self.atom, self.value)
-        return s
-
-
-
-class Grid(object):
+class SitesGrid(object):
     """
     Grid object. Used for constructed grids where to put the atoms on. 
     Like a chess board. 
     """
 
-    def __init__(self, matrix, size=(2,2,2)):
-        m = np.array(matrix, dtype=np.float64).reshape((3,3))
-        lengths = np.sqrt(np.sum(m ** 2, axis=1))
-        angles = np.zeros(3)
-        for i in range(3):
-            j = (i+1) % 3
-            k = (i+2) % 3
-            # angles[i] = abs_cap(dot(m[j], m[k]) / (lengths[j] * lengths[k]))
+    def __init__(self, sites):
+        self._sites = sites
+        self._depth = len(sites)
+        self._width = len(sites[0])
+        self._length = len(sites[0][0])
 
-        self.length = size[0]
-        self.width = size[1]
-        self.height = size[2]
-        self.sites = [[[Site() for _ in range(self.length)] 
-                                        for _ in range(self.width)]
-                                            for _ in range(self.height)]
+    @classmethod
+    def sea(cls, depth, width, length, sp = GhostSpecie()):
+        sites = [[[sp for _ in range(length)]
+                          for _ in range(width)] 
+                              for _ in range(depth)]
 
-    def dot():
-        pass
+        return cls(sites)
 
-    def get_site(self, position):
-        (x,y) = position
-        return self.sites[x][y]
+    @property
+    def sites(self):
+        return self._sites
 
-    def get_shape(self):
-        pass
+    @property
+    def depth(self):
+        return self._depth
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def length(self):
+        return self._length
+
+    def __getitem__(self, pos):
+        d, w, l = pos
+        return self._sites[d][w][l]
+
+    def __setitem__(self, pos, sp):
+        d, w, l = pos
+        self._sites[d][w][l] = sp
+
+    def __eq__(self, other):
+        if other == None: return False
+        return self._sites == other._sites
+
+    def deepCopy(self):
+        g = SitesGrid(self._sites)
+        g._sites = [x[:][:] for x in self._sites]
+        return g
+
+    def to_array(self):
+        mfunc = np.vectorize(lambda sp: sp.Z)
+        arr = mfunc(np.array(self._sites))
+        return arr
+
+    @classmethod
+    def from_array(cls, arr):
+        mfunc = np.vectorize(lambda n: Specie.to_sp(n))
+        sarr = mfunc(arr)
+        return cls(sarr.tolist())
+
+    @classmethod
+    def random_fill(cls, bsp, size, sp):
+        # d, w, l = size
+        rarr = (sp.Z - bsp.Z)*np.random.randint(2, size = size)
+        sarr = np.zeros(size, dtype = np.int)+bsp.Z
+        arr = sarr + rarr
+        return cls.from_array(arr)
+
+    @classmethod
+    def gen_speckle(cls, ssp, size, sp, noa):
+        d, w, l = size
+        n = d * w * l
+        i_sea = ssp.Z
+        i_speckle = sp.Z
+        for w_on in combinations(range(n), noa):
+            out = [i_sea]*n
+            for index in w_on:
+                out[index] = i_speckle
+            arr = np.array(out, dtype = np.int).reshape(size)
+            yield cls.from_array(arr)
 
 
+class CStru(object):
+
+    def __init__(self, m, sg):
+        self._matrix = m
+        self._sites_grid = sg
+
+    @property
+    def basis(self):
+        return self._matrix
+
+    @property
+    def sites_grid(self):
+        return self._sites_grid
+
+    # def get_grid(self):
+    #     return self._sites_grid.sites
+
+    def get_array(self):
+        return self._sites_grid.to_array()
+
+    def __eq__(self, other):
+        if other == None: return False
+        return other.basis == self.basis and other.sites_grid == self.sites_grid
+
+    @classmethod
+    def from_array(cls, m, arr):
+        return cls(m, SitesGrid.from_array(arr))
+
+    @classmethod
+    def gen_speckle(cls, m, ssp, size, sp, noa):
+        for stru in SitesGrid.gen_speckle(ssp, size, sp, noa):
+            yield cls(m, stru)
