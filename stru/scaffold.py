@@ -98,14 +98,30 @@ class CStru(object):
     def __init__(self, m, sg):
         self._matrix = m
         self._sites_grid = sg
+        self.depth = sg.depth
+        self.width = sg.width
+        self.length = sg.length
+
 
     @property
-    def basis(self):
+    def m(self):
         return self._matrix
 
     @property
     def sites_grid(self):
         return self._sites_grid
+
+    # @property
+    # def depth(self):
+    #     return self.sites_grid.depth
+
+    # @property
+    # def width(self):
+    #     return self.sites_grid.width
+
+    # @property
+    # def length(self):
+    #     return self.sites_grid.length
 
     # def get_grid(self):
     #     return self._sites_grid.sites
@@ -115,7 +131,7 @@ class CStru(object):
 
     def __eq__(self, other):
         if other == None: return False
-        return other.basis == self.basis and other.sites_grid == self.sites_grid
+        return other.m == self.m and other.sites_grid == self.sites_grid
 
     @classmethod
     def from_array(cls, m, arr):
@@ -125,3 +141,25 @@ class CStru(object):
     def gen_speckle(cls, m, ssp, size, sp, noa):
         for stru in SitesGrid.gen_speckle(ssp, size, sp, noa):
             yield cls(m, stru)
+
+    @staticmethod
+    def _yield_position(d, w, l):
+        for c in range(d):
+            for b in range(w):
+                for a in range(l):
+                    yield [c, b, a]
+
+    def get_cell(self):
+        marr = np.array(self._matrix, dtype = np.float64).reshape((3,3))
+        g_arr = self._sites_grid.to_array()
+        d = self.depth
+        w = self.width
+        l = self.length
+
+        arr_bas = marr*np.array([d,w,l], dtype = np.int).reshape((3,1))
+        grid_position = np.array([p for p in CStru._yield_position(d, w, l)]) 
+        frac = np.array([1/d, 1/w, 1/l], dtype = np.float64).reshape((1,3))
+        arr_pos = grid_position * frac
+        arr_num = np.array([i for i in g_arr.flat])
+
+        return (arr_bas, arr_pos, arr_num)

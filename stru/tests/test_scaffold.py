@@ -97,7 +97,11 @@ class testCStru:
         self.s = CStru(self.m, self.sg)
 
     def test_get_property(self):
-        eq_(self.s.basis, self.m)
+        eq_(self.s.m, self.m)
+        # eq_(self.s.depth, 2)
+        # eq_(self.s.width, 2)
+        # eq_(self.s.length, 2)
+
         # eq_(self.s.get_grid, self.sites)
         # arr = [[[0, 5],
         #         [0, 0]],
@@ -146,6 +150,57 @@ class testCStru:
         eq_(next(gen).get_array().sum(), 204)
         eq_(next(gen).get_array().sum(), 204)
 
+    def test_get_cell(self):
+        c = Specie("Cu")
+        t = Specie("Ti")
+        m = [[-0.5, -0.5, -0.5],
+             [-0.5,  0.5,  0.5],
+             [ 0.5, -0.5,  0.5]]
+
+        sites01 = [[[c]]]
+        sites02 = [[[t, c, t],
+                    [t, t, c]]]
+        sg01 = SitesGrid(sites01)
+        sg02 = SitesGrid(sites02)
+        cstru01 = CStru(m, sg01)
+        cstru02 = CStru(m, sg02)
+        lat01, pos01, num01 = cstru01.get_cell()
+        lat02, pos02, num02 = cstru02.get_cell()
+
+        ok_(np.allclose(lat01, np.array([[-0.5, -0.5, -0.5],
+                                        [-0.5,  0.5,  0.5],
+                                        [ 0.5, -0.5,  0.5]])))
+        ok_(np.allclose(pos01, np.array([[0, 0, 0]])))
+        ok_(np.allclose(num01, np.array([29])))
+
+        ok_(np.allclose(lat02, np.array([[-0.5, -0.5, -0.5],
+                                          [-1,  1,  1],
+                                         [ 1.5, -1.5,  1.5]])))
+        ok_(np.allclose(pos02, np.array([[0, 0, 0],
+                                         [0, 0, 1/3],
+                                         [0, 0, 2/3],
+                                         [0, 1/2, 0],
+                                         [0, 1/2, 1/3],
+                                         [0, 1/2, 2/3]])))
+        ok_(np.allclose(num02, np.array([22, 29, 22, 22, 22, 29])))
+
+    # def test_from_cell(self):
+    #     c = Specie("Cu")
+    #     t = Specie("Ti")
+    #     m = [[-0.5, -0.5, -0.5],
+    #          [-0.5,  0.5,  0.5],
+    #          [ 0.5, -0.5,  0.5]]
+
+    #     sites01 = [[[c]]]
+    #     sites02 = [[[t, c, t],
+    #                 [t, t, c]]]
+    #     sg01 = SitesGrid(sites01)
+    #     sg02 = SitesGrid(sites02)
+    #     cstru01 = CStru(m, sg01)
+    #     cstru02 = CStru(m, sg02)
+
+    #     eq_(cstru01, CStru.from_cell(cstru01.get_cell()))
+    #     eq_(cstru02, CStru.from_cell(cstru02.get_cell()))
 
     # def test_create_random(self):
     #     r = CStru.create_random(self.m, GhostSpecie(), (2,2,2), Specie("B"), 5)

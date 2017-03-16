@@ -1,0 +1,15 @@
+All new features; ml; and documentations are in the 
+nightly branch which hiden from public shallowly.
+All devel should first be merge to the nightly, and 
+then to master when technically and authorized allowed.
+
+1. bcc as primitive cell
+
+a bcc of a conventional cell can be transformed to the
+one atom primitive cell by Rotation matrix P:
+P = -0.5 -0.5  0.5
+    -0.5  0.5 -0.5
+    -0.5  0.5  0.5
+
+
+
