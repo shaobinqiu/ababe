@@ -13,3 +13,24 @@ P = -0.5 -0.5  0.5
 
 
 
+2. algorithom of the sites ordered generator.
+
+function site_ordered_generator:
+    input: a generator of repeated cstructures
+    output: a generator of non-repeated cstructures
+
+    set_isostructure = set()
+    for cstru in gen_repeat_cstru:
+        if cstru not in set_isostructure:
+            yield cstru
+            append cstru's isostructure into set_isostructure
+
+function update_set_isostru:
+    input: a cstru; the present set_isostructure
+    output: a new set_isostructure
+
+    cstru to a cell cell_cstru
+    cell_cstru transform to all isostructure by its parent structure's ops
+    isostructures_cstru should be a set now
+
+    join the isostructure_cstru and set_isostructure to new_set_isostructure

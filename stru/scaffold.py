@@ -163,3 +163,9 @@ class CStru(object):
         arr_num = np.array([i for i in g_arr.flat])
 
         return (arr_bas, arr_pos, arr_num)
+
+    @staticmethod
+    def get_id_matrix(cell, d, w, l):
+        arr_num = cell[2]
+
+        return arr_num.reshape((d, w, l))

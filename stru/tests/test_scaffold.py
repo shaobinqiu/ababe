@@ -184,6 +184,26 @@ class testCStru:
                                          [0, 1/2, 2/3]])))
         ok_(np.allclose(num02, np.array([22, 29, 22, 22, 22, 29])))
 
+    # def test_get_id_matrix(self):
+    #     c = Specie("Cu")
+    #     t = Specie("Ti")
+    #     m = [[-0.5, -0.5, -0.5],
+    #          [-0.5,  0.5,  0.5],
+    #          [ 0.5, -0.5,  0.5]]
+
+    #     sites01 = [[[c]]]
+    #     sites02 = [[[t, c, t],
+    #                 [t, t, c]]]
+    #     sg01 = SitesGrid(sites01)
+    #     sg02 = SitesGrid(sites02)
+    #     cell01 = CStru(m, sg01).get_cell()
+    #     cell02 = CStru(m, sg02).get_cell()
+
+    #     ok_(np.allclose(CStru.get_id_matrix(cell01, 1, 1, 1), sg01.to_array()))
+    #     ok_(np.allclose(CStru.get_id_matrix(cell02, 1, 2, 3), sg02.to_array()))
+
+
+
     # def test_from_cell(self):
     #     c = Specie("Cu")
     #     t = Specie("Ti")
