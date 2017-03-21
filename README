@@ -26,7 +26,7 @@ function site_ordered_generator:
             append cstru's isostructure into set_isostructure
 
 function update_set_isostru:
-    input: a cstru; the present set_isostructure
+    input: a cstru; the present set_isostructure; parent's ops
     output: a new set_isostructure
 
     cstru to a cell cell_cstru

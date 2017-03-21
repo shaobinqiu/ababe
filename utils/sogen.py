@@ -1,9 +1,15 @@
 #!/usr/bin/env python
 import argparse
+import sys
+import os.path
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from ababe.stru.scaffold import SitesGrid, CStru
+from ababe.stru.element import GhostSpecie, Specie
 
 import numpy as np
 from spglib import get_symmetry
+import os
 
 def _get_id_seq(pos, arr_num):
     func_tofrac = np.vectorize(lambda x: x % 1)
@@ -46,6 +52,19 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
 def default(str):
     return str + '  [Default: %(default)s]'
 
+def lat_dict(lattice):
+    lat = { 'bcc': [[-0.5, -0.5, -0.5],
+                [-0.5,  0.5,  0.5],
+                [ 0.5, -0.5,  0.5]],
+            'fcc': [[0, 0.5, 0.5],
+                    [0.5, 0, 0.5],
+                    [0.5, 0.5, 0]],
+            'scc': [[1, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 1]]}
+
+    return lat[lattice]
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc'],
@@ -53,13 +72,35 @@ def main():
     parser.add_argument('-b', '--base', dest='sea', required=True,
                             help='Element abbreviation of the base specie')
     parser.add_argument('-g', '--size', nargs=3, dest='size', required=True,
-                            help='Grid size of structure')
+                            help='Grid size of structure', type=int)
     parser.add_argument('-s', '--speckle', dest='speckle', required=True,
                             help='Element abbreviation of the speckle specie')
     parser.add_argument('-n', '--num', dest='number', type=int, 
                             help=default('Number of speckles filled in the base'), default=2)
+    parser.add_argument('-o', '--output-type', 
+                            help=default('Output type of generated non-duplicate periodic grid structure'), 
+                                default='normal')
 
     args = parser.parse_args()
+    size = args.size
+    sea_ele = Specie(args.sea)
+    speckle = Specie(args.speckle)
+
+    nodup_gen = gen_nodup_cstru(lat_dict(args.lattice), sea_ele, size, speckle, args.number)
+    with open('allstru.txt', 'w') as f:
+        for s in nodup_gen:
+            basis, pos, atom = s.get_cell()
+            f.write('ONE NEW STRUCTURE:\n')
+            f.write('The basis is:\n')
+            f.write('\n'.join(str(line) for line in basis))
+
+            f.write('\nThe position is:\n')
+            f.write('\n'.join(str(line) for line in pos))
+
+            f.write('\nThe elements is:\n')
+            f.write(str(atom))
+
+            f.write('\n\n\n')
     # print(args.lattice)
     # print(args.sea)
     # print(args.size)
