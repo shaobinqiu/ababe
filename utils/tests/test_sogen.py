@@ -9,6 +9,21 @@ from spglib import get_symmetry
 import ababe.utils.sogen as sogen
 from ababe.stru.element import GhostSpecie, Specie
 from ababe.stru.scaffold import SitesGrid, CStru
+from ababe.stru.scaffold2d import SitesGrid2d, CStru2d
+
+class testAlgorithomSog2d:
+
+    # def setUp(self):
+    #     pos_01 = 
+
+    def test_get_id_seq2d(self):
+        pass
+
+    def test_update_isoset2d(self):
+        pass
+
+    def test_gen_nodup_cstru2d(self):
+        pass
 
 class testAlgorithomSog:
 

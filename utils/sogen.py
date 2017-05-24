@@ -11,6 +11,8 @@ import numpy as np
 from spglib import get_symmetry
 import os
 
+# Filename sogen is for Site-Occupy-GENerator
+
 def _get_id_seq(pos, arr_num):
     func_tofrac = np.vectorize(lambda x: x % 1)
     o_pos = func_tofrac(pos)
@@ -36,7 +38,7 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
     d, w, l = size
     ele_sea = SitesGrid.sea(d, w, l, sea_ele)
     cell_mother_stru = CStru(lattice, ele_sea).get_cell()
-    sym = get_symmetry(cell_mother_stru, symprec=1e-5)
+    sym = get_symmetry(cell_mother_stru, symprec=1e-3)
     ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
 
     gen_dup_cstrus = CStru.gen_speckle(lattice, sea_ele, size, speckle, num)
@@ -61,13 +63,24 @@ def lat_dict(lattice):
                     [0.5, 0.5, 0]],
             'scc': [[1, 0, 0],
                     [0, 1, 0],
-                    [0, 0, 1]]}
+                    [0, 0, 1]],
+            'triflat': [[0, 1, 0],
+                        [0.5, 0.866, 0],
+                        [0, 0, 1]]}
 
     return lat[lattice]
 
+# This function is used for remove the structures conflict with 
+# the defined restricted condition
+# input: a generator to produce structures
+# output: a generator of structures satisfied with the restricted 
+# condition.
+def filter_restriction(cstru, condition):
+    pass
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc'],
+    parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc', 'triflat'],
                             help='Lattice type of grid conventional cell')
     parser.add_argument('-b', '--base', dest='sea', required=True,
                             help='Element abbreviation of the base specie')

@@ -34,3 +34,7 @@ function update_set_isostru:
     isostructures_cstru should be a set now
 
     join the isostructure_cstru and set_isostructure to new_set_isostructure
+
+## TODO
+    Periodic strucutres distinguish. 6x6 triangle gird, with no double-atoms
+    connected.
