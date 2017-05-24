@@ -14,6 +14,7 @@ import os
 # Filename sogen is for Site-Occupy-GENerator
 
 def _get_id_seq(pos, arr_num):
+    # transfer the atom position into >=0 and <=1
     func_tofrac = np.vectorize(lambda x: x % 1)
     o_pos = func_tofrac(pos)
     z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
@@ -50,7 +51,6 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
             _update_isoset(isoset, cstru, ops)
             yield cstru
 
-
 def default(str):
     return str + '  [Default: %(default)s]'
 
@@ -64,9 +64,9 @@ def lat_dict(lattice):
             'scc': [[1, 0, 0],
                     [0, 1, 0],
                     [0, 0, 1]],
-            'triflat': [[0, 1, 0],
-                        [0.5, 0.866, 0],
-                        [0, 0, 1]]}
+            'triflat': [[1, 0, 0],
+                        [0.5, 0.8660254, 0],
+                        [0, 0, 20]]}
 
     return lat[lattice]
 
@@ -75,8 +75,30 @@ def lat_dict(lattice):
 # input: a generator to produce structures
 # output: a generator of structures satisfied with the restricted 
 # condition.
-def filter_restriction(cstru, condition):
-    pass
+def is_speckle_disjunct(cstru, speckle):
+    m = cstru.m
+    sites_arr = cstru.get_array()
+    ele = speckle.Z
+
+    pool_sites_arr = _pool_sites(sites_arr)
+    ele_index = np.argwhere(pool_sites_arr==ele)
+    
+
+def _pool_sites(sites_arr):
+    d, w, l = np.shape(sites_arr)
+    pool = sites_arr    
+    # pool the elements of outer dimension (depth)
+    depth_d = pool[0, :, :].reshape(1,w,l)
+    pool = np.concatenate((l_arr, depth_d), axis=0)
+    # pool the elements of meddle dimension (width)
+    width_d = pool[:, 0, :].reshape(d+1, 1, l)
+    pool = np.concatenate((pool, width_d), axis=1)
+    # pool the elements of inner dimension (length)
+    length_d = pool[:, :, 0].reshape(d+1, w+1, 1)
+    pool = np.concatenate((pool, length_d), axis=2)
+
+    return pool
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -119,7 +141,6 @@ def main():
     # print(args.size)
     # print(args.speckle)
     # print(args.number)
-
 
 if __name__ == "__main__":
     main()
