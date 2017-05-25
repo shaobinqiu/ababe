@@ -135,10 +135,10 @@ class testAlgorithomSog:
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()
         b = Specie('B')
-        m = [[1, 0, 0],
-             [0.5, 0.866, 0],
-             [0, 0, 20]]
-        ele_sea = SitesGrid.sea(4, 4, 1, b)
+        m = [[0, 0, 20],
+             [1, 0, 0],
+             [0.5, 0.8660254, 0]]
+        # ele_sea = SitesGrid.sea(4, 4, 1, b)
         # cell_mother_stru = CStru(m, ele_sea).get_cell()
         # sym = get_symmetry(cell_mother_stru, symprec=1e-3)
         # ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
@@ -163,8 +163,8 @@ class testAlgorithomSog:
 
 
         sites_2 = [[[g, b, b, b],
-                    [b, b, b, b],
                     [b, g, b, b],
+                    [b, b, b, b],
                     [b, b, b, b]]]
         sg_2 = SitesGrid(sites_2)
         cstru02 = CStru(m, sg_2)

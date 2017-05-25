@@ -10,5 +10,9 @@
 	"Ti":{
 		"Atomic no": 22,
 		"Atomic mass": 47.867,
-		"Atomic radius": 1.4}
+		"Atomic radius": 1.4},
+	"G":{
+		"Atomic no": 0,
+		"Atomic mass": 0,
+		"Atomic radius": 0}
 }

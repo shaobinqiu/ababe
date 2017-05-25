@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import argparse
+import yaml
 import sys
 import os.path
 
@@ -65,9 +66,10 @@ def lat_dict(lattice):
             'scc': [[1, 0, 0],
                     [0, 1, 0],
                     [0, 0, 1]],
-            'triflat': [[1, 0, 0],
-                        [0.5, 0.8660254, 0],
-                        [0, 0, 20]]}
+            'triflat': [[0, 0, 20],
+                        [1, 0, 0],
+                        [0.5, 0.8660254, 0]]
+            }
 
     return lat[lattice]
 
@@ -85,11 +87,13 @@ def is_speckle_disjunct(cstru, speckle):
     ele_index = np.argwhere(pool_sites_arr==ele)
     points = np.array([_index2coor(ind, m) for ind in ele_index])
     min_d = _min_dist(points)
-    is_disjunct = min_d > 1
+    is_disjunct = min_d > 1.01
 
     return is_disjunct
 
 def _min_dist(points):
+    # get the closest pair of points
+    # Brute-force algorithm
     min_distance = 9999
     pairs = combinations(points, 2)
     for pair in pairs:
@@ -120,36 +124,78 @@ def _pool_sites(sites_arr):
 def _index2coor(ind, m):
     m_arr = np.array(m)
     d, w, l = ind
-    v1 = m_arr[0]*l
+    v1 = m_arr[0]*d
     v2 = m_arr[1]*w
-    v3 = m_arr[2]*d
+    v3 = m_arr[2]*l
     cood = np.array([v1[0]+v2[0]+v3[0], v1[1]+v2[1]+v3[1], v1[2]+v2[2]+v3[2]])
     return cood
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc', 'triflat'],
-                            help='Lattice type of grid conventional cell')
-    parser.add_argument('-b', '--base', dest='sea', required=True,
-                            help='Element abbreviation of the base specie')
-    parser.add_argument('-g', '--size', nargs=3, dest='size', required=True,
-                            help='Grid size of structure', type=int)
-    parser.add_argument('-s', '--speckle', dest='speckle', required=True,
-                            help='Element abbreviation of the speckle specie')
-    parser.add_argument('-n', '--num', dest='number', type=int, 
-                            help=default('Number of speckles filled in the base'), default=2)
-    parser.add_argument('-o', '--output-type', 
-                            help=default('Output type of generated non-duplicate periodic grid structure'), 
-                                default='normal')
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc', 'triflat'],
+    #                         help='Lattice type of grid conventional cell')
+    # parser.add_argument('-b', '--base', dest='sea', required=True,
+    #                         help='Element abbreviation of the base specie')
+    # parser.add_argument('-g', '--size', nargs=3, dest='size', required=True,
+    #                         help='Grid size of structure', type=int)
+    # parser.add_argument('-s', '--speckle', dest='speckle', required=True,
+    #                         help='Element abbreviation of the speckle specie')
+    # parser.add_argument('-n', '--num', dest='number', type=int, 
+    #                         help=default('Number of speckles filled in the base'), default=2)
+    # parser.add_argument('-o', '--output-type', 
+    #                         help=default('Output type of generated non-duplicate periodic grid structure'), 
+    #                             default='normal')
 
-    args = parser.parse_args()
-    size = args.size
-    sea_ele = Specie(args.sea)
-    speckle = Specie(args.speckle)
+    # args = parser.parse_args()
+    # size = args.size
+    # sea_ele = Specie(args.sea)
+    # speckle = Specie(args.speckle)
 
-    nodup_gen = gen_nodup_cstru(lat_dict(args.lattice), sea_ele, size, speckle, args.number)
+    # nodup_gen = gen_nodup_cstru(lat_dict(args.lattice), sea_ele, size, speckle, args.number)
+    # with open('allstru.txt', 'w') as f:
+    #     for s in nodup_gen:
+    #         basis, pos, atom = s.get_cell()
+    #         f.write('ONE NEW STRUCTURE:\n')
+    #         f.write('The basis is:\n')
+    #         f.write('\n'.join(str(line) for line in basis))
+
+    #         f.write('\nThe position is:\n')
+    #         f.write('\n'.join(str(line) for line in pos))
+
+    #         f.write('\nThe elements is:\n')
+    #         f.write(str(atom))
+
+    #         f.write('\n\n\n')
+
+    settings = open("setting.yaml", "r")
+    args = yaml.load(settings)
+    print(args)
+
+    size = args['grid_size']
+    sea_ele = Specie(args['base'])
+    speckle = Specie(args['speckle'])
+
+    nodup_gen = gen_nodup_cstru(lat_dict(args['lattice']), sea_ele, size, speckle, args['number'])
+
+    if args["restriction"]:
+        # result = list(filter(lambda x: is_speckle_disjunct(x, speckle), nodup_gen))
+        # print(result)
+        result = []
+        for c in nodup_gen:
+            print(c)
+            print(is_speckle_disjunct(c, speckle))
+
+            if is_speckle_disjunct(c, speckle):
+                print(is_speckle_disjunct(c, speckle))
+                result.append(c)
+
+        print(result)
+    else:
+        result = nodup_gen
+
     with open('allstru.txt', 'w') as f:
-        for s in nodup_gen:
+        for s in result:
+            print(result)
             basis, pos, atom = s.get_cell()
             f.write('ONE NEW STRUCTURE:\n')
             f.write('The basis is:\n')
@@ -161,12 +207,10 @@ def main():
             f.write('\nThe elements is:\n')
             f.write(str(atom))
 
+            f.write('\nThe array is:\n')
+            f.write('\n'.join(str(line) for line in s.get_array()))
+
             f.write('\n\n\n')
-    # print(args.lattice)
-    # print(args.sea)
-    # print(args.size)
-    # print(args.speckle)
-    # print(args.number)
 
 if __name__ == "__main__":
     main()
