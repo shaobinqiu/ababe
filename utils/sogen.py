@@ -6,6 +6,7 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from ababe.stru.scaffold import SitesGrid, CStru
 from ababe.stru.element import GhostSpecie, Specie
+from itertools import combinations
 
 import numpy as np
 from spglib import get_symmetry
@@ -82,14 +83,31 @@ def is_speckle_disjunct(cstru, speckle):
 
     pool_sites_arr = _pool_sites(sites_arr)
     ele_index = np.argwhere(pool_sites_arr==ele)
-    
+    points = np.array([_index2coor(ind, m) for ind in ele_index])
+    min_d = _min_dist(points)
+    is_disjunct = min_d > 1
+
+    return is_disjunct
+
+def _min_dist(points):
+    min_distance = 9999
+    pairs = combinations(points, 2)
+    for pair in pairs:
+        if _dist(pair[0], pair[1]) < min_distance:
+            min_distance = _dist(pair[0], pair[1])
+
+    return min_distance
+
+def _dist(p,q):
+    dist = np.linalg.norm(p-q)
+    return dist
 
 def _pool_sites(sites_arr):
     d, w, l = np.shape(sites_arr)
     pool = sites_arr    
     # pool the elements of outer dimension (depth)
     depth_d = pool[0, :, :].reshape(1,w,l)
-    pool = np.concatenate((l_arr, depth_d), axis=0)
+    pool = np.concatenate((pool, depth_d), axis=0)
     # pool the elements of meddle dimension (width)
     width_d = pool[:, 0, :].reshape(d+1, 1, l)
     pool = np.concatenate((pool, width_d), axis=1)
@@ -99,6 +117,14 @@ def _pool_sites(sites_arr):
 
     return pool
 
+def _index2coor(ind, m):
+    m_arr = np.array(m)
+    d, w, l = ind
+    v1 = m_arr[0]*l
+    v2 = m_arr[1]*w
+    v3 = m_arr[2]*d
+    cood = np.array([v1[0]+v2[0]+v3[0], v1[1]+v2[1]+v3[1], v1[2]+v2[2]+v3[2]])
+    return cood
 
 def main():
     parser = argparse.ArgumentParser()
