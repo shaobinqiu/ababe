@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import argparse
-import yaml
 import sys
 import os.path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+# sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from ababe.stru.scaffold import SitesGrid, CStru
 from ababe.stru.element import GhostSpecie, Specie
 from itertools import combinations
@@ -130,7 +128,7 @@ def _index2coor(ind, m):
     cood = np.array([v1[0]+v2[0]+v3[0], v1[1]+v2[1]+v3[1], v1[2]+v2[2]+v3[2]])
     return cood
 
-def main():
+# def main():
     # parser = argparse.ArgumentParser()
     # parser.add_argument('--lattice', choices=['bcc', 'fcc', 'scc', 'triflat'],
     #                         help='Lattice type of grid conventional cell')
@@ -166,51 +164,3 @@ def main():
     #         f.write(str(atom))
 
     #         f.write('\n\n\n')
-
-    settings = open("setting.yaml", "r")
-    args = yaml.load(settings)
-    print(args)
-
-    size = args['grid_size']
-    sea_ele = Specie(args['base'])
-    speckle = Specie(args['speckle'])
-
-    nodup_gen = gen_nodup_cstru(lat_dict(args['lattice']), sea_ele, size, speckle, args['number'])
-
-    if args["restriction"]:
-        # result = list(filter(lambda x: is_speckle_disjunct(x, speckle), nodup_gen))
-        # print(result)
-        result = []
-        for c in nodup_gen:
-            print(c)
-            print(is_speckle_disjunct(c, speckle))
-
-            if is_speckle_disjunct(c, speckle):
-                print(is_speckle_disjunct(c, speckle))
-                result.append(c)
-
-        print(result)
-    else:
-        result = nodup_gen
-
-    with open('allstru.txt', 'w') as f:
-        for s in result:
-            print(result)
-            basis, pos, atom = s.get_cell()
-            f.write('ONE NEW STRUCTURE:\n')
-            f.write('The basis is:\n')
-            f.write('\n'.join(str(line) for line in basis))
-
-            f.write('\nThe position is:\n')
-            f.write('\n'.join(str(line) for line in pos))
-
-            f.write('\nThe elements is:\n')
-            f.write(str(atom))
-
-            f.write('\nThe array is:\n')
-            f.write('\n'.join(str(line) for line in s.get_array()))
-
-            f.write('\n\n\n')
-
-if __name__ == "__main__":
-    main()

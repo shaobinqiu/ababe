@@ -6,24 +6,9 @@ from nose.tools import *
 
 import numpy as np
 from spglib import get_symmetry
-import ababe.utils.sogen as sogen
+import ababe.stru.sogen as sogen
 from ababe.stru.element import GhostSpecie, Specie
 from ababe.stru.scaffold import SitesGrid, CStru
-from ababe.stru.scaffold2d import SitesGrid2d, CStru2d
-
-class testAlgorithomSog2d:
-
-    # def setUp(self):
-    #     pos_01 = 
-
-    def test_get_id_seq2d(self):
-        pass
-
-    def test_update_isoset2d(self):
-        pass
-
-    def test_gen_nodup_cstru2d(self):
-        pass
 
 class testAlgorithomSog:
 
@@ -128,9 +113,9 @@ class testAlgorithomSog:
         nodup_01 = [stru for stru in gen_01]
         eq_(len(nodup_01), 1)
 
-        # gen_02 = sogen.gen_nodup_cstru(m, c, (1,2,8), t, 4)
-        # nodup_02 = [stru for stru in gen_02]
-        # eq_(len(nodup_02), 51)
+        gen_02 = sogen.gen_nodup_cstru(m, c, (1,2,8), t, 4)
+        nodup_02 = [stru for stru in gen_02]
+        eq_(len(nodup_02), 51)
 
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()
