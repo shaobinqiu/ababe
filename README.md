@@ -1,47 +1,49 @@
-Title: ABabe
+# ABabe
 
-# Introduction
+## Introduction
 ABabe is a library with some uitils to deal grid site
  structures.
 
-# Installation
+## Installation
 1. From source
 
-    ::: console
-    $ cd ABabe
-    $ pip install .
-    $ pip install -U .
+```
+$ cd ABabe
+$ pip install .
+$ pip install -U .
+```
 
-# How to use
+## How to use
 
-1. grid generator with no duplicate structure
+1. `grid_gen.py` with no duplicate structure
 
-    ::: yaml
-    # lattice shape of grid
-    # triflat for plant triangle grid
-    lattice: triflat
-    
-    # base is the element of full padding grid
-    base: B
-    
-    # grid size -- seq are depth width lenght
-    grid_size: [1, 4, 4]
-    
-    # speckle -- the element of filled site
-    speckle: G
-    
-    # how many site are filled with speckle
-    number: 3
-    
-    # the output filetype
-    output: normal
-    
-    # ON or OFF the is_speckle_disjunct restriction
-    restriction: True
+```
+# lattice shape of grid
+# triflat for plant triangle grid
+lattice: triflat
 
-    ::: console
-    python utils/grid_gen.py -f setting.yaml
+# base is the element of full padding grid
+base: B
 
+# grid size -- seq are depth width lenght
+grid_size: [1, 4, 4]
+
+# speckle -- the element of filled site
+speckle: G
+
+# how many site are filled with speckle
+number: 3
+
+# the output filetype
+output: normal
+
+# ON or OFF the is_speckle_disjunct restriction
+restriction: True
+```
+
+```
+$ python utils/grid_gen.py -f setting.yaml
+```
 
 
 
