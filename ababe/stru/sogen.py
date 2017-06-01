@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+# coding: utf-8
+# Distributed under the terms of the MIT License.
+
 import sys
 import os.path
 
-# sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from ababe.stru.scaffold import SitesGrid, CStru
 from ababe.stru.element import GhostSpecie, Specie
 from itertools import combinations
