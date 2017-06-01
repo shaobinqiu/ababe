@@ -18,6 +18,8 @@ $ pip install -U .
 1. `grid_gen.py` with no duplicate structure
 
 ```
+# This is the setting.yaml file for grid_gen.py
+
 # lattice shape of grid
 # triflat for plant triangle grid
 lattice: triflat
@@ -48,7 +50,7 @@ $ python utils/grid_gen.py -f setting.yaml
 
 
 
-All new features; ml; and documentations are in the 
+<!-- All new features; ml; and documentations are in the 
 nightly branch which hiden from public shallowly.
 All devel should first be merge to the nightly, and 
 then to master when technically and authorized allowed.
@@ -88,3 +90,4 @@ function update_set_isostru:
 ## TODO
     Periodic strucutres distinguish. 6x6 triangle gird, with no double-atoms
     connected.
+ -->
