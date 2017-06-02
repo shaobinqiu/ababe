@@ -17,8 +17,10 @@ def default(str):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--file', dest='settings', 
+    parser.add_argument('-fi', '--input', dest='settings', 
                             help='Setting file for site-occupied generator')
+    parser.add_argument('-fo', '--output', dest='output_file',
+                            help='The location of output file')
     cmd_args = parser.parse_args()
 
     settings = open(cmd_args.settings, "r")
@@ -36,20 +38,26 @@ def main():
         # print(result)
         result = []
         for c in nodup_gen:
-            print(c)
+            # print(c)
             print(is_speckle_disjunct(c, speckle))
 
             if is_speckle_disjunct(c, speckle):
-                print(is_speckle_disjunct(c, speckle))
+                # print(is_speckle_disjunct(c, speckle))
                 result.append(c)
 
-        print(result)
+        # print(result)
     else:
         result = nodup_gen
 
-    with open('allstru.txt', 'w') as f:
+    with open(cmd_args.output_file, 'w') as f:
+        print("\n\nThere are {0} structures nonduplicated.".format(len(result)))
+        f.write('#######################################################\n')
+        f.write('There are {0} structures nonduplicated\n'.format(len(result)))
+        f.write('#######################################################')
+        f.write('\n\n')
+
         for s in result:
-            print(result)
+            # print(result)
             basis, pos, atom = s.get_cell()
             f.write('ONE NEW STRUCTURE:\n')
             f.write('The basis is:\n')
