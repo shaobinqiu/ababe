@@ -44,7 +44,7 @@ restriction: True
 ```
 
 ```
-$ python utils/grid_gen.py -f setting.yaml
+$ python utils/grid_gen.py -fi setting.yaml -fo <output_file_name>
 ```
 
 
