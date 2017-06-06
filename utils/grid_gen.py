@@ -47,7 +47,7 @@ def main():
 
         # print(result)
     else:
-        result = nodup_gen
+        result = list(nodup_gen)
 
     with open(cmd_args.output_file, 'w') as f:
         print("\n\nThere are {0} structures nonduplicated.".format(len(result)))

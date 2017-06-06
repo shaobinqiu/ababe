@@ -18,15 +18,15 @@ class testAlgorithomSog:
     def test_get_id_seq(self):
         pos_0 = np.array([[ 0.        ,  0.        ,  0.        ],
                            [ 0.        ,  0.        ,  0.33333333],
-                           [ 0.        ,  0.        ,  0.66666667],
+                           [ 0.        ,  0.        ,  0.6666666],
                            [ 0.        ,  0.5       ,  0.        ],
                            [ 0.        ,  0.5       ,  0.33333333],
                            [ 0.        ,  0.5       ,  0.66666667]])
 
         pos_01 = np.array([[ 0.        ,  0.        ,  0.        ],
-                           [ 0.        ,  0.        ,  0.66666667],
-                           [ 0.        ,  0.        ,  0.33333333],
-                           [ 0.        ,  0.5       ,  0.        ],
+                           [ 0.        ,  0.        ,  2/3],
+                           [ 0.        ,  0.        ,  0.33333333-3],
+                           [ 0.        ,  12.500003       ,  0.        ],
                            [ 0.        ,  0.5       ,  0.33333333],
                            [ 0.        ,  0.5       ,  0.66666667]])
         arr_num_01 = np.array([n for n in np.array([[[22,29,22],
@@ -115,8 +115,33 @@ class testAlgorithomSog:
 
         gen_02 = sogen.gen_nodup_cstru(m, c, (1,2,8), t, 4)
         nodup_02 = [stru for stru in gen_02]
-        eq_(len(nodup_02), 51)
+        # eq_(len(nodup_02), 51)
 
+        m_tri = [[0, 0, 20],
+                        [1, 0, 0],
+                        [0.5, 0.8660254, 0]]
+        ele_sea = SitesGrid.sea(1, 3, 3, c)
+        cell_mother_stru = CStru(m, ele_sea).get_cell()
+        sym = get_symmetry(cell_mother_stru, symprec=1e-3)
+        ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
+
+        sites_0 = [[[c, c, c],
+                    [c, c, c],
+                    [c, c, c]]]
+        sg_0 = SitesGrid(sites_0)
+        cstru01 = CStru(m, sg_0)
+
+        gen_01 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 2)
+        nodup_01 = [stru for stru in gen_01]
+        eq_(len(nodup_01), 2)
+
+        gen_02 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 3)
+        nodup_02 = [stru for stru in gen_02]
+        eq_(len(nodup_02), 4)  
+
+        gen_03 = sogen.gen_nodup_cstru(m_tri, c, (1,5,5), t, 2)
+        nodup_03 = [stru for stru in gen_03]
+        eq_(len(nodup_03), 4)  
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()
         b = Specie('B')

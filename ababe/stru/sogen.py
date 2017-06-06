@@ -14,10 +14,29 @@ import os
 
 # Filename sogen is for Site-Occupy-GENerator
 
+def is_stru_equal(struA, struB, ops):
+    bA, posA, atom_numA = struA.get_cell()
+    bB, posB, atom_numB = struB.get_cell()
+    id_struA = _get_id_seq(posA, atom_numA)
+
+    is_equal = False
+    for r, t in ops:
+        pos_new = np.transpose(r @ np.transpose(posB)) + t
+        id_stru = _get_id_seq(pos_new, atom_numB)
+        if id_stru == id_struA:
+            is_equal = True
+
+    return is_equal
+
 def _get_id_seq(pos, arr_num):
+
+    # from fractions import Fraction
     # transfer the atom position into >=0 and <=1
-    func_tofrac = np.vectorize(lambda x: x % 1)
+    pos = np.around(pos, decimals=10)
+    func_tofrac = np.vectorize(lambda x: round((x % 1), 3))
     o_pos = func_tofrac(pos)
+    # round_o_pos = np.around(o_pos, decimals=3)
+    # z, y, x = round_o_pos[:, 2], round_o_pos[:, 1], round_o_pos[:, 0]
     z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
     ind_sort = np.lexsort((z, y, x))
     id_seq = str(arr_num[ind_sort])
@@ -42,6 +61,8 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
     cell_mother_stru = CStru(lattice, ele_sea).get_cell()
     sym = get_symmetry(cell_mother_stru, symprec=1e-3)
     ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
+    # print(size)
+    # print(lattice)
 
     gen_dup_cstrus = CStru.gen_speckle(lattice, sea_ele, size, speckle, num)
     isoset = set()
@@ -49,13 +70,17 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
         b, pos, atom_num = cstru.get_cell()
         id_cstru = _get_id_seq(pos, atom_num)
         if id_cstru not in isoset:
-            _update_isoset(isoset, cstru, ops)
+            # print(len(ops))
+            # print(len(isoset))
+            # print(cstru.get_array())
             yield cstru
+            _update_isoset(isoset, cstru, ops)
 
 def default(str):
     return str + '  [Default: %(default)s]'
 
 def lat_dict(lattice):
+    from math import sqrt
     lat = { 'bcc': [[-0.5, -0.5, -0.5],
                 [-0.5,  0.5,  0.5],
                 [ 0.5, -0.5,  0.5]],
@@ -67,7 +92,7 @@ def lat_dict(lattice):
                     [0, 0, 1]],
             'triflat': [[0, 0, 20],
                         [1, 0, 0],
-                        [0.5, 0.8660254, 0]]
+                        [0.5, sqrt(3)/2, 0]]
             }
 
     return lat[lattice]

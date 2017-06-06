@@ -153,6 +153,9 @@ class CStru(object):
                     yield [c, b, a]
 
     def get_cell(self):
+
+        # from fractions import Fraction
+
         marr = np.array(self._matrix, dtype = np.float64).reshape((3,3))
         g_arr = self._sites_grid.to_array()
         d = self.depth
@@ -161,7 +164,9 @@ class CStru(object):
 
         arr_bas = marr*np.array([d,w,l], dtype = np.int).reshape((3,1))
         grid_position = np.array([p for p in CStru._yield_position(d, w, l)]) 
+        # frac = np.array([Fraction(1,d), Fraction(1,w), Fraction(1,l)], dtype = np.float64).reshape((1,3))
         frac = np.array([1/d, 1/w, 1/l], dtype = np.float64).reshape((1,3))
+        # round_frac = np.around(frac, decimals=22)
         arr_pos = grid_position * frac
         arr_num = np.array([i for i in g_arr.flat])
 
