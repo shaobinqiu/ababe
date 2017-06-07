@@ -24,6 +24,10 @@ class Specie(object):
     def Z(self):
         return self._Z
 
+    @property
+    def name(self):
+        return self.symbol
+
     @staticmethod
     def to_sp(an):
         if an == 0:
@@ -33,6 +37,16 @@ class Specie(object):
             sp = Specie(key)
         
         return sp
+
+    @staticmethod
+    def to_name(an):
+        if an == 0:
+            name = "G"
+        else:
+            key = [k for k, v in _pt_db.items() if v["Atomic no"] == an][0]
+            name = key
+
+        return name
 
     def __eq__(self, other):
         return isinstance(other, Specie) and self.Z == other.Z

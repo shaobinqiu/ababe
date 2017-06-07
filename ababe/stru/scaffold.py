@@ -172,6 +172,18 @@ class CStru(object):
 
         return (arr_bas, arr_pos, arr_num)
 
+    def get_lattice(self):
+        arr_bas, arr_pos, arr_num = self.get_cell()
+        return arr_bas
+
+    def get_positions(self):
+        arr_bas, arr_pos, arr_num = self.get_cell()
+        return arr_pos
+
+    def get_atoms(self):
+        arr_bas, arr_pos, arr_num = self.get_cell()
+        return arr_num
+
     @staticmethod
     def get_id_matrix(cell, d, w, l):
         arr_num = cell[2]

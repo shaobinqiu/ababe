@@ -14,6 +14,7 @@ class SpecieTestCase(unittest.TestCase):
 
     def test_properties(self):
         eq_(self.b.symbol, "B")
+        eq_(self.b.name, "B")
         eq_(self.b.Z, 5)
         eq_(self.b.atom_mass, 10.811)
         eq_(self.b.atom_radius, 0.85)
@@ -21,6 +22,10 @@ class SpecieTestCase(unittest.TestCase):
     def test_to_sp(self):
         eq_(Specie.to_sp(5), Specie("B"))
         eq_(Specie.to_sp(0), GhostSpecie())
+
+    def test_to_name(self):
+        eq_(Specie.to_name(5), "B")
+        eq_(Specie.to_name(0), "G")
 
     def test_equal(self):
         eq_(Specie("B"), Specie("B"))
