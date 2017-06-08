@@ -30,7 +30,7 @@ class VaspPOSCAR(object):
             lines.append(line)
 
         d = Counter(self.atoms_name_list)
-        orderd_atoms = OrderedDict(sorted(d.items(), key=itemgetter(1)))
+        orderd_atoms = OrderedDict(sorted(d.items(), key=lambda x: Specie(x[0]).Z))
         if 'G' in orderd_atoms:
             del orderd_atoms['G']
 
@@ -60,6 +60,7 @@ class VaspPOSCAR(object):
         """
         String representation of Poscar file
         """
+        print(self.get_string())
         return self.get_string()
 
     def write_POSCAR(self, filename):
