@@ -7,6 +7,7 @@ import os.path
 from ababe.stru.scaffold import SitesGrid, CStru
 from ababe.stru.element import GhostSpecie, Specie
 from itertools import combinations
+from progressbar import ProgressBar
 
 import numpy as np
 from spglib import get_symmetry
@@ -66,7 +67,13 @@ def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
 
     gen_dup_cstrus = CStru.gen_speckle(lattice, sea_ele, size, speckle, num)
     isoset = set()
-    for cstru in gen_dup_cstrus:
+
+    # Add the progress bar when looping
+    from scipy.special import comb
+    number_of_structures = comb((d*w*l), num)
+    bar = ProgressBar(max_value=number_of_structures)
+
+    for cstru in bar(gen_dup_cstrus):
         b, pos, atom_num = cstru.get_cell()
         id_cstru = _get_id_seq(pos, atom_num)
         if id_cstru not in isoset:

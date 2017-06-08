@@ -22,17 +22,20 @@ class VaspPOSCAR(object):
         from operator import itemgetter
 
         latt = self.lattice
+        d = Counter(self.atoms_name_list)
+        orderd_atoms = OrderedDict(sorted(d.items(), key=lambda x: Specie(x[0]).Z))
+        if 'G' in orderd_atoms:
+            del orderd_atoms['G']
 
-        lines = ["none", "1.0"]
+        comment = ''.join(['{}{}'.format(k,v) for k,v in orderd_atoms.items()])
+
+        lines = [comment, "1.0"]
         # lattice string
         for c in self.lattice:
             line = " ".join("{:10.6f}".format(p) for p in c)
             lines.append(line)
 
-        d = Counter(self.atoms_name_list)
-        orderd_atoms = OrderedDict(sorted(d.items(), key=lambda x: Specie(x[0]).Z))
-        if 'G' in orderd_atoms:
-            del orderd_atoms['G']
+        
 
         lines.append(" ".join([str(x) for x in orderd_atoms.keys()]))
         lines.append(" ".join([str(x) for x in orderd_atoms.values()]))
@@ -67,4 +70,5 @@ class VaspPOSCAR(object):
         """
         Writes POSCAR to a file.
         """
-        pass
+        with open(filename, "w") as f:
+            f.write(self.get_string())

@@ -3,13 +3,17 @@
 
 import nose
 from nose.tools import *
+import os
+import unittest
 
 import numpy as np
 from math import sqrt
 from ababe.stru.scaffold import CStru
 from ababe.stru.io import VaspPOSCAR
 
-class testVaspPOSCAR:
+# test_dir = os.path.join(os.path.dirname(__file__), 'test_files')
+
+class testVaspPOSCAR(object):
 
     def test_get_string(self):
         boron_arr = np.array([[[5,0,5,5,5,5],
@@ -21,7 +25,7 @@ class testVaspPOSCAR:
         boron_stru = CStru.from_array(latt, boron_arr)
         poscar = VaspPOSCAR(boron_stru)
 
-        expected_str = '''none
+        expected_str = '''B16
 1.0
   0.000000   0.000000  20.000000
   3.000000   0.000000   0.000000
@@ -57,7 +61,7 @@ direct
         bcu_stru = CStru.from_array(latt, bcu_arr)
         poscar_bcu = VaspPOSCAR(bcu_stru)
 
-        expected_str_bcu = '''none
+        expected_str_bcu = '''B16Cu2
 1.0
   0.000000   0.000000  20.000000
   3.000000   0.000000   0.000000
@@ -93,7 +97,23 @@ direct
         Compare the parameters read from to the 
         origin input parameter. Using almostEqual
         """
-        pass
+        bcu_arr = np.array([[[5,29,5,5,5,5],
+                               [5,5,5,5,5,5],
+                               [5,5,29,5,5,5]]])
+        latt = [[0, 0, 20],
+                [1, 0, 0],
+                [0.5, sqrt(3)/2, 0]]
+        bcu_stru = CStru.from_array(latt, bcu_arr)
+        poscar_bcu = VaspPOSCAR(bcu_stru)
+
+        tmp_file = "POSCAR.testing"
+        poscar_bcu.write_POSCAR(tmp_file)
+
+        with open(tmp_file, 'r') as testing_file:
+            data = testing_file.read()
+
+        eq_(data, str(poscar_bcu))
+        os.remove(tmp_file)
 
 if __name__ == "__main__":
     nose.main()
