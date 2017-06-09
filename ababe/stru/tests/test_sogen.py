@@ -1,8 +1,7 @@
 # encoding: utf-8
 # Distributed under the terms of the MIT License.
 
-import nose
-from nose.tools import *
+import unittest
 
 import numpy as np
 from spglib import get_symmetry
@@ -10,7 +9,7 @@ import ababe.stru.sogen as sogen
 from ababe.stru.element import GhostSpecie, Specie
 from ababe.stru.scaffold import SitesGrid, CStru
 
-class testAlgorithomSog:
+class testAlgorithomSog(unittest.TestCase):
 
     # def setUp(self):
     #     pos_01 = 
@@ -53,11 +52,11 @@ class testAlgorithomSog:
         s = set()
         s.add(a_id)
         s.add(a_id)
-        eq_(len(s), 1)
-        eq_(sogen._get_id_seq(pos_1, arr_num_00), a_id)
+        self.assertEqual(len(s), 1)
+        self.assertEqual(sogen._get_id_seq(pos_1, arr_num_00), a_id)
 
-        eq_(a_id_01, a_id)
-        eq_(a_id_02, a_id)
+        self.assertEqual(a_id_01, a_id)
+        self.assertEqual(a_id_02, a_id)
 
 
     def test_update_isoset(self):
@@ -82,13 +81,13 @@ class testAlgorithomSog:
         isoset_init = set()
         isoset_init_copy = isoset_init.copy()
         isoset_a01 = sogen._update_isoset(isoset_init, cstru01, ops)
-        assert_not_equal(isoset_a01, isoset_init_copy)
-        ok_(isinstance(isoset_a01, set))
+        self.assertNotEqual(isoset_a01, isoset_init_copy)
+        self.assertIsInstance(isoset_a01, set)
 
         isoset_a01_copy = isoset_a01.copy()
         isoset_a02 = sogen._update_isoset(isoset_a01, cstru01, ops)
-        eq_(isoset_a02, isoset_a01_copy)
-        ok_(len(isoset_a01) < len(ops))
+        self.assertEqual(isoset_a02, isoset_a01_copy)
+        self.assertLessEqual(len(isoset_a01), len(ops))
 
     def test_gen_nodup_cstru(self):
         c = Specie("Cu")
@@ -111,7 +110,7 @@ class testAlgorithomSog:
 
         gen_01 = sogen.gen_nodup_cstru(m, c, (2,2,2), t, 1)
         nodup_01 = [stru for stru in gen_01]
-        eq_(len(nodup_01), 1)
+        self.assertEqual(len(nodup_01), 1)
 
         gen_02 = sogen.gen_nodup_cstru(m, c, (1,2,8), t, 4)
         nodup_02 = [stru for stru in gen_02]
@@ -133,15 +132,16 @@ class testAlgorithomSog:
 
         gen_01 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 2)
         nodup_01 = [stru for stru in gen_01]
-        eq_(len(nodup_01), 2)
+        self.assertEqual(len(nodup_01), 2)
 
         gen_02 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 3)
         nodup_02 = [stru for stru in gen_02]
-        eq_(len(nodup_02), 4)  
+        self.assertEqual(len(nodup_02), 4)  
 
         gen_03 = sogen.gen_nodup_cstru(m_tri, c, (1,5,5), t, 2)
         nodup_03 = [stru for stru in gen_03]
-        eq_(len(nodup_03), 4)  
+        self.assertEqual(len(nodup_03), 4)  
+
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()
         b = Specie('B')
@@ -160,7 +160,7 @@ class testAlgorithomSog:
         sg_0 = SitesGrid(sites_0)
         cstru00 = CStru(m, sg_0)
 
-        eq_(sogen.is_speckle_disjunct(cstru00, g), False)
+        self.assertFalse(sogen.is_speckle_disjunct(cstru00, g))
 
         sites_1 = [[[g, b, b, g],
                     [b, b, b, b],
@@ -169,7 +169,7 @@ class testAlgorithomSog:
         sg_1 = SitesGrid(sites_1)
         cstru01 = CStru(m, sg_1)
 
-        eq_(sogen.is_speckle_disjunct(cstru01, g), False)
+        self.assertFalse(sogen.is_speckle_disjunct(cstru01, g))
 
 
         sites_2 = [[[g, b, b, b],
@@ -179,7 +179,8 @@ class testAlgorithomSog:
         sg_2 = SitesGrid(sites_2)
         cstru02 = CStru(m, sg_2)
 
-        eq_(sogen.is_speckle_disjunct(cstru02, g), True)
+        self.assertTrue(sogen.is_speckle_disjunct(cstru02, g))
 
 if __name__ == "__main__":
-    nose.main()
+    import nose2
+    nose2.main()

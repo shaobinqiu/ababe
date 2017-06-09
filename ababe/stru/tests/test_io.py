@@ -1,8 +1,6 @@
 # encoding: utf-8
 # Distributed under the terms of the MIT License.
 
-import nose
-from nose.tools import *
 import os
 import unittest
 
@@ -13,7 +11,7 @@ from ababe.stru.io import VaspPOSCAR
 
 # test_dir = os.path.join(os.path.dirname(__file__), 'test_files')
 
-class testVaspPOSCAR(object):
+class testVaspPOSCAR(unittest.TestCase):
 
     def test_get_string(self):
         boron_arr = np.array([[[5,0,5,5,5,5],
@@ -50,7 +48,7 @@ direct
   0.000000   0.666667   0.666667 B
   0.000000   0.666667   0.833333 B
 '''
-        eq_(str(poscar), expected_str)
+        self.assertEqual(str(poscar), expected_str)
 
         bcu_arr = np.array([[[5,29,5,5,5,5],
                                [5,5,5,5,5,5],
@@ -88,7 +86,7 @@ direct
   0.000000   0.000000   0.166667 Cu
   0.000000   0.666667   0.333333 Cu
 '''
-        eq_(str(poscar_bcu), expected_str_bcu)
+        self.assertEqual(str(poscar_bcu), expected_str_bcu)
 
     def test_write_file(self):
         """.
@@ -112,8 +110,9 @@ direct
         with open(tmp_file, 'r') as testing_file:
             data = testing_file.read()
 
-        eq_(data, str(poscar_bcu))
+        self.assertEqual(data, str(poscar_bcu))
         os.remove(tmp_file)
 
 if __name__ == "__main__":
-    nose.main()
+    import nose2
+    nose2.main()
