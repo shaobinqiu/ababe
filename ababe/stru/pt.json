@@ -3,6 +3,10 @@
 		"Atomic no": 5,
 		"Atomic mass": 10.811,
 		"Atomic radius": 0.85},
+	"C":{
+		"Atomic no": 6,
+		"Atomic mass": 12.011,
+		"Atomic radius": 0.70},
 	"Cu":{
 		"Atomic no": 29,
 		"Atomic mass": 63.546,
