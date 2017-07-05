@@ -1,5 +1,7 @@
 # coding: utf-8
 # Distributed under the terms of the MIT license.
+import os
+import json
 
 import numpy as np
 import spglib
@@ -45,6 +47,35 @@ class Structure(object):
         """
         symmetry = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
         return symmetry
+
+    def get_symmetry_permutation(self):
+        sym_perm = []
+        numbers = [i for i in range(60)]
+        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        ops = [(r,t) for r, t in zip(sym_mat['rotation', sym['translations']])]
+        for r, t in ops:
+            pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
+            perm = _get_new_id_seq(pos_new, numbers)
+            sym_perm.append(perm)
+
+        return sym_perm
+
+    def _get_new_id_seq(pos, numbers):
+        """
+        A helper function to produce the new sequence of the transformed 
+        structure. Algs is sort the position back to init and use the index
+        to sort numbers.
+        """
+        # transfer the atom position into >=0 and <=1
+        pos = np.around(pos, decimals=10)
+        func_tofrac = np.vectorize(lambda x: round((x % 1), 3))
+        o_pos = func_tofrac(pos)
+        # round_o_pos = np.around(o_pos, decimals=3)
+        # z, y, x = round_o_pos[:, 2], round_o_pos[:, 1], round_o_pos[:, 0]
+        z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
+        ind_sort = np.lexsort((z, y, x))
+
+        return id_sort
 
     def get_name(self):
         """

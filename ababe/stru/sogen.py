@@ -22,7 +22,7 @@ def is_stru_equal(struA, struB, ops):
 
     is_equal = False
     for r, t in ops:
-        pos_new = np.transpose(r @ np.transpose(posB)) + t
+        pos_new = np.transpose(np.matmul(r, np.transpose(posB))) + t
         id_stru = _get_id_seq(pos_new, atom_numB)
         if id_stru == id_struA:
             is_equal = True
@@ -49,7 +49,7 @@ def _update_isoset(isoset, cstru, ops):
 
     isoset_cstru = set()
     for r, t in ops:
-        pos_new = np.transpose(r @ np.transpose(pos)) + t
+        pos_new = np.transpose(np.matmul(r, np.transpose(pos))) + t
         id_stru = _get_id_seq(pos_new, atom_num)
         isoset_cstru.add(id_stru)
         isoset.update(isoset_cstru)
