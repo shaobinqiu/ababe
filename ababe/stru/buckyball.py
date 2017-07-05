@@ -20,9 +20,14 @@ class Structure(object):
 
     def __init__(self, numbers):
         self._lattice = np.array(_buckyball["lattice"])
-        self._positions = np.array(_buckyball["positions"])
+
+        # Sorting positions (x,y,z)
+        init_positions = np.array(_buckyball["positions"])
+        init_index = self._get_new_id_seq(init_positions, numbers)
+        self._positions = init_positions[init_index]
+
         self._atom_numbers = numbers
-        self._spg_cell = (self._lattice, self._positions, self.numbers)
+        self._spg_cell = (self._lattice, self._positions, self._atom_numbers)
         self._carbon = Specie("C")
 
     @property
@@ -49,17 +54,22 @@ class Structure(object):
         return symmetry
 
     def get_symmetry_permutation(self):
+        """
+        This a object function to get the permutation group operators.
+        Represented as a table.
+        """
         sym_perm = []
         numbers = [i for i in range(60)]
         sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
-        ops = [(r,t) for r, t in zip(sym_mat['rotation', sym['translations']])]
+        ops = [(r,t) for r, t in zip(sym_mat['rotations'], sym_mat['translations'])]
         for r, t in ops:
             pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
-            perm = _get_new_id_seq(pos_new, numbers)
+            perm = self._get_new_id_seq(pos_new, numbers)
             sym_perm.append(perm)
 
         return sym_perm
 
+    @staticmethod
     def _get_new_id_seq(pos, numbers):
         """
         A helper function to produce the new sequence of the transformed 
@@ -67,15 +77,15 @@ class Structure(object):
         to sort numbers.
         """
         # transfer the atom position into >=0 and <=1
-        pos = np.around(pos, decimals=10)
+        pos = np.around(pos, decimals=5)
         func_tofrac = np.vectorize(lambda x: round((x % 1), 3))
         o_pos = func_tofrac(pos)
         # round_o_pos = np.around(o_pos, decimals=3)
         # z, y, x = round_o_pos[:, 2], round_o_pos[:, 1], round_o_pos[:, 0]
         z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
-        ind_sort = np.lexsort((z, y, x))
+        inds = np.lexsort((z, y, x))
 
-        return id_sort
+        return inds
 
     def get_name(self):
         """
@@ -108,6 +118,7 @@ class Structure(object):
                 atom_numbers[index] = i_speckle
             yield cls(atom_numbers)
 
+    @staticmethod
     def help_add_one_speckle(l, sp):
         atom = sp.Z
         for index, val in enumerate(l):
