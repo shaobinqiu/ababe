@@ -44,44 +44,81 @@ def _get_id_seq(pos, arr_num):
 
     return id_seq
 
-def _update_isoset(isoset, cstru, ops):
-    b, pos, atom_num = cstru.get_cell()
+def _get_atom_seq_identifier(numbers):
+    return str(list(numbers))
 
-    isoset_cstru = set()
-    for r, t in ops:
-        pos_new = np.transpose(np.matmul(r, np.transpose(pos))) + t
-        id_stru = _get_id_seq(pos_new, atom_num)
-        isoset_cstru.add(id_stru)
-        isoset.update(isoset_cstru)
+def _update_isoset(isoset, numbers, sym_perm):
+    for ind in sym_perm:
+        # pos_new = np.transpose(np.matmul(r, np.transpose(pos))) + t
+        sequence_new = numbers[ind]
+        id_stru = _get_atom_seq_identifier(sequence_new)
+        # isoset_cstru.add(id_stru)
+        # isoset.update(isoset_cstru)
+        isoset.add(id_stru)
 
     return isoset
+
+def get_new_id_seq(pos, numbers):
+    """
+    A helper function to produce the new sequence of the transformed 
+    structure. Algs is sort the position back to init and use the index
+    to sort numbers.
+    """
+    # transfer the atom position into >=0 and <=1
+    pos = np.around(pos, decimals=5)
+    func_tofrac = np.vectorize(lambda x: round((x % 1), 3))
+    o_pos = func_tofrac(pos)
+    # round_o_pos = np.around(o_pos, decimals=3)
+    # z, y, x = round_o_pos[:, 2], round_o_pos[:, 1], round_o_pos[:, 0]
+    z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
+    inds = np.lexsort((z, y, x))
+
+    return inds
+
+def get_permutation_cell(cell):
+    lat, pos, num = cell
+    atom_num = len(cell[2])
+    numbers = [i for i in range(atom_num)]
+    sym = get_symmetry(cell, symprec=1e-3)
+    ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
+    sym_perm = []
+    for r,t in ops:
+        pos_new = np.transpose(np.matmul(r, np.transpose(pos))) + t
+        perm = get_new_id_seq(pos_new, numbers)
+        sym_perm.append(perm)
+
+    print(len(sym_perm))
+    return sym_perm
 
 def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
     d, w, l = size
     ele_sea = SitesGrid.sea(d, w, l, sea_ele)
     cell_mother_stru = CStru(lattice, ele_sea).get_cell()
-    sym = get_symmetry(cell_mother_stru, symprec=1e-3)
-    ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
-    # print(size)
-    # print(lattice)
+
+    sym_perm = get_permutation_cell(cell_mother_stru)
+
+    # For testing: Show that the first unit matrix convert to range(num) perm_operator
+    # print(sym_perm[0])
 
     gen_dup_cstrus = CStru.gen_speckle(lattice, sea_ele, size, speckle, num)
-    isoset = set()
 
     # Add the progress bar when looping
     from scipy.special import comb
     number_of_structures = comb((d*w*l), num)
     bar = ProgressBar(max_value=number_of_structures)
 
+    isoset = set()
     for cstru in bar(gen_dup_cstrus):
         b, pos, atom_num = cstru.get_cell()
-        id_cstru = _get_id_seq(pos, atom_num)
+        #id_cstru = _get_id_seq(pos, atom_num)
+        id_cstru = _get_atom_seq_identifier(atom_num)
+        # print(id_cstru)
         if id_cstru not in isoset:
-            # print(len(ops))
+            # print(len(sym_perm))
             # print(len(isoset))
             # print(cstru.get_array())
             yield cstru
-            _update_isoset(isoset, cstru, ops)
+            _update_isoset(isoset, atom_num, sym_perm)
 
 def default(str):
     return str + '  [Default: %(default)s]'

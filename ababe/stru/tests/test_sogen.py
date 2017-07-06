@@ -69,6 +69,7 @@ class testAlgorithomSog(unittest.TestCase):
         cell_mother_stru = CStru(m, ele_sea).get_cell()
         sym = get_symmetry(cell_mother_stru, symprec=1e-5)
         ops = [(r, t) for r, t in zip(sym['rotations'], sym['translations'])]
+        sym_perm = sogen.get_permutation_cell(cell_mother_stru)
 
         sites_0 = [[[c, c],
                     [c, c]],
@@ -77,15 +78,16 @@ class testAlgorithomSog(unittest.TestCase):
                     [t, c]]]
         sg_0 = SitesGrid(sites_0)
         cstru01 = CStru(m, sg_0)
+        number01 = cstru01.get_cell()[2]
 
         isoset_init = set()
         isoset_init_copy = isoset_init.copy()
-        isoset_a01 = sogen._update_isoset(isoset_init, cstru01, ops)
+        isoset_a01 = sogen._update_isoset(isoset_init, number01, sym_perm)
         self.assertNotEqual(isoset_a01, isoset_init_copy)
         self.assertIsInstance(isoset_a01, set)
 
         isoset_a01_copy = isoset_a01.copy()
-        isoset_a02 = sogen._update_isoset(isoset_a01, cstru01, ops)
+        isoset_a02 = sogen._update_isoset(isoset_a01, number01, sym_perm)
         self.assertEqual(isoset_a02, isoset_a01_copy)
         self.assertLessEqual(len(isoset_a01), len(ops))
 

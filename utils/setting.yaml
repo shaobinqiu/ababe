@@ -6,13 +6,13 @@ lattice: triflat
 base: B
 
 # grid size -- seq are depth width lenght
-grid_size: [1, 4, 4]
+grid_size: [1, 6, 6]
 
 # speckle -- the element of filled site
 speckle: G
 
 # how many site are filled with speckle
-number: 3
+number: 4
 
 # the output filetype
 output: normal
