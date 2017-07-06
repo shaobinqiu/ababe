@@ -13,6 +13,10 @@ with open(os.path.join(os.path.dirname(__file__),
                             "buckyball.json"), "rt") as f:
     _buckyball = json.load(f)
 
+# Loads buckyball's permutation table from .npy
+_perm_table = np.load(os.path.join(os.path.dirname(__file__),
+                                    "bucky_permu_table.npy"))
+
 class Structure(object):
     """
     Class to generate bucky-ball related structure parameters.
@@ -29,6 +33,7 @@ class Structure(object):
         self._atom_numbers = numbers
         self._spg_cell = (self._lattice, self._positions, self._atom_numbers)
         self._carbon = Specie("C")
+        self._sym_perm = list(_perm_table)
 
     @property
     def spg_cell(self):
@@ -58,16 +63,16 @@ class Structure(object):
         This a object function to get the permutation group operators.
         Represented as a table.
         """
-        sym_perm = []
-        numbers = [i for i in range(60)]
-        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
-        ops = [(r,t) for r, t in zip(sym_mat['rotations'], sym_mat['translations'])]
-        for r, t in ops:
-            pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
-            perm = self._get_new_id_seq(pos_new, numbers)
-            sym_perm.append(perm)
+        # sym_perm = []
+        # numbers = [i for i in range(60)]
+        # sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        # ops = [(r,t) for r, t in zip(sym_mat['rotations'], sym_mat['translations'])]
+        # for r, t in ops:
+        #     pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
+        #     perm = self._get_new_id_seq(pos_new, numbers)
+        #     sym_perm.append(perm)
 
-        return sym_perm
+        return self._sym_perm
 
     @staticmethod
     def _get_new_id_seq(pos, numbers):
@@ -104,19 +109,20 @@ class Structure(object):
         g = (n for n in l)
         return g
 
-    @classmethod
-    def gen_speckle(cls, sp, noa):
+    @staticmethod
+    def gen_speckle(sp, noa):
         """
         This method creates speckle structures which have speckles 
         number = noa.
         """
-        i_sea = self._carbon.Z
+        i_sea = 6
         i_speckle = sp.Z
+        from itertools import combinations
         for comb_index in combinations(range(60), noa):
-            atom_numbers = [i_sea]*n
+            atom_numbers = [i_sea]*60
             for index in comb_index:
                 atom_numbers[index] = i_speckle
-            yield cls(atom_numbers)
+            yield np.array(atom_numbers)
 
     @staticmethod
     def help_add_one_speckle(l, sp):
@@ -158,11 +164,6 @@ class Structure(object):
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:
-            print(atoms)
-            print(ind)
-            print(type(atoms))
-            print(type(ind))
-            print(len(atoms))
             atoms_new = atoms[ind]
             id_stru = self._get_atom_seq_identifier(atoms_new)
             isoset.add(id_stru)
@@ -188,9 +189,9 @@ class Structure(object):
     def all_speckle_gen(bucky_stru, n_max, sp):
         gen = bucky_stru.to_gen()
         n_init = bucky_stru.get_speckle_num(sp)
-        for i in range(n_init, n_max+1):
-            gen = add_one_speckle_generator(gen)
-            gen = to_nodup_generator(gen)
+        for i in range(n_init, n_max):
+            gen = bucky_stru.add_one_speckle_generator(gen, sp)
+            gen = bucky_stru.to_nodup_generator(gen)
 
         return gen
 
