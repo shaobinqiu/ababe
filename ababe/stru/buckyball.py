@@ -124,7 +124,7 @@ class Structure(object):
         for index, val in enumerate(l):
             l_new= list(l)
             if val != atom:
-                l_new[index] = sp
+                l_new[index] = atom
                 yield l_new
 
 
@@ -142,19 +142,47 @@ class Structure(object):
             for index, val in enumerate(s_atoms):
                 l_new = list(s_atoms)
                 if val != atom:
-                    l_new[index] = sp
+                    l_new[index] = atom
                     if str(l_new) not in idy_seq:
-                        yield l_new
+                        yield np.array(l_new)
                         idy_seq.add(str(l_new))
 
     @staticmethod
-    def to_nodup_generator(gen):
+    def _get_atom_seq_identifier(numbers):
+        """
+        This method convert a list to a immutable string, which used
+        as an identifier of diffrent structures, can be move to
+        outerside class.
+        """
+        return str(list(numbers))
+
+    def _update_isoset(self, isoset, atoms, sym_perm):
+        for ind in sym_perm:
+            print(atoms)
+            print(ind)
+            print(type(atoms))
+            print(type(ind))
+            print(len(atoms))
+            atoms_new = atoms[ind]
+            id_stru = self._get_atom_seq_identifier(atoms_new)
+            isoset.add(id_stru)
+
+        return isoset
+
+    def to_nodup_generator(self, gen):
         """
         input: a generator with duplicate structures
         output: a generator with no structures dupicated
         This a method filter the duplicate structure to nonduplicates.
         """
-        pass
+        sym_perm = self.get_symmetry_permutation()
+
+        isoset = set()
+        for atoms in gen:
+            id_stru = self._get_atom_seq_identifier(atoms)
+            if id_stru not in isoset:
+                yield atoms
+                self._update_isoset(isoset, atoms, sym_perm)
 
     @staticmethod
     def all_speckle_gen(bucky_stru, n_max, sp):
@@ -165,5 +193,4 @@ class Structure(object):
             gen = to_nodup_generator(gen)
 
         return gen
-
 

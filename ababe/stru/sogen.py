@@ -87,7 +87,6 @@ def get_permutation_cell(cell):
         perm = get_new_id_seq(pos_new, numbers)
         sym_perm.append(perm)
 
-    print(len(sym_perm))
     return sym_perm
 
 def gen_nodup_cstru(lattice, sea_ele, size, speckle, num):
