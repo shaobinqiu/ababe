@@ -170,7 +170,7 @@ class Structure(object):
 
         return isoset
 
-    def to_nodup_generator(self, gen):
+    def to_nodup_generator(self, dup_gen):
         """
         input: a generator with duplicate structures
         output: a generator with no structures dupicated
@@ -179,19 +179,28 @@ class Structure(object):
         sym_perm = self.get_symmetry_permutation()
 
         isoset = set()
-        for atoms in gen:
+        for atoms in dup_gen:
             id_stru = self._get_atom_seq_identifier(atoms)
             if id_stru not in isoset:
                 yield atoms
                 self._update_isoset(isoset, atoms, sym_perm)
 
+    def nodup_generator(self):
+
+        while True:
+            yield atoms
+
     @staticmethod
     def all_speckle_gen(bucky_stru, n_max, sp):
+        from itertools import tee
         gen = bucky_stru.to_gen()
+        out_gen, gen = tee(gen, 2)
+        yield out_gen
         n_init = bucky_stru.get_speckle_num(sp)
         for i in range(n_init, n_max):
             gen = bucky_stru.add_one_speckle_generator(gen, sp)
             gen = bucky_stru.to_nodup_generator(gen)
 
-        return gen
+            out_gen, gen = tee(gen, 2)
+            yield out_gen
 
