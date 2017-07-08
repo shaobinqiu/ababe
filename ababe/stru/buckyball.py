@@ -2,6 +2,7 @@
 # Distributed under the terms of the MIT license.
 import os
 import json
+import xxhash
 
 import numpy as np
 import spglib
@@ -154,7 +155,7 @@ class Structure(object):
                 #print(arr_new)
                 if val != atom:
                     arr_new[index] = atom
-                    arr_idy = arr_new.tostring()
+                    arr_idy = xxhash.xxh64(arr_new).intdigest()
                     if arr_idy not in idy_seq:
                         yield arr_new
                         idy_seq.add(arr_idy)
@@ -166,7 +167,7 @@ class Structure(object):
         as an identifier of diffrent structures, can be move to
         outerside class.
         """
-        return numbers.tostring()
+        return xxhash.xxh64(numbers).intdigest()
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:

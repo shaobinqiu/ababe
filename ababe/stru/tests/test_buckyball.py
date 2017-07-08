@@ -33,9 +33,9 @@ class testBuckyballStructure(unittest.TestCase):
     def test_time_of_speckle_gen(self):
         import time
         init_buckyball = Structure([6]*60)
-        gen_with_4speckle = init_buckyball.all_speckle_gen(init_buckyball, 4, self.speckle)
+        gen_with_5speckle = init_buckyball.all_speckle_gen(init_buckyball, 5, self.speckle)
 
-        for nodup_gen in gen_with_4speckle:
+        for nodup_gen in gen_with_5speckle:
             start = time.time()
             _ = [i for i in nodup_gen]
             end = time.time()
