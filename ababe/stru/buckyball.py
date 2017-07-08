@@ -24,6 +24,7 @@ class Structure(object):
 
     def __init__(self, numbers):
         self._lattice = np.array(_buckyball["lattice"])
+        numbers = np.array(numbers)
 
         # Sorting positions (x,y,z)
         init_positions = np.array(_buckyball["positions"])
@@ -43,8 +44,11 @@ class Structure(object):
         return spglib.get_spacegroup(self._spg_cell, symprec=1e-4)
 
     def get_speckle_num(self, sp):
+        from collections import Counter
         atom = sp.Z
-        num = self._atom_numbers.count(atom)
+        num_count = Counter(self._atom_numbers)
+        num = num_count[atom]
+        #num = self._atom_numbers.count(atom)
         return num
 
     def get_symmetry(self):
@@ -98,7 +102,7 @@ class Structure(object):
         only atom sequences are diff. Therefore as the hashable name
         and dict key.
         """
-        return str(self._atom_numbers)
+        return self._atom_numbers.tostring()
 
     def to_gen(self):
         """
@@ -146,12 +150,14 @@ class Structure(object):
         idy_seq = set()
         for s_atoms in gen:
             for index, val in enumerate(s_atoms):
-                l_new = list(s_atoms)
+                arr_new = s_atoms.copy()
+                #print(arr_new)
                 if val != atom:
-                    l_new[index] = atom
-                    if str(l_new) not in idy_seq:
-                        yield np.array(l_new)
-                        idy_seq.add(str(l_new))
+                    arr_new[index] = atom
+                    arr_idy = arr_new.tostring()
+                    if arr_idy not in idy_seq:
+                        yield arr_new
+                        idy_seq.add(arr_idy)
 
     @staticmethod
     def _get_atom_seq_identifier(numbers):
@@ -160,7 +166,7 @@ class Structure(object):
         as an identifier of diffrent structures, can be move to
         outerside class.
         """
-        return str(list(numbers))
+        return numbers.tostring()
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:
