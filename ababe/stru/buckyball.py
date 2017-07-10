@@ -3,6 +3,7 @@
 import os
 import json
 import xxhash
+from hat_trie import Trie
 
 import numpy as np
 import spglib
@@ -138,9 +139,7 @@ class Structure(object):
                 l_new[index] = atom
                 yield l_new
 
-
-    @staticmethod
-    def add_one_speckle_generator(gen, sp):
+    def add_one_speckle_generator(self, gen, sp):
         """
         input a structure generator(mostly nonduplicate)
         output a generator with one more speckle.
@@ -148,17 +147,18 @@ class Structure(object):
         than the input structures.
         """
         atom = sp.Z
-        idy_seq = set()
+        idy_seq = Trie()
         for s_atoms in gen:
             for index, val in enumerate(s_atoms):
                 arr_new = s_atoms.copy()
                 #print(arr_new)
                 if val != atom:
                     arr_new[index] = atom
-                    arr_idy = xxhash.xxh64(arr_new).intdigest()
+                    arr_idy = self._get_atom_seq_identifier(arr_new)
+                    #arr_idy = xxhash.xxh32(arr_new).intdigest()
                     if arr_idy not in idy_seq:
                         yield arr_new
-                        idy_seq.add(arr_idy)
+                        idy_seq[arr_idy] = None
 
     @staticmethod
     def _get_atom_seq_identifier(numbers):
@@ -167,13 +167,14 @@ class Structure(object):
         as an identifier of diffrent structures, can be move to
         outerside class.
         """
-        return xxhash.xxh64(numbers).intdigest()
+        num_hash = xxhash.xxh32(numbers).intdigest()
+        return unicode(num_hash)
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:
             atoms_new = atoms[ind]
             id_stru = self._get_atom_seq_identifier(atoms_new)
-            isoset.add(id_stru)
+            isoset[id_stru] = None
 
         return isoset
 
@@ -185,7 +186,7 @@ class Structure(object):
         """
         sym_perm = self.get_symmetry_permutation()
 
-        isoset = set()
+        isoset = Trie()
         for atoms in dup_gen:
             id_stru = self._get_atom_seq_identifier(atoms)
             if id_stru not in isoset:

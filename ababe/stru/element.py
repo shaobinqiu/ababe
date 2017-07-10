@@ -3,7 +3,7 @@
 import os
 import json
 
-from enum import Enum
+from aenum import Enum
 
 # Loads periodic_table database from json file pt.json
 with open(os.path.join(os.path.dirname(__file__),
