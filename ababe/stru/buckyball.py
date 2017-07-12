@@ -4,6 +4,8 @@ import os
 import json
 import xxhash
 from hat_trie import Trie
+from Bio import trie
+tr = trie.trie()
 
 import numpy as np
 import spglib
@@ -130,15 +132,6 @@ class Structure(object):
                 atom_numbers[index] = i_speckle
             yield np.array(atom_numbers)
 
-    @staticmethod
-    def help_add_one_speckle(l, sp):
-        atom = sp.Z
-        for index, val in enumerate(l):
-            l_new= list(l)
-            if val != atom:
-                l_new[index] = atom
-                yield l_new
-
     def add_one_speckle_generator(self, gen, sp):
         """
         input a structure generator(mostly nonduplicate)
@@ -147,7 +140,7 @@ class Structure(object):
         than the input structures.
         """
         atom = sp.Z
-        idy_seq = Trie()
+        idy_seq = tr
         for s_atoms in gen:
             for index, val in enumerate(s_atoms):
                 arr_new = s_atoms.copy()
@@ -168,7 +161,7 @@ class Structure(object):
         outerside class.
         """
         num_hash = xxhash.xxh32(numbers).intdigest()
-        return unicode(num_hash)
+        return str(num_hash)
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:
@@ -186,17 +179,12 @@ class Structure(object):
         """
         sym_perm = self.get_symmetry_permutation()
 
-        isoset = Trie()
+        isoset = tr
         for atoms in dup_gen:
             id_stru = self._get_atom_seq_identifier(atoms)
             if id_stru not in isoset:
                 yield atoms
                 self._update_isoset(isoset, atoms, sym_perm)
-
-    def nodup_generator(self):
-
-        while True:
-            yield atoms
 
     @staticmethod
     def all_speckle_gen(bucky_stru, n_max, sp):
