@@ -140,7 +140,7 @@ class Structure(object):
         than the input structures.
         """
         atom = sp.Z
-        idy_seq = tr
+        idy_seq = set()
         for s_atoms in gen:
             for index, val in enumerate(s_atoms):
                 arr_new = s_atoms.copy()
@@ -151,7 +151,7 @@ class Structure(object):
                     #arr_idy = xxhash.xxh32(arr_new).intdigest()
                     if arr_idy not in idy_seq:
                         yield arr_new
-                        idy_seq[arr_idy] = None
+                        idy_seq.add(arr_idy)
 
     @staticmethod
     def _get_atom_seq_identifier(numbers):
@@ -167,7 +167,7 @@ class Structure(object):
         for ind in sym_perm:
             atoms_new = atoms[ind]
             id_stru = self._get_atom_seq_identifier(atoms_new)
-            isoset[id_stru] = None
+            isoset.add(id_stru)
 
         return isoset
 
@@ -179,7 +179,7 @@ class Structure(object):
         """
         sym_perm = self.get_symmetry_permutation()
 
-        isoset = tr
+        isoset = set()
         for atoms in dup_gen:
             id_stru = self._get_atom_seq_identifier(atoms)
             if id_stru not in isoset:
