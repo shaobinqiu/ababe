@@ -6,8 +6,78 @@ import unittest
 import numpy as np
 from spglib import get_symmetry
 import ababe.stru.sogen as sogen
+from ababe.stru.sogen import OccupyGenerator
 from ababe.stru.element import GhostSpecie, Specie
-from ababe.stru.scaffold import SitesGrid, CStru
+from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell
+
+
+class testOccupyGeneratorCell(unittest.TestCase):
+
+    def setUp(self):
+        self.arr_lat = np.array([[3.0, 0, 0], [0, 2.0, 0.0], [0, 0, 1.0]])
+        positions = [
+                        [0.00000, 0.00000, 0.00000],
+                        [0.00000, 0.50000, 0.00000],
+                        [0.33333, 0.00000, 0.00000],
+                        [0.33333, 0.50000, 0.00000],
+                        [0.66666, 0.00000, 0.00000],
+                        [0.66666, 0.50000, 0.00000],
+                        [0.16666, 0.25000, 0.50000],
+                        [0.16666, 0.75000, 0.50000],
+                        [0.50000, 0.25000, 0.50000],
+                        [0.50000, 0.75000, 0.50000],
+                        [0.83333, 0.25000, 0.50000],
+                        [0.83333, 0.75000, 0.50000]
+                    ]
+        self.arr_positions = np.array(positions)
+        arr_numbers_0 = np.array([6]*12)
+        self.cell = GeneralCell(self.arr_lat, self.arr_positions, arr_numbers_0)
+        self.ocu_gen = OccupyGenerator(self.cell)
+
+        tmp = arr_numbers_0.copy()
+        tmp[0] = 5
+        arr_numbers_a = tmp
+
+        tmp = arr_numbers_0.copy()
+        tmp[1] = 5
+        arr_numbers_b = tmp
+
+        self.cell_a = GeneralCell(self.arr_lat, self.arr_positions, arr_numbers_a)
+        self.cell_b = GeneralCell(self.arr_lat, self.arr_positions, arr_numbers_b)
+
+        self.numbers_3A = np.array([5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6])
+        self.numbers_3B = np.array([5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5, 6])
+
+        self.numbers_3C = np.array([5, 5, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6])
+        self.numbers_3D = np.array([5, 5, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6])
+
+    def test_is_equivalent(self):
+        # perm_sym = self.cell.get_symmetry_permutation()
+        self.assertTrue(self.ocu_gen.is_equivalent(self.cell_a, self.cell_b))
+
+        cell_3A = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3A)
+        cell_3B = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3B)
+        cell_3C = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3C)
+        cell_3D = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3D)
+
+        self.assertTrue(self.ocu_gen.is_equivalent(cell_3A, cell_3B))
+        self.assertTrue(self.ocu_gen.is_equivalent(cell_3C, cell_3D))
+
+
+    def test_gen_dup(self):
+        dup_gen = self.ocu_gen.gen_dup(3, Specie('B'))  # a generator
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 220)
+
+    def test_gen_nodup(self):
+        nodup_gen = self.ocu_gen.gen_nodup(3, Specie('B'))
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 9)
+
+        nodup_gen = self.ocu_gen.gen_nodup(4, Specie('B'))
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 21)
+
 
 class testAlgorithomSog(unittest.TestCase):
 
@@ -182,6 +252,7 @@ class testAlgorithomSog(unittest.TestCase):
         cstru02 = CStru(m, sg_2)
 
         self.assertTrue(sogen.is_speckle_disjunct(cstru02, g))
+
 
 if __name__ == "__main__":
     import nose2

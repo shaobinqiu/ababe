@@ -1,19 +1,81 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
 
+import pdb
 import sys
 import os.path
 
-from ababe.stru.scaffold import SitesGrid, CStru
+from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell
 from ababe.stru.element import GhostSpecie, Specie
 from itertools import combinations
 from progressbar import ProgressBar
 
 import numpy as np
+import spglib
 from spglib import get_symmetry
 import os
-
+import xxhash
 # Filename sogen is for Site-Occupy-GENerator
+
+
+class OccupyGenerator(object):
+    """
+    The class takes a GeneralCell instance as input,
+    and can produces a generator GeneralCell instances which are
+    nonduplicated to each others.
+    """
+    def __init__(self, general_cell):
+        self.init_cell = general_cell
+        self.lattice = general_cell.lattice
+        self.positions = general_cell.positions
+        self.numbers = general_cell.numbers
+
+        self.symmetry_permutation = general_cell.get_symmetry_permutation()
+
+    def is_equivalent(self, cell_i, cell_other):
+        numbers_i = cell_i.numbers
+        numbers_other = cell_other.numbers
+        for perm in self.symmetry_permutation:
+            new_numbers = numbers_i[perm]
+            if np.array_equal(new_numbers, numbers_other):
+                return True
+
+        return False
+
+    def gen_dup(self, n, sp):
+        init_numbers = self.init_cell.numbers
+        num_count = init_numbers.size   # number of atoms in structure
+        i_speckle = sp.Z
+        from itertools import combinations
+        for comb_index in combinations(range(num_count), n):
+            numbers = init_numbers.copy()
+            for index in comb_index:
+                numbers[index] = i_speckle
+            yield GeneralCell(self.lattice, self.positions, numbers)
+
+    def gen_nodup(self, n, sp):
+        dup = self.gen_dup(n, sp)
+        sym_perm = self.symmetry_permutation
+
+        isoset = dict()
+        for cell in dup:
+            cell_id = cell.id
+            if cell_id not in isoset:
+                yield cell
+                from ababe.stru.io import VaspPOSCAR
+                #pdb.set_trace()
+                self._update_isoset(isoset, cell.numbers, sym_perm)
+
+    @staticmethod
+    def _update_isoset(isoset, numbers, sym_perm):
+        def numbers2id(numbers):
+            num_hash = xxhash.xxh64(numbers).intdigest()
+            return num_hash
+
+        for ind in sym_perm:
+            numbers_new = numbers[ind]
+            cell_id = numbers2id(numbers_new)
+            isoset[cell_id] = None
 
 def is_stru_equal(struA, struB, ops):
     bA, posA, atom_numA = struA.get_cell()

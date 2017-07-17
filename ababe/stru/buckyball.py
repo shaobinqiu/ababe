@@ -3,7 +3,7 @@
 import os
 import json
 import xxhash
-from hat_trie import Trie
+# from hat_trie import Trie
 
 import numpy as np
 import spglib
@@ -147,7 +147,7 @@ class Structure(object):
         than the input structures.
         """
         atom = sp.Z
-        idy_seq = Trie()
+        idy_seq = dict()
         for s_atoms in gen:
             for index, val in enumerate(s_atoms):
                 arr_new = s_atoms.copy()
@@ -168,7 +168,7 @@ class Structure(object):
         outerside class.
         """
         num_hash = xxhash.xxh32(numbers).intdigest()
-        return unicode(num_hash)
+        return num_hash
 
     def _update_isoset(self, isoset, atoms, sym_perm):
         for ind in sym_perm:
@@ -176,7 +176,7 @@ class Structure(object):
             id_stru = self._get_atom_seq_identifier(atoms_new)
             isoset[id_stru] = None
 
-        return isoset
+        #return isoset
 
     def to_nodup_generator(self, dup_gen):
         """
@@ -186,7 +186,7 @@ class Structure(object):
         """
         sym_perm = self.get_symmetry_permutation()
 
-        isoset = Trie()
+        isoset = dict()
         for atoms in dup_gen:
             id_stru = self._get_atom_seq_identifier(atoms)
             if id_stru not in isoset:

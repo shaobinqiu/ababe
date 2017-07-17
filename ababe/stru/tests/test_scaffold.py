@@ -1,7 +1,7 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
 
-from ababe.stru.scaffold import SitesGrid, CStru
+from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell
 from ababe.stru.element import GhostSpecie, Specie
 import numpy as np
 
@@ -182,6 +182,41 @@ class testCStru(unittest.TestCase):
                                          [0, 1/2, 1/3],
                                          [0, 1/2, 2/3]])))
         self.assertTrue(np.allclose(num02, np.array([22, 29, 22, 22, 22, 29])))
+
+
+class testGeneralCell(unittest.TestCase):
+
+    def setUp(self):
+        arr_lat = np.array([[3.0, 0, 0], [0, 2.0, 0.0], [0, 0, 1.0]])
+        positions = [
+                        [0.00000, 0.00000, 0.00000],
+                        [0.00000, 0.50000, 0.00000],
+                        [0.33333, 0.00000, 0.00000],
+                        [0.33333, 0.50000, 0.00000],
+                        [0.66666, 0.00000, 0.00000],
+                        [0.66666, 0.50000, 0.00000],
+                        [0.16666, 0.25000, 0.50000],
+                        [0.16666, 0.75000, 0.50000],
+                        [0.50000, 0.25000, 0.50000],
+                        [0.50000, 0.75000, 0.50000],
+                        [0.83333, 0.25000, 0.50000],
+                        [0.83333, 0.75000, 0.50000]
+                    ]
+        arr_positions = np.array(positions)
+        arr_numbers = np.array([6]*12)
+        self.cell = GeneralCell(arr_lat, arr_positions, arr_numbers)
+
+    def test_property(self):
+        np.testing.assert_equal(self.cell.numbers, np.array([6]*12))
+
+    def test_get_symmetry(self):
+        sym = self.cell.get_spacegroup()
+        self.assertEqual(sym, 'Im-3m (229)')
+
+    def test_get_symmetry_permutation(self):
+        sym_num = len(self.cell.get_symmetry_permutation())
+        self.assertEqual(sym_num, 96)
+
 
 if __name__ == "__main__":
     import nose2

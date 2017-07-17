@@ -1,5 +1,6 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
+from __future__ import division
 
 import numpy as np
 # import collections
@@ -9,11 +10,14 @@ from itertools import combinations
 
 from scipy.spatial import cKDTree
 from operator import itemgetter
+import spglib
+import xxhash
+
 
 class SitesGrid(object):
     """
-    Grid object. Used for constructed grids where to put the atoms on. 
-    Like a chess board. 
+    Grid object. Used for constructed grids where to put the atoms on.
+    Like a chess board.
     """
 
     def __init__(self, sites):
@@ -23,9 +27,9 @@ class SitesGrid(object):
         self._length = len(sites[0][0])
 
     @classmethod
-    def sea(cls, depth, width, length, sp = GhostSpecie()):
+    def sea(cls, depth, width, length, sp=GhostSpecie()):
         sites = [[[sp for _ in range(length)]
-                          for _ in range(width)] 
+                          for _ in range(width)]
                               for _ in range(depth)]
 
         return cls(sites)
@@ -55,7 +59,8 @@ class SitesGrid(object):
         self._sites[d][w][l] = sp
 
     def __eq__(self, other):
-        if other == None: return False
+        if other is None:
+            return False
         return self._sites == other._sites
 
     def deepCopy(self):
@@ -77,8 +82,8 @@ class SitesGrid(object):
     @classmethod
     def random_fill(cls, bsp, size, sp):
         # d, w, l = size
-        rarr = (sp.Z - bsp.Z)*np.random.randint(2, size = size)
-        sarr = np.zeros(size, dtype = np.int)+bsp.Z
+        rarr = (sp.Z - bsp.Z)*np.random.randint(2, size=size)
+        sarr = np.zeros(size, dtype=np.int)+bsp.Z
         arr = sarr + rarr
         return cls.from_array(arr)
 
@@ -92,7 +97,7 @@ class SitesGrid(object):
             out = [i_sea]*n
             for index in w_on:
                 out[index] = i_speckle
-            arr = np.array(out, dtype = np.int).reshape(size)
+            arr = np.array(out, dtype=np.int).reshape(size)
             yield cls.from_array(arr)
 
 
@@ -104,7 +109,6 @@ class CStru(object):
         self.depth = sg.depth
         self.width = sg.width
         self.length = sg.length
-
 
     @property
     def m(self):
@@ -133,7 +137,8 @@ class CStru(object):
         return self._sites_grid.to_array()
 
     def __eq__(self, other):
-        if other == None: return False
+        if other is None:
+            return False
         return other.m == self.m and other.sites_grid == self.sites_grid
 
     @classmethod
@@ -156,16 +161,15 @@ class CStru(object):
 
         # from fractions import Fraction
 
-        marr = np.array(self._matrix, dtype = np.float64).reshape((3,3))
+        marr = np.array(self._matrix, dtype=np.float64).reshape((3, 3))
         g_arr = self._sites_grid.to_array()
         d = self.depth
         w = self.width
         l = self.length
 
-        arr_bas = marr*np.array([d,w,l], dtype = np.int).reshape((3,1))
-        grid_position = np.array([p for p in CStru._yield_position(d, w, l)]) 
-        # frac = np.array([Fraction(1,d), Fraction(1,w), Fraction(1,l)], dtype = np.float64).reshape((1,3))
-        frac = np.array([1/d, 1/w, 1/l], dtype = np.float64).reshape((1,3))
+        arr_bas = marr*np.array([d, w, l], dtype=np.int).reshape((3, 1))
+        grid_position = np.array([p for p in CStru._yield_position(d, w, l)])
+        frac = np.array([1/d, 1/w, 1/l], dtype=np.float64).reshape((1, 3))
         # round_frac = np.around(frac, decimals=22)
         arr_pos = grid_position * frac
         arr_num = np.array([i for i in g_arr.flat])
@@ -204,10 +208,10 @@ class CStru(object):
     #     return tuple(coor)
 
     def get_neighbors(self, pos, delta):
-        
+
         def _pos2coor(pos):
             a, b, c = np.array(self.m)
-            x, y, z= pos
+            x, y, z = pos
             coor = a*x + b*y + c*z    # an array
             return tuple(coor)
 
@@ -216,11 +220,11 @@ class CStru(object):
                 for x in range(self.width):
                     for y in range(self.length):
                         yield(x, y, z)
-        
+
         point = _pos2coor(pos)
         # w = self.width
         # l = self.length
-        coor_map = {p : _pos2coor(p) for p in p_gen()}
+        coor_map = {p: _pos2coor(p) for p in p_gen()}
         del coor_map[pos]
 
         points = list(coor_map.values())
@@ -228,3 +232,94 @@ class CStru(object):
         ind = points_tree.query_ball_point(point, delta)
         neighbors = itemgetter(*ind)(list(coor_map.keys()))
         return set(neighbors)
+
+
+class GeneralCell(object):
+    """
+    A Cell data structure used for generate all nonduplicated structure.
+    Initialized by three np.array
+    """
+    def __init__(self, lattice, positions, numbers):
+        self._lattice = lattice
+        init_index = self._get_new_id_seq(positions, numbers)
+        self._positions = positions[init_index]
+        self._numbers = numbers
+        self._spg_cell = (self._lattice, self._positions, self._numbers)
+        self._num_count = numbers.size
+
+    @staticmethod
+    def _get_new_id_seq(pos, numbers):
+        """
+        A helper function to produce the new sequence of the transformed
+        structure. Algs is sort the position back to init and use the index
+        to sort numbers.
+        """
+        # transfer the atom position into >=0 and <=1
+        pos = np.around(pos, decimals=3)
+        func_tofrac = np.vectorize(lambda x: round((x % 1), 3))
+        o_pos = func_tofrac(pos)
+        # round_o_pos = np.around(o_pos, decimals=3)
+        # z, y, x = round_o_pos[:, 2], round_o_pos[:, 1], round_o_pos[:, 0]
+        z, y, x = o_pos[:, 2], o_pos[:, 1], o_pos[:, 0]
+        inds = np.lexsort((z, y, x))
+
+        return inds
+
+    @property
+    def spg_cell(self):
+        return self._spg_cell
+
+    @property
+    def lattice(self):
+        return self._lattice
+
+    @property
+    def positions(self):
+        return self._positions
+
+    @property
+    def numbers(self):
+        return self._numbers
+
+    @property
+    def num_count(self):
+        """
+        number of atoms
+        """
+        return self._num_count
+
+    @property
+    def id(self):
+        num_id = xxhash.xxh64(self.numbers).intdigest()
+        return num_id
+
+    def get_spacegroup(self):
+        return spglib.get_spacegroup(self._spg_cell, symprec=1e-4)
+
+    def get_symmetry(self):
+        """
+        Symmetry operations are obtained as a dictionary.
+        The key rotation contains a numpy array of integer,
+        which is “number of symmetry operations” x “3x3 matrices”.
+        The key translation contains a numpy array of float,
+        which is “number of symmetry operations” x “vectors”.
+        """
+        symmetry = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        return symmetry
+
+    def get_symmetry_permutation(self):
+        """
+        This a object function to get the permutation group operators.
+        Represented as a table.
+        """
+        sym_perm = []
+        numbers = [i for i in range(self.num_count)]
+        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        ops = [(r, t) for r, t in zip(sym_mat['rotations'], sym_mat['translations'])]
+        for r, t in ops:
+            pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
+            perm = self._get_new_id_seq(pos_new, numbers)
+            sym_perm.append(perm)
+
+        return sym_perm
+

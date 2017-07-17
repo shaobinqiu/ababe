@@ -5,11 +5,11 @@ from ababe.stru.element import Specie
 
 class VaspPOSCAR(object):
 
-    def __init__(self, cstru):
-        self.structure = cstru
-        self.lattice = cstru.get_lattice()
-        self.positions = cstru.get_positions()
-        self.atoms = cstru.get_atoms()
+    def __init__(self, spg_cell):
+        self.structure = spg_cell
+        self.lattice = spg_cell[0]
+        self.positions = spg_cell[1]
+        self.atoms = spg_cell[2]
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x), list(self.atoms)))
 

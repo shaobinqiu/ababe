@@ -21,7 +21,7 @@ class testVaspPOSCAR(unittest.TestCase):
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         boron_stru = CStru.from_array(latt, boron_arr)
-        poscar = VaspPOSCAR(boron_stru)
+        poscar = VaspPOSCAR(boron_stru.get_cell())
 
         expected_str = '''B16
 1.0
@@ -57,7 +57,7 @@ direct
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru)
+        poscar_bcu = VaspPOSCAR(bcu_stru.get_cell())
 
         expected_str_bcu = '''B16Cu2
 1.0
@@ -102,7 +102,7 @@ direct
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru)
+        poscar_bcu = VaspPOSCAR(bcu_stru.get_cell())
 
         tmp_file = "POSCAR.testing"
         poscar_bcu.write_POSCAR(tmp_file)
