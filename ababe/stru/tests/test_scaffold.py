@@ -206,6 +206,10 @@ class testGeneralCell(unittest.TestCase):
         arr_numbers = np.array([6]*12)
         self.cell = GeneralCell(arr_lat, arr_positions, arr_numbers)
 
+    def test_get_speckle_num(self):
+        self.assertEqual(self.cell.get_speckle_num(Specie("B")), 0)
+        self.assertEqual(self.cell.get_speckle_num(Specie("C")), 12)
+
     def test_property(self):
         np.testing.assert_equal(self.cell.numbers, np.array([6]*12))
 

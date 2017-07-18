@@ -18,6 +18,11 @@ import xxhash
 # Filename sogen is for Site-Occupy-GENerator
 
 
+def numbers2id(numbers_arr):
+    num_hash = xxhash.xxh64(numbers_arr).intdigest()
+    return num_hash
+
+
 class OccupyGenerator(object):
     """
     The class takes a GeneralCell instance as input,
@@ -55,27 +60,71 @@ class OccupyGenerator(object):
 
     def gen_nodup(self, n, sp):
         dup = self.gen_dup(n, sp)
+        # sym_perm = self.symmetry_permutation
+
+        # isoset = dict()
+        # for cell in dup:
+        #     cell_id = cell.id
+        #     if cell_id not in isoset:
+        #         yield cell
+        #         # from ababe.stru.io import VaspPOSCAR
+        #         # pdb.set_trace()
+        #         self._update_isoset(isoset, cell.numbers, sym_perm)
+        return self.gen_2nodup_gen(dup)
+
+    def gen_add_one_speckle(self, gen, sp):
+        """
+        input a structure generator __ spg_cell(mostly nonduplicate)
+        output a generator with one more speckle.
+        This a method give duplicate structures which have one more speckle
+        than the input structures.
+        """
+        atom = sp.Z
+        id_db = dict()
+        for cell in gen:
+            for index, val in enumerate(cell.numbers):
+                numbers_new = cell.numbers.copy()
+                if atom != val:
+                    numbers_new[index] = atom
+                    num_id = numbers2id(numbers_new)
+                    if num_id not in id_db:
+                        yield GeneralCell(cell.lattice, cell.positions, numbers_new)
+                        id_db[num_id] = None
+
+    def gen_2nodup_gen(self, dup_gen):
         sym_perm = self.symmetry_permutation
 
         isoset = dict()
-        for cell in dup:
-            cell_id = cell.id
-            if cell_id not in isoset:
+        for cell in dup_gen:
+            # cell_id = cell.id
+            if cell.id not in isoset:
+                # print(cell.id)
                 yield cell
-                from ababe.stru.io import VaspPOSCAR
-                #pdb.set_trace()
+                # from ababe.stru.io import VaspPOSCAR
+                # pdb.set_trace()
                 self._update_isoset(isoset, cell.numbers, sym_perm)
 
     @staticmethod
     def _update_isoset(isoset, numbers, sym_perm):
-        def numbers2id(numbers):
-            num_hash = xxhash.xxh64(numbers).intdigest()
-            return num_hash
-
         for ind in sym_perm:
             numbers_new = numbers[ind]
             cell_id = numbers2id(numbers_new)
             isoset[cell_id] = None
+
+    def all_speckle_gen(self, n, sp):
+        from itertools import tee
+        gen = (i for i in [self.init_cell])
+        # output the initial no speckle one
+        # out_gen, gen = tee(gen, 2)
+        # yield out_gen
+        n_init = self.init_cell.get_speckle_num(sp)
+        for i in range(n_init, n):
+            gen = self.gen_add_one_speckle(gen, sp)
+            gen = self.gen_2nodup_gen(gen)
+
+            out_gen, gen = tee(gen, 2)
+            yield out_gen
+
 
 def is_stru_equal(struA, struB, ops):
     bA, posA, atom_numA = struA.get_cell()

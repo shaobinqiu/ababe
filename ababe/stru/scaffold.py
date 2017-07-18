@@ -247,6 +247,12 @@ class GeneralCell(object):
         self._spg_cell = (self._lattice, self._positions, self._numbers)
         self._num_count = numbers.size
 
+    def get_speckle_num(self, sp):
+        from collections import Counter
+        num = Counter(self.numbers)[sp.Z]
+        # num = num_count[atom]
+        return num
+
     @staticmethod
     def _get_new_id_seq(pos, numbers):
         """
@@ -280,6 +286,10 @@ class GeneralCell(object):
     @property
     def numbers(self):
         return self._numbers
+
+    @numbers.setter
+    def numbers(self, arr_numbers):
+        self._numbers = arr_numbers
 
     @property
     def num_count(self):

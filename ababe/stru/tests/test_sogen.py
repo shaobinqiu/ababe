@@ -63,7 +63,6 @@ class testOccupyGeneratorCell(unittest.TestCase):
         self.assertTrue(self.ocu_gen.is_equivalent(cell_3A, cell_3B))
         self.assertTrue(self.ocu_gen.is_equivalent(cell_3C, cell_3D))
 
-
     def test_gen_dup(self):
         dup_gen = self.ocu_gen.gen_dup(3, Specie('B'))  # a generator
         l = [i for i in dup_gen]
@@ -77,6 +76,34 @@ class testOccupyGeneratorCell(unittest.TestCase):
         nodup_gen = self.ocu_gen.gen_nodup(4, Specie('B'))
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 21)
+
+        nodup_gen = self.ocu_gen.gen_nodup(1, Specie('B'))
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 1)
+
+    def test_gen_add_one_speckle(self):
+        init_gen = (i for i in [self.cell])
+        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle(init_gen, Specie("B"))
+        l = [s for s in add_one_speckle_gen]
+        # print([m.numbers for m in l])
+        self.assertEqual(len(l), 12)
+
+    def test_gen_2nodup_gen(self):
+        init_gen = (i for i in [self.cell])
+        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle(init_gen, Specie("B"))
+        # l = [s for s in add_one_speckle_gen]
+        nodup_gen = self.ocu_gen.gen_2nodup_gen(add_one_speckle_gen)
+        l = [s for s in nodup_gen]
+        # print(l)
+        self.assertEqual(len(l), 1)
+
+    def test_all_speckle_gen(self):
+        big_gen = self.ocu_gen.all_speckle_gen(4, Specie('B'))
+        num_list = [1, 5, 9, 21]
+        gen_list = [i for i in big_gen]
+        for c, r_gen in zip(num_list, gen_list):
+            r_length = len([i for i in r_gen])
+            self.assertEqual(r_length, c)
 
 
 class testAlgorithomSog(unittest.TestCase):
