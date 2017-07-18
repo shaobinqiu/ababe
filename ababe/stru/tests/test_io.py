@@ -24,7 +24,7 @@ class testVaspPOSCAR(unittest.TestCase):
         poscar = VaspPOSCAR(boron_stru.get_cell())
 
         expected_str = '''B16
-1.0
+4.0
   0.000000   0.000000  20.000000
   3.000000   0.000000   0.000000
   3.000000   5.196152   0.000000
@@ -60,7 +60,7 @@ direct
         poscar_bcu = VaspPOSCAR(bcu_stru.get_cell())
 
         expected_str_bcu = '''B16Cu2
-1.0
+4.0
   0.000000   0.000000  20.000000
   3.000000   0.000000   0.000000
   3.000000   5.196152   0.000000

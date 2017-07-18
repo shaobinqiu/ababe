@@ -1,24 +1,24 @@
 #!/usr/bin/env python
 import argparse
 import yaml
-import sys
 import tempfile
 import shutil
 
 # sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
-from ababe.stru.scaffold import SitesGrid, CStru
-from ababe.stru.element import GhostSpecie, Specie
+# from ababe.stru.scaffold import CStru
+from ababe.stru.element import Specie
 from ababe.stru.sogen import gen_nodup_cstru, is_speckle_disjunct, lat_dict
-from itertools import combinations
 from ababe.stru.io import VaspPOSCAR
 import os
+
 
 def default(str):
     return str + '  [Default: %(default)s]'
 
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-fi', '--input', dest='settings', 
+    parser.add_argument('-fi', '--input', dest='settings',
                             help='Setting file for site-occupied generator')
     parser.add_argument('-fo', '--output', dest='output_file',
                             help='The location of output file')
@@ -74,7 +74,7 @@ def main():
             f.write('\n'.join(str(line) for line in s.get_array()))
 
             f.write('\n\n\n')
-    
+
     # Write the structures into POSCARs dir
     working_path = os.getcwd()
     poscars_dir = os.path.join(working_path, 'POSCARs')
@@ -85,10 +85,11 @@ def main():
         os.makedirs(poscars_dir)
 
     for s in result:
-        working_poscar = VaspPOSCAR(s)
-        tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir, \
-                                                prefix='POSCAR_', suffix='.vaspin', delete=False)
+        working_poscar = VaspPOSCAR(s.get_cell())
+        tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
+                                                prefix='POSCAR_', suffix='.vasp', delete=False)
         working_poscar.write_POSCAR(tf.name)
+
 
 if __name__ == "__main__":
     main()

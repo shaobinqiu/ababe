@@ -3,6 +3,7 @@
 
 from ababe.stru.element import Specie
 
+
 class VaspPOSCAR(object):
 
     def __init__(self, spg_cell):
@@ -21,21 +22,19 @@ class VaspPOSCAR(object):
         from collections import Counter, OrderedDict
         from operator import itemgetter
 
-        latt = self.lattice
+        # latt = self.lattice
         d = Counter(self.atoms_name_list)
         orderd_atoms = OrderedDict(sorted(d.items(), key=lambda x: Specie(x[0]).Z))
         if 'G' in orderd_atoms:
             del orderd_atoms['G']
 
-        comment = ''.join(['{}{}'.format(k,v) for k,v in orderd_atoms.items()])
+        comment = ''.join(['{}{}'.format(k, v) for k, v in orderd_atoms.items()])
 
-        lines = [comment, "1.0"]
+        lines = [comment, "4.0"]
         # lattice string
         for c in self.lattice:
             line = " ".join("{:10.6f}".format(p) for p in c)
             lines.append(line)
-
-        
 
         lines.append(" ".join([str(x) for x in orderd_atoms.keys()]))
         lines.append(" ".join([str(x) for x in orderd_atoms.values()]))
@@ -46,15 +45,13 @@ class VaspPOSCAR(object):
         lines.append("direct" if direct else "cartesian")
 
         # sort the positions by atoms seqence
-        
         for (i, pos, site) in sorted_position:
             if not i == 0:
-                line = " ".join(["{:10.6f}".format(p) for p in pos]) 
+                line = " ".join(["{:10.6f}".format(p) for p in pos])
                 line += " " + site
                 lines.append(line)
 
-        return "\n".join(lines) + "\n"       
-
+        return "\n".join(lines) + "\n"
 
     def __repr__(self):
         return self.get_string()

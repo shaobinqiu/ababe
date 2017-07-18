@@ -95,7 +95,8 @@ class OccupyGenerator(object):
         sym_perm = self.symmetry_permutation
 
         isoset = dict()
-        for cell in dup_gen:
+        bar = ProgressBar()
+        for cell in bar(dup_gen):
             # cell_id = cell.id
             if cell.id not in isoset:
                 # print(cell.id)
@@ -118,6 +119,7 @@ class OccupyGenerator(object):
         # out_gen, gen = tee(gen, 2)
         # yield out_gen
         n_init = self.init_cell.get_speckle_num(sp)
+        print("Mission: Replace with {0:4}, up to {1:4d}...".format(sp.name, n))
         for i in range(n_init, n):
             gen = self.gen_add_one_speckle(gen, sp)
             gen = self.gen_2nodup_gen(gen)
