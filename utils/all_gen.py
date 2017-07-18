@@ -11,7 +11,7 @@ from ababe.stru.sogen import OccupyGenerator
 from ababe.stru.scaffold import GeneralCell
 from ababe.stru.element import Specie
 from ababe.stru.io import VaspPOSCAR
-# import pdb
+import pdb
 
 
 def main():
@@ -26,13 +26,13 @@ def main():
     args = yaml.load(settings)
 
     dir_name = args['comment']
-    lattice_dict = args['lattice']
-    lattice = np.array([b for b in lattice_dict.values()])
+    # lattice_dict = args['lattice']
+    lattice = np.array(args['lattice'])
     positions = np.array(args['positions'])
     numbers = np.array(args['numbers'])
     speckle = args['speckle']
     nmax = args['n']
-    # pdb.set_trace()
+    pdb.set_trace()
 
     # Write the structures into POSCARs dir
     working_path = os.getcwd()
