@@ -4,6 +4,7 @@
 import unittest
 
 import numpy as np
+import yaml
 from spglib import get_symmetry
 import ababe.stru.sogen as sogen
 from ababe.stru.sogen import OccupyGenerator
@@ -45,61 +46,127 @@ class testOccupyGeneratorCell(unittest.TestCase):
         self.cell_a = GeneralCell(self.arr_lat, self.arr_positions, arr_numbers_a)
         self.cell_b = GeneralCell(self.arr_lat, self.arr_positions, arr_numbers_b)
 
-        self.numbers_3A = np.array([5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6])
-        self.numbers_3B = np.array([5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5, 6])
+        # self.numbers_3A = np.array([5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6])
+        # self.numbers_3B = np.array([5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 5, 6])
 
-        self.numbers_3C = np.array([5, 5, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6])
-        self.numbers_3D = np.array([5, 5, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6])
+        # self.numbers_3C = np.array([5, 5, 6, 6, 5, 6, 6, 6, 6, 6, 6, 6])
+        # self.numbers_3D = np.array([5, 5, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6])
+
+        self.trinary_lat = np.array([[1.5, 0., 0.], [0., 1.5, 0.], [0., 0., 1.5]])
+        self.trinary_positions = np.array([[0.25,  0.25,  0.25],
+                                           [0.25,  0.75,  0.75],
+                                           [0.75,  0.25,  0.75],
+                                           [0.75,  0.75,  0.25],
+                                           [0.00,  0.00,  0.00],
+                                           [0.50,  0.50,  0.00],
+                                           [0.50,  0.00,  0.50],
+                                           [0.00,  0.50,  0.50],
+                                           [0.75,  0.75,  0.75],
+                                           [0.75,  0.25,  0.25],
+                                           [0.25,  0.75,  0.25],
+                                           [0.25,  0.25,  0.75]])
+        self.trinary_numbers = np.array([28, 28, 28, 28, 50, 50, 50, 50, 22, 22, 22, 22])
+        self.trinary_cell = GeneralCell(self.trinary_lat, self.trinary_positions, self.trinary_numbers)
+        self.trinary_ocu_gen = OccupyGenerator(self.trinary_cell)
+
+        import os
+        test_dir = os.path.join(os.path.dirname(__file__), 'test_files')
+        file_name = os.path.join(test_dir, 'zns_f43m2x.yaml')
+        zns2x = open(file_name, "r")
+        binary = yaml.load(zns2x)
+        self.binary_lat = np.array(binary["lattice"])
+        self.binary_positions = np.array(binary["positions"])
+        self.binary_numbers = np.array(binary["numbers"])
+        self.binary_cell = GeneralCell(self.binary_lat, self.binary_positions, self.binary_numbers)
+        self.binary_ocu_gen = OccupyGenerator(self.binary_cell)
+
 
     def test_is_equivalent(self):
         # perm_sym = self.cell.get_symmetry_permutation()
         self.assertTrue(self.ocu_gen.is_equivalent(self.cell_a, self.cell_b))
 
-        cell_3A = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3A)
-        cell_3B = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3B)
-        cell_3C = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3C)
-        cell_3D = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3D)
+        # cell_3A = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3A)
+        # cell_3B = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3B)
+        # cell_3C = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3C)
+        # cell_3D = GeneralCell(self.arr_lat, self.arr_positions, self.numbers_3D)
 
-        self.assertTrue(self.ocu_gen.is_equivalent(cell_3A, cell_3B))
-        self.assertTrue(self.ocu_gen.is_equivalent(cell_3C, cell_3D))
+        # self.assertTrue(self.ocu_gen.is_equivalent(cell_3A, cell_3B))
+        # self.assertTrue(self.ocu_gen.is_equivalent(cell_3C, cell_3D))
 
-    def test_gen_dup(self):
-        dup_gen = self.ocu_gen.gen_dup(3, Specie('B'))  # a generator
+        tri_num_A = np.array([28, 28, 28, 28, 51, 51, 50, 50, 22, 22, 22, 22])
+        tri_num_B = np.array([28, 28, 28, 28, 51, 50, 50, 51, 22, 22, 22, 22])
+        trinary_cell_A = GeneralCell(self.trinary_lat, self.trinary_positions, tri_num_A)
+        trinary_cell_B = GeneralCell(self.trinary_lat, self.trinary_positions, tri_num_B)
+        self.assertTrue(self.trinary_ocu_gen.is_equivalent(trinary_cell_A, trinary_cell_B))
+
+        bin_num_A = np.array([30, 30, 30, 30, 30, 30, 30, 30, 50, 50, 16, 16, 16, 16, 16, 16])
+        bin_num_B = np.array([30, 30, 30, 30, 30, 30, 30, 30, 16, 16, 50, 50, 16, 16, 16, 16])
+        bin_cell_A = GeneralCell(self.binary_lat, self.binary_positions, bin_num_A)
+        bin_cell_B = GeneralCell(self.binary_lat, self.binary_positions, bin_num_B)
+        self.assertTrue(self.binary_ocu_gen.is_equivalent(bin_cell_A, bin_cell_B))
+
+    def test_gen_dup_unitary(self):
+        dup_gen = self.ocu_gen.gen_dup_unitary(3, Specie('B'))  # a generator
         l = [i for i in dup_gen]
         self.assertEqual(len(l), 220)
 
-    def test_gen_nodup(self):
-        nodup_gen = self.ocu_gen.gen_nodup(3, Specie('B'))
+    def test_gen_nodup_unitary(self):
+        nodup_gen = self.ocu_gen.gen_nodup_unitary(3, Specie('B'))
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 9)
 
-        nodup_gen = self.ocu_gen.gen_nodup(4, Specie('B'))
+        nodup_gen = self.ocu_gen.gen_nodup_unitary(4, Specie('B'))
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 21)
 
-        nodup_gen = self.ocu_gen.gen_nodup(1, Specie('B'))
+        nodup_gen = self.ocu_gen.gen_nodup_unitary(1, Specie('B'))
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 1)
 
-    def test_gen_add_one_speckle(self):
+    def test_gen_dup(self):
+        dup_gen = self.binary_ocu_gen.gen_dup('c', 3, Specie('Ti'))
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 56)
+
+    def test_gen_nodup(self):
+        nodup_gen = self.binary_ocu_gen.gen_nodup('c', 3, Specie('Ti'))
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 4)
+
+    def test_gen_add_one_speckle_unitary(self):
         init_gen = (i for i in [self.cell])
-        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle(init_gen, Specie("B"))
+        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle_unitary(init_gen, Specie("B"))
         l = [s for s in add_one_speckle_gen]
         # print([m.numbers for m in l])
         self.assertEqual(len(l), 12)
 
+    def test_gen_add_one_speckle(self):
+        init_gen = (i for i in [self.binary_cell])
+        add_one_speckle_gen = self.binary_ocu_gen.gen_add_one_speckle(init_gen, 'c', Specie("Ti"))
+        l = [s for s in add_one_speckle_gen]
+
+        self.assertEqual(len(l), 8)
+
     def test_gen_2nodup_gen(self):
         init_gen = (i for i in [self.cell])
-        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle(init_gen, Specie("B"))
+        add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle_unitary(init_gen, Specie("B"))
         # l = [s for s in add_one_speckle_gen]
         nodup_gen = self.ocu_gen.gen_2nodup_gen(add_one_speckle_gen)
         l = [s for s in nodup_gen]
         # print(l)
         self.assertEqual(len(l), 1)
 
-    def test_all_speckle_gen(self):
-        big_gen = self.ocu_gen.all_speckle_gen(4, Specie('B'))
+    def test_all_speckle_gen_unitary(self):
+        big_gen = self.ocu_gen.all_speckle_gen_unitary(4, Specie('B'))
         num_list = [1, 5, 9, 21]
+        gen_list = [i for i in big_gen]
+        for c, r_gen in zip(num_list, gen_list):
+            r_length = len([i for i in r_gen])
+            self.assertEqual(r_length, c)
+
+    def test_all_speckle_gen(self):
+        big_gen = self.binary_ocu_gen.all_speckle_gen(4, 'c', Specie('Ti'))
+        num_list = [1, 4, 4, 8]
         gen_list = [i for i in big_gen]
         for c, r_gen in zip(num_list, gen_list):
             r_length = len([i for i in r_gen])

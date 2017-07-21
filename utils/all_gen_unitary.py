@@ -32,7 +32,6 @@ def main():
     numbers = np.array(args['numbers'])
     speckle = args['speckle']
     nmax = args['n']
-    wy = args['wyckoff']
     # pdb.set_trace()
 
     # Write the structures into POSCARs dir
@@ -46,7 +45,7 @@ def main():
 
     cell = GeneralCell(lattice, positions, numbers)
     ogg = OccupyGenerator(cell)
-    gg = ogg.all_speckle_gen(nmax, wy, Specie(speckle))
+    gg = ogg.all_speckle_gen_unitary(nmax, Specie(speckle))
 
     print("Mission: Replace with {0:3}, up to number {1:3d}...".format(speckle, nmax))
     for i, outer_gen in enumerate(gg):
@@ -56,7 +55,6 @@ def main():
             tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                     prefix='POSCAR_S{:}_'.format(i+1), suffix='.vasp', delete=False)
             poscar.write_POSCAR(tf.name)
-        # pdb.set_trace()
         print("Total {0:3d} nonduplicated structures in {1:3d} substitute.".format(n_count+1, i+1))
 
 

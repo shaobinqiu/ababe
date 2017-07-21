@@ -1,18 +1,18 @@
 # lattice shape of grid
 # triflat for plant triangle grid
-lattice: bcc
+lattice: fcc
 
 # base is the element of full padding grid
 base: C
 
 # grid size -- seq are depth width lenght
-grid_size: [5, 3, 2]
+grid_size: [1, 2, 4]
 
 # speckle -- the element of filled site
 speckle: B
 
 # how many site are filled with speckle
-number: 4
+number: 2
 
 # the output filetype
 output: normal

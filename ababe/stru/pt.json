@@ -18,5 +18,25 @@
 	"G":{
 		"Atomic no": 0,
 		"Atomic mass": 0,
-		"Atomic radius": 0}
+		"Atomic radius": 0},
+	"Ni":{
+		"Atomic no": 28,
+		"Atomic mass": 58.693,
+		"Atomic radius": 1.24},
+	"Sn":{
+		"Atomic no": 50,
+		"Atomic mass": 118.71,
+		"Atomic radius": 1.40},
+	"Sb":{
+		"Atomic no": 51,
+		"Atomic mass": 121.760,
+		"Atomic radius": 1.40},
+	"Zn":{
+		"Atomic no": 30,
+		"Atomic mass": 65.38,
+		"Atomic radius": 1.34},
+	"S":{
+		"Atomic no": 16,
+		"Atomic mass": 32.06,
+		"Atomic radius": 1.05}
 }

@@ -15,6 +15,7 @@ import spglib
 from spglib import get_symmetry
 import os
 import xxhash
+from itertools import tee
 # Filename sogen is for Site-Occupy-GENerator
 
 
@@ -36,6 +37,7 @@ class OccupyGenerator(object):
         self.numbers = general_cell.numbers
 
         self.symmetry_permutation = general_cell.get_symmetry_permutation()
+        self.wyckoffs = general_cell.get_wyckoffs()
 
     def is_equivalent(self, cell_i, cell_other):
         numbers_i = cell_i.numbers
@@ -47,7 +49,7 @@ class OccupyGenerator(object):
 
         return False
 
-    def gen_dup(self, n, sp):
+    def gen_dup_unitary(self, n, sp):
         init_numbers = self.init_cell.numbers
         num_count = init_numbers.size   # number of atoms in structure
         i_speckle = sp.Z
@@ -58,8 +60,8 @@ class OccupyGenerator(object):
                 numbers[index] = i_speckle
             yield GeneralCell(self.lattice, self.positions, numbers)
 
-    def gen_nodup(self, n, sp):
-        dup = self.gen_dup(n, sp)
+    def gen_nodup_unitary(self, n, sp):
+        dup = self.gen_dup_unitary(n, sp)
         # sym_perm = self.symmetry_permutation
 
         # isoset = dict()
@@ -72,7 +74,24 @@ class OccupyGenerator(object):
         #         self._update_isoset(isoset, cell.numbers, sym_perm)
         return self.gen_2nodup_gen(dup)
 
-    def gen_add_one_speckle(self, gen, sp):
+    def gen_dup(self, wy, n, sp):
+        init_numbers = self.init_cell.numbers
+        i_speckle = sp.Z
+        wyckoffs = self.wyckoffs
+        sp_ind = [i for i, w in enumerate(wyckoffs) if w is wy]
+        # pdb.set_trace()
+        from itertools import combinations
+        for comb_index in combinations(sp_ind, n):
+            numbers = init_numbers.copy()
+            for index in comb_index:
+                numbers[index] = i_speckle
+            yield GeneralCell(self.lattice, self.positions, numbers)
+
+    def gen_nodup(self, wy, n, sp):
+        dup = self.gen_dup(wy, n, sp)
+        return self.gen_2nodup_gen(dup)
+
+    def gen_add_one_speckle_unitary(self, gen, sp):
         """
         input a structure generator __ spg_cell(mostly nonduplicate)
         output a generator with one more speckle.
@@ -85,6 +104,20 @@ class OccupyGenerator(object):
             for index, val in enumerate(cell.numbers):
                 numbers_new = cell.numbers.copy()
                 if atom != val:
+                    numbers_new[index] = atom
+                    num_id = numbers2id(numbers_new)
+                    if num_id not in id_db:
+                        yield GeneralCell(cell.lattice, cell.positions, numbers_new)
+                        id_db[num_id] = None
+
+    def gen_add_one_speckle(self, gen, wy, sp):
+        atom = sp.Z
+        id_db = dict()
+        for cell in gen:
+            wy_ele = zip(self.wyckoffs, cell.numbers)
+            for index, tuple_w_e in enumerate(wy_ele):
+                numbers_new = cell.numbers.copy()
+                if tuple_w_e[0] == wy and atom != tuple_w_e[1]:
                     numbers_new[index] = atom
                     num_id = numbers2id(numbers_new)
                     if num_id not in id_db:
@@ -112,8 +145,7 @@ class OccupyGenerator(object):
             cell_id = numbers2id(numbers_new)
             isoset[cell_id] = None
 
-    def all_speckle_gen(self, n, sp):
-        from itertools import tee
+    def all_speckle_gen_unitary(self, n, sp):
         gen = (i for i in [self.init_cell])
         # output the initial no speckle one
         # out_gen, gen = tee(gen, 2)
@@ -121,7 +153,18 @@ class OccupyGenerator(object):
         n_init = self.init_cell.get_speckle_num(sp)
         print("Mission: Replace with {0:4}, up to {1:4d}...".format(sp.name, n))
         for i in range(n_init, n):
-            gen = self.gen_add_one_speckle(gen, sp)
+            gen = self.gen_add_one_speckle_unitary(gen, sp)
+            gen = self.gen_2nodup_gen(gen)
+
+            out_gen, gen = tee(gen, 2)
+            yield out_gen
+
+    def all_speckle_gen(self, n, wy, sp):
+        gen = (i for i in [self.init_cell])
+        n_init = self.init_cell.get_speckle_num(sp)
+        print("Mission: Replace with {0:4}, up to {1:4d}, in wyckoff site {2:3}...".format(sp.name, n, wy))
+        for i in range(n_init, n):
+            gen = self.gen_add_one_speckle(gen, wy, sp)
             gen = self.gen_2nodup_gen(gen)
 
             out_gen, gen = tee(gen, 2)

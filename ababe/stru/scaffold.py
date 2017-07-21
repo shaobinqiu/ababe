@@ -242,8 +242,11 @@ class GeneralCell(object):
     def __init__(self, lattice, positions, numbers):
         self._lattice = lattice
         init_index = self._get_new_id_seq(positions, numbers)
+
+        # Following two line sort positions and numbers
         self._positions = positions[init_index]
-        self._numbers = numbers
+        self._numbers = numbers[init_index]
+
         self._spg_cell = (self._lattice, self._positions, self._numbers)
         self._num_count = numbers.size
 
@@ -332,4 +335,12 @@ class GeneralCell(object):
             sym_perm.append(perm)
 
         return sym_perm
+
+    def get_wyckoffs(self):
+        symdb = spglib.get_symmetry_dataset(self._spg_cell, symprec=1e-4)
+        return symdb['wyckoffs']
+
+    @classmethod
+    def from_poscar(cls, poscar_file):
+        pass
 
