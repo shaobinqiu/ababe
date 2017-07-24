@@ -52,7 +52,7 @@ def main():
     for i, outer_gen in enumerate(gg):
         print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
         for n_count, c in enumerate(outer_gen):
-            poscar = VaspPOSCAR(c.spg_cell)
+            poscar = VaspPOSCAR(c.spg_cell, zoom=1)
             tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                     prefix='POSCAR_S{:}_'.format(i+1), suffix='.vasp', delete=False)
             poscar.write_POSCAR(tf.name)

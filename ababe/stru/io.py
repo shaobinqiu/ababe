@@ -6,13 +6,16 @@ from ababe.stru.element import Specie
 
 class VaspPOSCAR(object):
 
-    def __init__(self, spg_cell):
+    def __init__(self, spg_cell, zoom=1):
         self.structure = spg_cell
         self.lattice = spg_cell[0]
         self.positions = spg_cell[1]
         self.atoms = spg_cell[2]
 
-        self.atoms_name_list = list(map(lambda x: Specie.to_name(x), list(self.atoms)))
+        self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
+                                        list(self.atoms)))
+
+        self.zoom = zoom
 
     def get_string(self, direct=True):
         """
@@ -24,13 +27,15 @@ class VaspPOSCAR(object):
 
         # latt = self.lattice
         d = Counter(self.atoms_name_list)
-        orderd_atoms = OrderedDict(sorted(d.items(), key=lambda x: Specie(x[0]).Z))
+        orderd_atoms = OrderedDict(sorted(d.items(),
+                                          key=lambda x: Specie(x[0]).Z))
         if 'G' in orderd_atoms:
             del orderd_atoms['G']
 
-        comment = ''.join(['{}{}'.format(k, v) for k, v in orderd_atoms.items()])
+        comment = ''.join(['{}{}'.format(k, v)
+                           for k, v in orderd_atoms.items()])
 
-        lines = [comment, "4.0"]
+        lines = [comment, str(self.zoom)]
         # lattice string
         for c in self.lattice:
             line = " ".join("{:10.6f}".format(p) for p in c)
@@ -39,7 +44,8 @@ class VaspPOSCAR(object):
         lines.append(" ".join([str(x) for x in orderd_atoms.keys()]))
         lines.append(" ".join([str(x) for x in orderd_atoms.values()]))
 
-        zipped_list = list(zip(self.atoms, self.positions, self.atoms_name_list))
+        zipped_list = list(zip(self.atoms, self.positions,
+                               self.atoms_name_list))
         sorted_position = sorted(zipped_list, key=itemgetter(0))
 
         lines.append("direct" if direct else "cartesian")
