@@ -12,7 +12,7 @@ from itertools import product
 from ababe.stru.scaffold import GeneralCell
 
 
-class HermiteLattice(object):
+class SuperLatticeGenerator(object):
     """
     The class will produce the instance which is a Hermite Normal
     Form of a superlattice. It can be used to generate a GeneralCell.
@@ -28,7 +28,7 @@ class HermiteLattice(object):
         self.sym = spglib.get_symmetry(self.unit_cell)
 
     @classmethod
-    def HNFs_from_n_dups(cls, unit_cell, n):
+    def hnfs_from_n_dups(cls, unit_cell, n):
         def factors(n):
             return set(reduce(list.__add__,
                               ([i, n//i] for i in
@@ -80,8 +80,8 @@ class HermiteLattice(object):
     #     return False
 
     @classmethod
-    def HNFs_from_n(cls, unit_cell, n):
-        hnfs = cls.HNFs_from_n_dups(unit_cell, n)
+    def hnfs_from_n(cls, unit_cell, n):
+        hnfs = cls.hnfs_from_n_dups(unit_cell, n)
         nodup_hnfs = []
         bar = ProgressBar()
         for hnf in bar(hnfs):

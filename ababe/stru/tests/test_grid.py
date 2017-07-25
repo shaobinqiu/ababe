@@ -4,10 +4,10 @@
 import unittest
 import numpy as np
 
-from ababe.stru.grid import HermiteLattice
+from ababe.stru.grid import SuperLatticeGenerator
 
 
-class testHermiteLattice(unittest.TestCase):
+class testSuperLatticeGenerator(unittest.TestCase):
 
     def setUp(self):
         self.bcc_base = np.array([[-0.5, -0.5, -0.5],
@@ -20,17 +20,17 @@ class testHermiteLattice(unittest.TestCase):
                        self.bcc_u_n)
 
     def test_HNFs_from_n_dups(self):
-        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 4)
+        hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 4)
         self.assertEqual(len(hnfs), 35)
 
-        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 5)
+        hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 5)
         self.assertEqual(len(hnfs), 31)
 
-        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 6)
+        hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 6)
         self.assertEqual(len(hnfs), 91)
 
     def test_eq(self):
-        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 2)
+        hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 2)
         hnf00 = hnfs[0]
         hnf01 = hnfs[1]
         self.assertEqual(hnf00, hnf01)
@@ -40,7 +40,7 @@ class testHermiteLattice(unittest.TestCase):
         # to test...
         results = [2, 3, 7, 5, 10, 7]
         for i, result in zip(range(2, 8), results):
-            nodup_hnfs = HermiteLattice.HNFs_from_n(self.bcc_uc, i)
+            nodup_hnfs = SuperLatticeGenerator.hnfs_from_n(self.bcc_uc, i)
             self.assertEqual(len(nodup_hnfs), result)
 
         # hcp test
@@ -51,11 +51,11 @@ class testHermiteLattice(unittest.TestCase):
                                   [0.66666663,  0.33333331,  0.75]])
         hcp_numbers = np.array([0, 0])
         hcp_uc = (hcp_b, hcp_positions, hcp_numbers)
-        result = HermiteLattice.HNFs_from_n(hcp_uc, 9)
+        result = SuperLatticeGenerator.hnfs_from_n(hcp_uc, 9)
         self.assertEqual(len(result), 23)
 
     def test_to_general_cell(self):
-        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 4)
+        hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 4)
         hnf = hnfs[2]
         cell = hnf.to_general_cell()
         # print(cell.spg_cell)
@@ -68,7 +68,7 @@ class testHermiteLattice(unittest.TestCase):
                            [0.25, 0.25, 0.25]])
         zb_num = np.array([30, 16])
         zb_uc = (zb_b, zb_pos, zb_num)
-        zbs = HermiteLattice.HNFs_from_n(zb_uc, 3)
+        zbs = SuperLatticeGenerator.hnfs_from_n(zb_uc, 3)
         one_zb = zbs[1]
         cell = one_zb.to_general_cell()
         # print(cell.spg_cell)
