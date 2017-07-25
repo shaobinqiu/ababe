@@ -3,6 +3,7 @@
 
 import itertools
 import numpy as np
+import spglib
 from functools import reduce
 
 # import pdb
@@ -15,7 +16,10 @@ class HermiteLattice(object):
     """
 
     def __init__(self, unit_bases, lat_coeff):
-        pass
+        self.ub = unit_bases
+        self.lat_coeff = lat_coeff
+        cell = (self.ub, np.array([[0, 0, 0]]), np.array([0]))
+        self.sym = spglib.get_symmetry(cell)
 
     @classmethod
     def HNFs_from_n_dups(cls, unit_bases, n):
@@ -36,6 +40,48 @@ class HermiteLattice(object):
                         hnf = np.array([[a, 0, 0],
                                         [b, c, 0],
                                         [d, e, f]])
-                        l_HNFs.append(hnf)
+                        l_HNFs.append(cls(unit_bases, hnf))
 
         return l_HNFs
+
+    def __eq__(self, other):
+        inv = np.linalg.inv
+        mul = np.matmul
+        for r in self.sym['rotations']:
+            h_inv = mul(inv(other.lat_coeff),
+                        inv(r))
+            # h = mul(r, other.lat_coeff)
+            h_mat = mul(h_inv, self.lat_coeff)
+            h_mat = np.around(h_mat, decimals=3)
+            if np.all(np.mod(h_mat, 1) == 0):
+                return True
+
+        return False
+
+    # def is_eq(self, my, other):
+    #     inv = np.linalg.inv
+    #     mul = np.matmul
+    #     for r in self.sym['rotations']:
+    #         h_inv = mul(inv(other.lat_coeff),
+    #                     inv(r))
+    #         # h = mul(r, other.lat_coeff)
+    #         h_mat = mul(h_inv, my.lat_coeff)
+    #         h_mat = np.around(h_mat, decimals=2)
+    #         # pdb.set_trace()
+    #         if np.all(np.mod(h_mat, 1) == 0):
+    #             return True
+
+    #     return False
+
+    @classmethod
+    def HNFs_from_n(cls, unit_bases, n):
+        hnfs = cls.HNFs_from_n_dups(unit_bases, n)
+        nodup_hnfs = []
+        for hnf in hnfs:
+            if hnf not in nodup_hnfs:
+                nodup_hnfs.append(hnf)
+
+        return nodup_hnfs
+
+    def to_general_cell(self):
+        pass
