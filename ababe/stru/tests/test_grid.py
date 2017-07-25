@@ -54,6 +54,26 @@ class testHermiteLattice(unittest.TestCase):
         result = HermiteLattice.HNFs_from_n(hcp_uc, 9)
         self.assertEqual(len(result), 23)
 
+    def test_to_general_cell(self):
+        hnfs = HermiteLattice.HNFs_from_n_dups(self.bcc_uc, 4)
+        hnf = hnfs[2]
+        cell = hnf.to_general_cell()
+        # print(cell.spg_cell)
+        self.assertEqual(len(cell.spg_cell[2]), 4)
+
+        zb_b = np.array([[3.82863, 0., 0.],
+                         [1.91431, 3.31569, 0.],
+                         [1.91431, 1.10523, 3.12606]])
+        zb_pos = np.array([[0., 0., 0.],
+                           [0.25, 0.25, 0.25]])
+        zb_num = np.array([30, 16])
+        zb_uc = (zb_b, zb_pos, zb_num)
+        zbs = HermiteLattice.HNFs_from_n(zb_uc, 3)
+        one_zb = zbs[1]
+        cell = one_zb.to_general_cell()
+        # print(cell.spg_cell)
+        self.assertEqual(len(cell.spg_cell[2]), 6)
+
 
 if __name__ == "__main__":
     import nose2

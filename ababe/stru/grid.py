@@ -7,6 +7,9 @@ import spglib
 from functools import reduce
 from progressbar import ProgressBar
 # import pdb
+from itertools import product
+
+from ababe.stru.scaffold import GeneralCell
 
 
 class HermiteLattice(object):
@@ -87,7 +90,7 @@ class HermiteLattice(object):
 
         return nodup_hnfs
 
-    def to_general_cell(self, numbers):
+    def to_general_cell(self):
         """
         The function used to convert the superlattice
         HermiteLattice to a GeneralCell instance.
@@ -95,4 +98,29 @@ class HermiteLattice(object):
         of the unit basis.
         input numbers are element number of the corespoding positions.
         """
-        pass
+        latt = np.matmul(self.ub, self.lat_coeff)
+
+        o_unit_pos = self.upositions/np.amax(self.lat_coeff)
+        o_pos = self.get_frac_from_H(self.lat_coeff)
+        l_of_positions = [i for i in map(lambda x: x+o_pos, list(o_unit_pos))]
+        # pdb.set_trace()
+        pos = np.concatenate(l_of_positions, axis=0)
+
+        n = self.lat_coeff.diagonal().prod()
+        numbers = np.repeat(self.unumbers, n)
+
+        # pdb.set_trace()
+        return GeneralCell(latt, pos, numbers)
+
+    @staticmethod
+    def get_frac_from_H(h_mat):
+        inv = np.linalg.inv
+        mul = np.matmul
+        m = np.amax(h_mat)
+        int_coor_all = np.array([i for i in product(range(m), repeat=3)])
+        frac_all = mul(int_coor_all, inv(h_mat))
+        # print(frac_all)
+        is_incell = np.all(((frac_all >= 0) & (frac_all < 1)),
+                           axis=1)
+        ind = np.where(is_incell)[0]
+        return frac_all[ind]
