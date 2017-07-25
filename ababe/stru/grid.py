@@ -5,7 +5,7 @@ import itertools
 import numpy as np
 import spglib
 from functools import reduce
-
+from progressbar import ProgressBar
 # import pdb
 
 
@@ -15,14 +15,17 @@ class HermiteLattice(object):
     Form of a superlattice. It can be used to generate a GeneralCell.
     """
 
-    def __init__(self, unit_bases, lat_coeff):
-        self.ub = unit_bases
+    def __init__(self, unit_cell, lat_coeff):
+        self.ub = unit_cell[0]
+        self.upositions = unit_cell[1]
+        self.unumbers = unit_cell[2]
         self.lat_coeff = lat_coeff
-        cell = (self.ub, np.array([[0, 0, 0]]), np.array([0]))
-        self.sym = spglib.get_symmetry(cell)
+        self.unit_cell = unit_cell
+
+        self.sym = spglib.get_symmetry(self.unit_cell)
 
     @classmethod
-    def HNFs_from_n_dups(cls, unit_bases, n):
+    def HNFs_from_n_dups(cls, unit_cell, n):
         def factors(n):
             return set(reduce(list.__add__,
                               ([i, n//i] for i in
@@ -40,7 +43,7 @@ class HermiteLattice(object):
                         hnf = np.array([[a, 0, 0],
                                         [b, c, 0],
                                         [d, e, f]])
-                        l_HNFs.append(cls(unit_bases, hnf))
+                        l_HNFs.append(cls(unit_cell, hnf))
 
         return l_HNFs
 
@@ -74,14 +77,22 @@ class HermiteLattice(object):
     #     return False
 
     @classmethod
-    def HNFs_from_n(cls, unit_bases, n):
-        hnfs = cls.HNFs_from_n_dups(unit_bases, n)
+    def HNFs_from_n(cls, unit_cell, n):
+        hnfs = cls.HNFs_from_n_dups(unit_cell, n)
         nodup_hnfs = []
-        for hnf in hnfs:
+        bar = ProgressBar()
+        for hnf in bar(hnfs):
             if hnf not in nodup_hnfs:
                 nodup_hnfs.append(hnf)
 
         return nodup_hnfs
 
-    def to_general_cell(self):
+    def to_general_cell(self, numbers):
+        """
+        The function used to convert the superlattice
+        HermiteLattice to a GeneralCell instance.
+        input aps for atome_position_s, which are atom positions
+        of the unit basis.
+        input numbers are element number of the corespoding positions.
+        """
         pass
