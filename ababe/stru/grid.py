@@ -6,7 +6,7 @@ import numpy as np
 import spglib
 from functools import reduce
 from progressbar import ProgressBar
-import pdb
+# import pdb
 from itertools import product
 
 from ababe.stru.scaffold import GeneralCell
@@ -46,9 +46,9 @@ class SuperLatticeGenerator(object):
                 for b in range(c):
                     # pdb.set_trace()
                     for d, e in itertools.product(range(f), repeat=2):
-                        hnf = np.array([[a, 0, 0],
-                                        [b, c, 0],
-                                        [d, e, f]])
+                        hnf = np.array([[a, b, d],
+                                        [0, c, e],
+                                        [0, 0, f]])
                         l_HNFs.append(cls(unit_cell, hnf))
 
         return l_HNFs
@@ -57,10 +57,10 @@ class SuperLatticeGenerator(object):
         inv = np.linalg.inv
         mul = np.matmul
         for r in self.sym['rotations']:
-            h_inv = mul(inv(other.lat_coeff),
+            h_inv = mul(inv(other.lat_coeff.T),
                         inv(r))
             # h = mul(r, other.lat_coeff)
-            h_mat = mul(h_inv, self.lat_coeff)
+            h_mat = mul(h_inv, self.lat_coeff.T)
             h_mat = np.around(h_mat, decimals=3)
             if np.all(np.mod(h_mat, 1) == 0):
                 return True
@@ -105,7 +105,7 @@ class SuperLatticeGenerator(object):
         """
         # lat_coeff is represent as column vector
         # while ub and latt is row vector
-        latt = np.matmul(np.transpose(self.lat_coeff),
+        latt = np.matmul(self.lat_coeff,
                          self.ub)
 
         o_unit_pos = self.upositions/np.amax(self.lat_coeff)
@@ -117,7 +117,7 @@ class SuperLatticeGenerator(object):
         n = self.lat_coeff.diagonal().prod()
         numbers = np.repeat(self.unumbers, n)
 
-        pdb.set_trace()
+        # pdb.set_trace()
         return GeneralCell(latt, pos, numbers)
 
     @staticmethod
@@ -126,11 +126,11 @@ class SuperLatticeGenerator(object):
         mul = np.matmul
         m = np.amax(h_mat)
         int_coor_all = np.array([i for i in product(range(m), repeat=3)])
-        frac_all = mul(int_coor_all, inv(h_mat.T))
+        frac_all = mul(int_coor_all, inv(h_mat))
         # frac_all = mul(int_coor_all, inv(h_mat))
         # print(frac_all)
         is_incell = np.all(((frac_all >= 0) & (frac_all < 1)),
                            axis=1)
         ind = np.where(is_incell)[0]
-        pdb.set_trace()
+        # pdb.set_trace()
         return frac_all[ind]

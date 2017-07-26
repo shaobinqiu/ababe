@@ -10,9 +10,9 @@ from ababe.stru.grid import SuperLatticeGenerator
 class testSuperLatticeGenerator(unittest.TestCase):
 
     def setUp(self):
-        self.bcc_base = np.array([[-0.5, -0.5, -0.5],
-                                  [-0.5,  0.5,  0.5],
-                                  [0.5, -0.5,  0.5]])
+        self.bcc_base = np.array([[0.5, 0.5, -0.5],
+                                  [-0.5, 0.5, 0.5],
+                                  [0.5, -0.5, 0.5]])
         self.bcc_u_position = np.array([[0, 0, 0]])
         self.bcc_u_n = np.array([0])
         self.bcc_uc = (self.bcc_base,
@@ -73,6 +73,13 @@ class testSuperLatticeGenerator(unittest.TestCase):
         cell = one_zb.to_general_cell()
         # print(cell.spg_cell)
         self.assertEqual(len(cell.spg_cell[2]), 6)
+
+        h = np.array([[1, 0, 3],
+                      [0, 2, 2],
+                      [0, 0, 4]])
+        strange_hnf = SuperLatticeGenerator(self.bcc_uc, h)
+        shnf = strange_hnf.to_general_cell()
+        self.assertEqual(len(shnf.spg_cell[2]), 8)
 
 
 if __name__ == "__main__":
