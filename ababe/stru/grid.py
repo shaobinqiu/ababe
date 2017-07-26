@@ -6,7 +6,7 @@ import numpy as np
 import spglib
 from functools import reduce
 from progressbar import ProgressBar
-# import pdb
+import pdb
 from itertools import product
 
 from ababe.stru.scaffold import GeneralCell
@@ -16,6 +16,9 @@ class SuperLatticeGenerator(object):
     """
     The class will produce the instance which is a Hermite Normal
     Form of a superlattice. It can be used to generate a GeneralCell.
+    TODO: input present, unit_cell is row vectors, which lat_coeff
+    is column vectors. SHOULD CHNAGE code to make lat_coeff be a
+    row vectors.
     """
 
     def __init__(self, unit_cell, lat_coeff):
@@ -88,6 +91,8 @@ class SuperLatticeGenerator(object):
             if hnf not in nodup_hnfs:
                 nodup_hnfs.append(hnf)
 
+        # pdb.set_trace()
+
         return nodup_hnfs
 
     def to_general_cell(self):
@@ -98,7 +103,10 @@ class SuperLatticeGenerator(object):
         of the unit basis.
         input numbers are element number of the corespoding positions.
         """
-        latt = np.matmul(self.ub, self.lat_coeff)
+        # lat_coeff is represent as column vector
+        # while ub and latt is row vector
+        latt = np.matmul(np.transpose(self.lat_coeff),
+                         self.ub)
 
         o_unit_pos = self.upositions/np.amax(self.lat_coeff)
         o_pos = self.get_frac_from_H(self.lat_coeff)
@@ -109,7 +117,7 @@ class SuperLatticeGenerator(object):
         n = self.lat_coeff.diagonal().prod()
         numbers = np.repeat(self.unumbers, n)
 
-        # pdb.set_trace()
+        pdb.set_trace()
         return GeneralCell(latt, pos, numbers)
 
     @staticmethod
@@ -118,9 +126,11 @@ class SuperLatticeGenerator(object):
         mul = np.matmul
         m = np.amax(h_mat)
         int_coor_all = np.array([i for i in product(range(m), repeat=3)])
-        frac_all = mul(int_coor_all, inv(h_mat))
+        frac_all = mul(int_coor_all, inv(h_mat.T))
+        # frac_all = mul(int_coor_all, inv(h_mat))
         # print(frac_all)
         is_incell = np.all(((frac_all >= 0) & (frac_all < 1)),
                            axis=1)
         ind = np.where(is_incell)[0]
+        pdb.set_trace()
         return frac_all[ind]
