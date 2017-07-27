@@ -7,9 +7,49 @@ import unittest
 import numpy as np
 from math import sqrt
 from ababe.stru.scaffold import CStru
-from ababe.stru.io import VaspPOSCAR
+from ababe.stru.io import VaspPOSCAR, YamlOutput
 
-# test_dir = os.path.join(os.path.dirname(__file__), 'test_files')
+
+class testYamlOutput(unittest.TestCase):
+
+    def setUp(self):
+        a_latt = np.array([[0.5, 0.5, -0.5],
+                           [-0.5, 0.5, 0.5],
+                           [0.5, -0.5, 0.5]])
+        a_pos = np.array([[0, 0, 0]])
+        a_num = np.array([16])
+        a_cell = (a_latt, a_pos, a_num)
+        self.a_yaml = YamlOutput(a_cell, zoom=3)
+
+    def test_get_string(self):
+
+        expected_str = '''comment: S1
+lattice:
+- [0.5, 0.5, -0.5]
+- [-0.5, 0.5, 0.5]
+- [0.5, -0.5, 0.5]
+numbers: [16]
+positions:
+- [0, 0, 0]
+zoom: 3
+'''
+        self.assertEqual(str(self.a_yaml), expected_str)
+
+    def test_write_file(self):
+        """.
+        The function is tested by save structure
+        to a POSCAR file, and then read from it.
+        Compare the parameters read from to the
+        origin input parameter. Using almostEqual
+        """
+        tmp_file = "YAML.testing"
+        self.a_yaml.write_YAML(tmp_file)
+
+        with open(tmp_file, 'r') as testing_file:
+            data = testing_file.read()
+
+        self.assertEqual(data, str(self.a_yaml))
+        os.remove(tmp_file)
 
 
 class testVaspPOSCAR(unittest.TestCase):

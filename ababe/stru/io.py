@@ -2,6 +2,64 @@
 # Distributed under the terms of the MIT License.
 
 from ababe.stru.element import Specie
+from collections import Counter, OrderedDict
+from operator import itemgetter
+
+# import ruamel.yaml as yaml
+import yaml
+
+
+class YamlOutput(object):
+
+    def __init__(self, spg_cell, zoom=1):
+        self.structure = spg_cell
+        self.lattice = spg_cell[0]
+        self.positions = spg_cell[1]
+        self.numbers = spg_cell[2]
+
+        self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
+                                        list(self.numbers)))
+
+        self.zoom = zoom
+
+    def get_string(self):
+        """
+        Returns:
+            String representation of YAML type
+        """
+        d = Counter(self.atoms_name_list)
+        ordered_atoms = OrderedDict(sorted(d.items(),
+                                           key=lambda x: Specie(x[0]).Z))
+        if 'G' in ordered_atoms:
+            del ordered_atoms['G']
+
+        comment = ''.join(['{}{}'.format(k, v)
+                           for k, v in ordered_atoms.items()])
+
+        output = {'comment':    comment,
+                  'lattice':    self.lattice.tolist(),
+                  'positions':  self.positions.tolist(),
+                  'numbers':    self.numbers.tolist(),
+                  'zoom':       self.zoom}
+
+        return yaml.dump(output)
+
+    def write_YAML(self, filename):
+        """
+        Writes YAML to a file.
+        """
+        with open(filename, "w") as f:
+            f.write(self.get_string())
+
+    def __repr__(self):
+        return self.get_string()
+
+    def __str__(self):
+        """
+        String representation of structure yaml file
+        """
+        print(self.get_string())
+        return self.get_string()
 
 
 class VaspPOSCAR(object):
@@ -20,20 +78,18 @@ class VaspPOSCAR(object):
     def get_string(self, direct=True):
         """
         Returns:
-            String represention of POSCAR.
+            String representation of POSCAR.
         """
-        from collections import Counter, OrderedDict
-        from operator import itemgetter
 
         # latt = self.lattice
         d = Counter(self.atoms_name_list)
-        orderd_atoms = OrderedDict(sorted(d.items(),
-                                          key=lambda x: Specie(x[0]).Z))
-        if 'G' in orderd_atoms:
-            del orderd_atoms['G']
+        ordered_atoms = OrderedDict(sorted(d.items(),
+                                           key=lambda x: Specie(x[0]).Z))
+        if 'G' in ordered_atoms:
+            del ordered_atoms['G']
 
         comment = ''.join(['{}{}'.format(k, v)
-                           for k, v in orderd_atoms.items()])
+                           for k, v in ordered_atoms.items()])
 
         lines = [comment, str(self.zoom)]
         # lattice string
@@ -41,8 +97,8 @@ class VaspPOSCAR(object):
             line = " ".join("{:10.6f}".format(p) for p in c)
             lines.append(line)
 
-        lines.append(" ".join([str(x) for x in orderd_atoms.keys()]))
-        lines.append(" ".join([str(x) for x in orderd_atoms.values()]))
+        lines.append(" ".join([str(x) for x in ordered_atoms.keys()]))
+        lines.append(" ".join([str(x) for x in ordered_atoms.values()]))
 
         zipped_list = list(zip(self.atoms, self.positions,
                                self.atoms_name_list))

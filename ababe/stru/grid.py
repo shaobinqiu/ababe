@@ -54,13 +54,14 @@ class SuperLatticeGenerator(object):
         return l_HNFs
 
     def __eq__(self, other):
+        # H_j * R.T ^-1 * H ^-1 should be an int matrix
         inv = np.linalg.inv
         mul = np.matmul
         for r in self.sym['rotations']:
-            h_inv = mul(inv(other.lat_coeff.T),
-                        inv(r))
+            h_inv = mul(other.lat_coeff,
+                        inv(r.T))
             # h = mul(r, other.lat_coeff)
-            h_mat = mul(h_inv, self.lat_coeff.T)
+            h_mat = mul(h_inv, inv(self.lat_coeff))
             h_mat = np.around(h_mat, decimals=3)
             if np.all(np.mod(h_mat, 1) == 0):
                 return True
@@ -125,7 +126,7 @@ class SuperLatticeGenerator(object):
         inv = np.linalg.inv
         mul = np.matmul
         m = np.amax(h_mat)
-        int_coor_all = np.array([i for i in product(range(m), repeat=3)])
+        int_coor_all = np.array([i for i in product(range(m*3), repeat=3)])
         frac_all = mul(int_coor_all, inv(h_mat))
         # frac_all = mul(int_coor_all, inv(h_mat))
         # print(frac_all)

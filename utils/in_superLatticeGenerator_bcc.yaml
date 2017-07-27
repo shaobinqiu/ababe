@@ -4,7 +4,7 @@
 
 # All Superlattice produce to a directory
 # name of the dir give following:
-comment: bcc_under_6
+comment: bcc_under_8
 
 # unit_basis: A 2-D LIST
 unit_basis:
@@ -20,4 +20,12 @@ unit_positions:
 unit_numbers: [29]
 
 # max volumn of super lattice
-volumn: 16
+volumn: 8
+
+# zoom of output structure
+zoom: 4
+
+# output file type:
+# 1. vasp for POSCAR
+# 2. yaml for yaml
+outfile_type: yaml

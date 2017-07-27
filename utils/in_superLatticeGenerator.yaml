@@ -21,3 +21,11 @@ unit_numbers: [29]
 
 # max volumn of super lattice
 volumn: 9
+
+# zoom of output structure
+zoom: 4
+
+# output file type:
+# 1. vasp for POSCAR
+# 2. yaml for yaml
+outfile_type: vasp

@@ -8,4 +8,5 @@
 *.egg-info/
 POSCAR*/
 SUPERLATT*/
+test/*
 x
