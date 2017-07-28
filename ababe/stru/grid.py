@@ -130,7 +130,7 @@ class SuperLatticeGenerator(object):
         frac_all = mul(int_coor_all, inv(h_mat))
         # frac_all = mul(int_coor_all, inv(h_mat))
         # print(frac_all)
-        is_incell = np.all(((frac_all >= 0) & (frac_all < 1)),
+        is_incell = np.all(((frac_all >= -0.00001) & (frac_all < 0.99999)),
                            axis=1)
         ind = np.where(is_incell)[0]
         # pdb.set_trace()

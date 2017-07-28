@@ -346,5 +346,5 @@ class GeneralCell(object):
         pass
 
     def is_primitive(self):
-        primitive_cell = spglib.find_primitive(self.spg_cell)
+        primitive_cell = spglib.find_primitive(self.spg_cell, symprec=1e-3)
         return primitive_cell[2].size == self.spg_cell[2].size
