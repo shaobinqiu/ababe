@@ -29,8 +29,8 @@ class SitesGrid(object):
     @classmethod
     def sea(cls, depth, width, length, sp=GhostSpecie()):
         sites = [[[sp for _ in range(length)]
-                          for _ in range(width)]
-                              for _ in range(depth)]
+                        for _ in range(width)]
+                          for _ in range(depth)]
 
         return cls(sites)
 
@@ -328,9 +328,10 @@ class GeneralCell(object):
         sym_perm = []
         numbers = [i for i in range(self.num_count)]
         sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
-        ops = [(r, t) for r, t in zip(sym_mat['rotations'], sym_mat['translations'])]
+        ops = [(r, t) for r, t in zip(sym_mat['rotations'],
+                                      sym_mat['translations'])]
         for r, t in ops:
-            pos_new = np.transpose(np.matmul(r, np.transpose(self._positions))) + t
+            pos_new = np.transpose(np.matmul(r, self._positions.T)) + t
             perm = self._get_new_id_seq(pos_new, numbers)
             sym_perm.append(perm)
 
@@ -344,3 +345,6 @@ class GeneralCell(object):
     def from_poscar(cls, poscar_file):
         pass
 
+    def is_primitive(self):
+        primitive_cell = spglib.find_primitive(self.spg_cell)
+        return primitive_cell[2].size == self.spg_cell[2].size

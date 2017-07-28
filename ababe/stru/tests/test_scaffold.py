@@ -221,6 +221,9 @@ class testGeneralCell(unittest.TestCase):
         sym_num = len(self.cell.get_symmetry_permutation())
         self.assertEqual(sym_num, 96)
 
+    def test_is_primitive(self):
+        self.assertFalse(self.cell.is_primitive())
+
 
 if __name__ == "__main__":
     import nose2
