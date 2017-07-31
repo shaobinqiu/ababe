@@ -3,6 +3,7 @@ from datetime import datetime
 from pymatgen.io.vasp.sets import MPRelaxSet, MPStaticSet
 from fireworks import Firework, Workflow
 from atomate.vasp.fireworks.core import OptimizeFW, StaticFW
+from atomate.vasp.config import VASP_CMD, DB_FILE
 
 
 def wf_optimize_static_energy(structure, c=None):
