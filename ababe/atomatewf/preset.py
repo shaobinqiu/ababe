@@ -32,6 +32,7 @@ def wf_optimize_static_energy(structure, c=None):
 
     parents = fws[0]
     fw_static = StaticFW(structure=structure, parents=parents,
+                         vasp_cmd=vasp_cmd, db_file=db_file,
                          name="{} structure scf".format(tag))
     fws.append(fw_static)
     wf_static_energy = Workflow(fws)
