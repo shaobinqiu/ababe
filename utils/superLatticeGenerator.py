@@ -71,6 +71,7 @@ def main():
         os.makedirs(superlattice_dir)
 
     unit_cell = (unit_basis, unit_positions, unit_numbers)
+    # pdb.set_trace()
     if outtype == 'vasp':
         print_POSCARs(superlattice_dir, volumn_max, unit_cell, zoom)
     else:
