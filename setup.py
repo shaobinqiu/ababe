@@ -19,5 +19,5 @@ setup(
         "License :: MIT License",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Scientific/Engineering :: Physics"],
-    scripts=['utils/occupyGenerator.py', 'utils/superLatticeGenerator.py']
+    scripts=['utils/occupyGenerator_flexible.py', 'utils/superLatticeGenerator.py']
     )
