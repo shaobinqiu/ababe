@@ -133,6 +133,19 @@ class testOccupyGeneratorCell(unittest.TestCase):
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 4)
 
+    def test_gen_dup_trinary_alloy(self):
+        # dup_gen = self.ocu_gen._gen_dup_trinary_alloy(Specie('Ti'), 4,
+        #                                              Specie('Cu'), 3)
+        # l = [i for i in dup_gen]
+        # self.assertEqual(len(l), 110880)
+        pass
+
+    def test_gen_nodup_trinary_alloy(self):
+        nodup_gen = self.ocu_gen.gen_nodup_trinary_alloy(Specie('Ti'), 2,
+                                                         Specie('Cu'), 3)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 191)
+
     def test_gen_add_one_speckle_unitary(self):
         init_gen = (i for i in [self.cell])
         add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle_unitary(init_gen, Specie("B"))

@@ -7,7 +7,7 @@ import os.path
 
 from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell
 from ababe.stru.element import GhostSpecie, Specie
-from itertools import combinations
+from itertools import combinations, zip_longest
 from progressbar import ProgressBar
 
 import numpy as np
@@ -80,7 +80,6 @@ class OccupyGenerator(object):
         wyckoffs = self.wyckoffs
         sp_ind = [i for i, w in enumerate(wyckoffs) if w is wy]
         # pdb.set_trace()
-        from itertools import combinations
         for comb_index in combinations(sp_ind, n):
             numbers = init_numbers.copy()
             for index in comb_index:
@@ -89,6 +88,28 @@ class OccupyGenerator(object):
 
     def gen_nodup(self, wy, n, sp):
         dup = self.gen_dup(wy, n, sp)
+        return self.gen_2nodup_gen(dup)
+
+    def _gen_dup_trinary_alloy(self, sp1, n1, sp2, n2):
+        init_numbers = self.init_cell.numbers
+        isp1 = sp1.Z
+        isp2 = sp2.Z
+
+        sp_ind_origin = [i for i, s in enumerate(init_numbers)]
+        for sp1_comb_index in combinations(sp_ind_origin, n1):
+            sp_ind_bin = [x for x in sp_ind_origin if x not in sp1_comb_index]
+            for sp2_comb_index in combinations(sp_ind_bin, n2):
+                numbers = init_numbers.copy()
+                for i1, i2 in zip_longest(sp1_comb_index, sp2_comb_index):
+                    if i1 is not None:
+                        numbers[i1] = isp1
+                    if i2 is not None:
+                        numbers[i2] = isp2
+                yield GeneralCell(self.lattice, self.positions, numbers)
+                # pdb.set_trace()
+
+    def gen_nodup_trinary_alloy(self, sp1, n1, sp2, n2):
+        dup = self._gen_dup_trinary_alloy(sp1, n1, sp2, n2)
         return self.gen_2nodup_gen(dup)
 
     def gen_add_one_speckle_unitary(self, gen, sp):
@@ -107,7 +128,8 @@ class OccupyGenerator(object):
                     numbers_new[index] = atom
                     num_id = numbers2id(numbers_new)
                     if num_id not in id_db:
-                        yield GeneralCell(cell.lattice, cell.positions, numbers_new)
+                        yield GeneralCell(cell.lattice, cell.positions,
+                                          numbers_new)
                         id_db[num_id] = None
 
     def gen_add_one_speckle(self, gen, wy, sp):
@@ -121,7 +143,8 @@ class OccupyGenerator(object):
                     numbers_new[index] = atom
                     num_id = numbers2id(numbers_new)
                     if num_id not in id_db:
-                        yield GeneralCell(cell.lattice, cell.positions, numbers_new)
+                        yield GeneralCell(cell.lattice, cell.positions,
+                                          numbers_new)
                         id_db[num_id] = None
 
     def gen_2nodup_gen(self, dup_gen):
@@ -151,7 +174,8 @@ class OccupyGenerator(object):
         # out_gen, gen = tee(gen, 2)
         # yield out_gen
         n_init = self.init_cell.get_speckle_num(sp)
-        print("Mission: Replace with {0:4}, up to {1:4d}...".format(sp.name, n))
+        print("Mission: Replace with {0:4}, up to\
+               {1:4d}...".format(sp.name, n))
         for i in range(n_init, n):
             gen = self.gen_add_one_speckle_unitary(gen, sp)
             gen = self.gen_2nodup_gen(gen)
@@ -162,7 +186,8 @@ class OccupyGenerator(object):
     def all_speckle_gen(self, n, wy, sp):
         gen = (i for i in [self.init_cell])
         n_init = self.init_cell.get_speckle_num(sp)
-        print("Mission: Replace with {0:4}, up to {1:4d}, in wyckoff site {2:3}...".format(sp.name, n, wy))
+        print("Mission: Replace with {0:4}, up to\
+              {1:4d}, in wyckoff site {2:3}...".format(sp.name, n, wy))
         for i in range(n_init, n):
             gen = self.gen_add_one_speckle(gen, wy, sp)
             gen = self.gen_2nodup_gen(gen)

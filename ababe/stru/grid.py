@@ -109,8 +109,10 @@ class SuperLatticeGenerator(object):
         latt = np.matmul(self.lat_coeff,
                          self.ub)
 
-        o_unit_pos = self.upositions/np.amax(self.lat_coeff)
+        coor_unit_pos = np.matmul(self.upositions, self.ub)
+        o_unit_pos = np.matmul(coor_unit_pos, np.linalg.inv(self.lat_coeff))
         o_pos = self.get_frac_from_H(self.lat_coeff)
+
         l_of_positions = [i for i in map(lambda x: x+o_pos, list(o_unit_pos))]
         # pdb.set_trace()
         pos = np.concatenate(l_of_positions, axis=0)
