@@ -128,8 +128,17 @@ class testOccupyGeneratorCell(unittest.TestCase):
         l = [i for i in dup_gen]
         self.assertEqual(len(l), 56)
 
+        # test case for provide element as input
+        dup_gen = self.binary_ocu_gen.gen_dup_of_ele(Specie("S"), 3, Specie('Ti'))
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 56)
+
     def test_gen_nodup(self):
         nodup_gen = self.binary_ocu_gen.gen_nodup('c', 3, Specie('Ti'))
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 4)
+
+        nodup_gen = self.binary_ocu_gen.gen_nodup_of_ele(Specie("S"), 3, Specie('Ti'))
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 4)
 
@@ -160,6 +169,13 @@ class testOccupyGeneratorCell(unittest.TestCase):
 
         self.assertEqual(len(l), 8)
 
+    def test_gen_add_one_speckle(self):
+        init_gen = (i for i in [self.binary_cell])
+        add_one_speckle_gen = self.binary_ocu_gen.gen_add_one_speckle_of_ele(init_gen, Specie("S"), Specie("Ti"))
+        l = [s for s in add_one_speckle_gen]
+
+        self.assertEqual(len(l), 8)
+
     def test_gen_2nodup_gen(self):
         init_gen = (i for i in [self.cell])
         add_one_speckle_gen = self.ocu_gen.gen_add_one_speckle_unitary(init_gen, Specie("B"))
@@ -179,6 +195,14 @@ class testOccupyGeneratorCell(unittest.TestCase):
 
     def test_all_speckle_gen(self):
         big_gen = self.binary_ocu_gen.all_speckle_gen(4, 'c', Specie('Ti'))
+        num_list = [1, 4, 4, 8]
+        gen_list = [i for i in big_gen]
+        for c, r_gen in zip(num_list, gen_list):
+            r_length = len([i for i in r_gen])
+            self.assertEqual(r_length, c)
+
+    def test_all_speckle_gen_of_ele(self):
+        big_gen = self.binary_ocu_gen.all_speckle_gen_of_ele(4, Specie("S"), Specie('Ti'))
         num_list = [1, 4, 4, 8]
         gen_list = [i for i in big_gen]
         for c, r_gen in zip(num_list, gen_list):

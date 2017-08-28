@@ -2,6 +2,7 @@
 # Distributed under the terms of the MIT License.
 import os
 import json
+import pdb
 
 from aenum import Enum
 
@@ -35,7 +36,6 @@ class Specie(object):
         else:
             key = [k for k, v in _pt_db.items() if v["Atomic no"] == an][0]
             sp = Specie(key)
-        
         return sp
 
     @staticmethod

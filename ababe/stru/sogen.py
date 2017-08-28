@@ -90,6 +90,24 @@ class OccupyGenerator(object):
         dup = self.gen_dup(wy, n, sp)
         return self.gen_2nodup_gen(dup)
 
+    def gen_dup_of_ele(self, ele, n, sp):
+        # ele is a Specie instance
+
+        ele_num = ele.Z
+        init_numbers = self.init_cell.numbers
+        i_speckle = sp.Z
+        sp_ind = [i for i, e in enumerate(init_numbers) if e == ele_num]
+
+        for comb_index in combinations(sp_ind, n):
+            numbers = init_numbers.copy()
+            for index in comb_index:
+                numbers[index] = i_speckle
+            yield GeneralCell(self.lattice, self.positions, numbers)
+
+    def gen_nodup_of_ele(self, ele, n, sp):
+        dup = self.gen_dup_of_ele(ele, n, sp)
+        return self.gen_2nodup_gen(dup)
+
     def _gen_dup_trinary_alloy(self, sp1, n1, sp2, n2):
         init_numbers = self.init_cell.numbers
         isp1 = sp1.Z
@@ -147,6 +165,22 @@ class OccupyGenerator(object):
                                           numbers_new)
                         id_db[num_id] = None
 
+    def gen_add_one_speckle_of_ele(self, gen, ele, sp):
+        ele_Z = ele.Z
+        atom = sp.Z
+        id_db = dict()
+        for cell in gen:
+            # site_ele = zip(self.wyckoffs, cell.numbers)
+            for index, e in enumerate(cell.numbers):
+                numbers_new = cell.numbers.copy()
+                if e == ele_Z and e != atom:
+                    numbers_new[index] = atom
+                    num_id = numbers2id(numbers_new)
+                    if num_id not in id_db:
+                        yield GeneralCell(cell.lattice, cell.positions,
+                                          numbers_new)
+                        id_db[num_id] = None
+
     def gen_2nodup_gen(self, dup_gen):
         sym_perm = self.symmetry_permutation
 
@@ -190,6 +224,18 @@ class OccupyGenerator(object):
               {1:4d}, in wyckoff site {2:3}...".format(sp.name, n, wy))
         for i in range(n_init, n):
             gen = self.gen_add_one_speckle(gen, wy, sp)
+            gen = self.gen_2nodup_gen(gen)
+
+            out_gen, gen = tee(gen, 2)
+            yield out_gen
+
+    def all_speckle_gen_of_ele(self, n, ele, sp):
+        gen = (i for i in [self.init_cell])
+        n_init = self.init_cell.get_speckle_num(sp)
+        print("Mission: Replace with {0:4}, up to\
+              {1:4d}, in wyckoff site {2:3}...".format(sp.name, n, ele.Z))
+        for i in range(n_init, n):
+            gen = self.gen_add_one_speckle_of_ele(gen, ele, sp)
             gen = self.gen_2nodup_gen(gen)
 
             out_gen, gen = tee(gen, 2)

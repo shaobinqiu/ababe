@@ -12,7 +12,6 @@ from ababe.stru.sogen import OccupyGenerator
 from ababe.stru.scaffold import GeneralCell
 from ababe.stru.element import Specie
 from ababe.stru.io import VaspPOSCAR
-# import pdb
 
 
 def main():
@@ -21,8 +20,8 @@ def main():
                         help='Setting file')
     # parser.add_argument('-fo', '--output', dest='output_file',
     #                     help='The location of output file')
-    parser.add_argument('-w', '--wyckoff-site', dest='wyckoff',
-                        help='which wyckoff site to be replaced.')
+    parser.add_argument('-e', '--element', dest='element',
+                        help='which element species to be replaced.')
     parser.add_argument('-s', '--speckle-element', dest='speckle',
                         help='substitute with what element.')
     parser.add_argument('-n', '--number-speckle', dest='nmax', type=int,
@@ -44,16 +43,15 @@ def main():
     if cmd_args.nmax is not None:
         nmax = cmd_args.nmax
     else:
-        nmax = numbers.size  # default half+1 number of speckles
+        nmax = math.ceil(numbers.size/2)  # default half+1 number of speckles
 
-    wy = cmd_args.wyckoff
-    # pdb.set_trace()
+    ele = Specie(cmd_args.element)
 
     # Write the structures into POSCARs dir
     import random
     import string
     rd_suffix = ''.join(random.choices(string.ascii_uppercase
-                                       + string.digits, k=5))
+                                       + string.digits, k=4))
     working_path = os.getcwd()
     poscars_dir = os.path.join(working_path,
                                'POSCARs_{0:}_{1:}'.format(dir_name,
@@ -66,10 +64,13 @@ def main():
 
     cell = GeneralCell(lattice, positions, numbers)
     ogg = OccupyGenerator(cell)
-    gg = ogg.all_speckle_gen(nmax, wy, Specie(speckle))
+    gg = ogg.all_speckle_gen_of_ele(nmax, ele, Specie(speckle))
     # pdb.set_trace()
 
+    print("Mission: Replace with {0:3}, up to number \
+          {1:3d}...".format(speckle, nmax))
     for i, outer_gen in enumerate(gg):
+        print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
         for n_count, c in enumerate(outer_gen):
             if c.is_primitive():
                 poscar = VaspPOSCAR(c.spg_cell, zoom)
@@ -79,6 +80,8 @@ def main():
                                                  suffix='.vasp', delete=False)
                 poscar.write_POSCAR(tf.name)
         # pdb.set_trace()
+        # print("Total {0:3d} nonduplicated structures in {1:3d} \
+        #       substitute.".format(n_count+1, i+1))
 
 
 if __name__ == "__main__":
