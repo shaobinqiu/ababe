@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ababe',
+    # Remenber change version in ababe.cmdline.runabalib.exec_from_cmdline()
     version='0.1.0',
     description='A grid structure machine learning tool used\
                  in material science.',
@@ -19,6 +20,10 @@ setup(
         "License :: MIT License",
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Scientific/Engineering :: Physics"],
-    scripts=['utils/occupyGenerator_flexible.py', 'utils/superLatticeGenerator.py',
-             'utils/occupyGenerator_byele.py']
+    scripts=[],
+    entry_points={
+        'console_scripts': [
+            'runaba=ababe.cmdline.runabalib:run'
+        ]
+    }
     )
