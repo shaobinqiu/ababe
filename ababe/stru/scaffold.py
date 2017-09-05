@@ -3,6 +3,7 @@
 from __future__ import division
 
 import numpy as np
+from itertools import product
 # import collections
 
 from ababe.stru.element import Specie, GhostSpecie
@@ -348,3 +349,56 @@ class GeneralCell(object):
     def is_primitive(self):
         primitive_cell = spglib.find_primitive(self.spg_cell, symprec=1e-3)
         return primitive_cell[2].size == self.spg_cell[2].size
+
+    def get_cartesian(self, ele=None):
+        """
+        Get the cartesian coordinates of the Cell
+        If ele is giving. than return the car-coor of
+        the element=ele
+        """
+        p = self.positions
+        if ele is not None:
+            e = ele.Z
+            num = np.where(self.numbers == e)[0]
+            p_target = p[num]
+        else:
+            p_target = p
+        cart_coor = np.matmul(p_target, self.lattice)
+        return cart_coor
+
+
+
+    def supercell(self, scale_mat):
+        """
+        Get the supercell of the origin gcell
+        scale_mat is similar as H matrix in superlattice generator
+        """
+        # return self.__class__(...)
+        sarr_lat = np.matmul(scale_mat, self.lattice)
+        # coor_conv_pos = np.matmul(self.positions, self.lattice)
+        # o_conv_pos = np.matmul(coor_conv_pos, np.linalg.inv(scale_mat))
+        o_conv_pos = np.matmul(self.positions, np.linalg.inv(scale_mat))
+        o_pos = self.get_frac_from_mat(scale_mat)
+
+        l_of_positions = [i for i in map(lambda x: x+o_pos, list(o_conv_pos))]
+        pos = np.concatenate(l_of_positions, axis=0)
+
+        n = scale_mat.diagonal().prod()
+        numbers = np.repeat(self.numbers, n)
+
+        return self.__class__(sarr_lat, pos, numbers)
+
+    @staticmethod
+    def get_frac_from_mat(scale_mat):
+        inv = np.linalg.inv
+        mul = np.matmul
+        m = np.amax(scale_mat)
+        int_coor_all = np.array([i for i in product(range(m*3), repeat=3)])
+        frac_all = mul(int_coor_all, inv(scale_mat))
+        # frac_all = mul(int_coor_all, inv(h_mat))
+        # print(frac_all)
+        is_incell = np.all(((frac_all >= -0.00001) & (frac_all < 0.99999)),
+                             axis=1)
+        ind = np.where(is_incell)[0]
+        # pdb.set_trace()
+        return frac_all[ind]

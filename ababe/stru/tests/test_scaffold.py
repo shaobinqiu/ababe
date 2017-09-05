@@ -22,7 +22,7 @@ class testSitesGrid(unittest.TestCase):
         self.allg = SitesGrid.sea(4, 2, 2, GhostSpecie())
 
     def test_properties(self):
-        # ok_(np.allclose(self.g.base_vector, 
+        # ok_(np.allclose(self.g.base_vector,
                         # np.array(m, dtype=np.float64).reshape((3,3))))
         self.assertEqual(self.allg.depth, 4)
         self.assertEqual(self.allg.length, 2)
@@ -86,7 +86,7 @@ class testCStru(unittest.TestCase):
         self.m = [[1,0,0],[0,1,0],[0,0,1]]
         g = GhostSpecie()
         b = Specie("B")
-        self.sites = [[[g, b], 
+        self.sites = [[[g, b],
                   [g, g]],
 
                  [[b, b],
@@ -224,6 +224,82 @@ class testGeneralCell(unittest.TestCase):
     def test_is_primitive(self):
         self.assertFalse(self.cell.is_primitive())
 
+    def test_get_cartesian(self):
+        arr_lat = np.array([[3.0, 0, 0], [0, 2.0, 0.0], [0, 0, 1.0]])
+        positions = [
+                        [0.00000, 0.00000, 0.00000],
+                        [0.00000, 0.50000, 0.00000],
+                        [0.33333, 0.00000, 0.00000],
+                        [0.33333, 0.50000, 0.00000],
+                        [0.66666, 0.00000, 0.00000],
+                        [0.66666, 0.50000, 0.00000],
+                        [0.16666, 0.25000, 0.50000],
+                        [0.16666, 0.75000, 0.50000],
+                        [0.50000, 0.25000, 0.50000],
+                        [0.50000, 0.75000, 0.50000],
+                        [0.83333, 0.25000, 0.50000],
+                        [0.83333, 0.75000, 0.50000]
+                    ]
+        arr_positions = np.array(positions)
+        arr_numbers = np.array([6]*12)
+        cell = GeneralCell(arr_lat, arr_positions, arr_numbers)
+
+        cart_coor = cell.get_cartesian()
+        cart_ans = np.array([[ 0.     ,  0.     ,  0.     ],
+                             [ 0.     ,  1.     ,  0.     ],
+                             [ 0.49998,  0.5    ,  0.5    ],
+                             [ 0.49998,  1.5    ,  0.5    ],
+                             [ 0.99999,  0.     ,  0.     ],
+                             [ 0.99999,  1.     ,  0.     ],
+                             [ 1.5    ,  0.5    ,  0.5    ],
+                             [ 1.5    ,  1.5    ,  0.5    ],
+                             [ 1.99998,  0.     ,  0.     ],
+                             [ 1.99998,  1.     ,  0.     ],
+                             [ 2.49999,  0.5    ,  0.5    ],
+                             [ 2.49999,  1.5    ,  0.5    ]])
+        self.assertTrue(np.allclose(cart_coor, cart_ans))
+
+        arr_numbers = np.array([6, 6, 6, 5, 6, 5, 6, 6, 6, 6, 6, 6])
+        cell = GeneralCell(arr_lat, arr_positions, arr_numbers)
+
+        cart_coor = cell.get_cartesian(Specie('B'))
+        cart_ans = np.array([[ 0.49998,  1.5    ,  0.5    ],
+                             [ 0.99999,  1.     ,  0.     ]])
+
+
+
+    def test_supercell(self):
+        scale_mat = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 2]])
+        scell = self.cell.supercell(scale_mat)
+        arr_lat = np.array([[3.0, 0, 0], [0, 2.0, 0.0], [0, 0, 2.0]])
+        positions =  [[ 0.     ,  0.     ,  0.     ],
+                      [ 0.     ,  0.     ,  0.5    ],
+                      [ 0.     ,  0.5    ,  0.     ],
+                      [ 0.     ,  0.5    ,  0.5    ],
+                      [ 0.16666,  0.25   ,  0.25   ],
+                      [ 0.16666,  0.25   ,  0.75   ],
+                      [ 0.16666,  0.75   ,  0.25   ],
+                      [ 0.16666,  0.75   ,  0.75   ],
+                      [ 0.33333,  0.     ,  0.     ],
+                      [ 0.33333,  0.     ,  0.5    ],
+                      [ 0.33333,  0.5    ,  0.     ],
+                      [ 0.33333,  0.5    ,  0.5    ],
+                      [ 0.5    ,  0.25   ,  0.25   ],
+                      [ 0.5    ,  0.25   ,  0.75   ],
+                      [ 0.5    ,  0.75   ,  0.25   ],
+                      [ 0.5    ,  0.75   ,  0.75   ],
+                      [ 0.66666,  0.     ,  0.     ],
+                      [ 0.66666,  0.     ,  0.5    ],
+                      [ 0.66666,  0.5    ,  0.     ],
+                      [ 0.66666,  0.5    ,  0.5    ],
+                      [ 0.83333,  0.25   ,  0.25   ],
+                      [ 0.83333,  0.25   ,  0.75   ],
+                      [ 0.83333,  0.75   ,  0.25   ],
+                      [ 0.83333,  0.75   ,  0.75   ]]
+        arr_positions = np.array(positions)
+        arr_numbers = np.array([6]*24)
+        ans_scell = GeneralCell(arr_lat, arr_positions, arr_numbers)
+        self.assertTrue(np.allclose(scell.positions, arr_positions))
 
 if __name__ == "__main__":
     import nose2
