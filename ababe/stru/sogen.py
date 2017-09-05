@@ -287,7 +287,7 @@ def _update_isoset(isoset, numbers, sym_perm):
 
 def get_new_id_seq(pos, numbers):
     """
-    A helper function to produce the new sequence of the transformed 
+    A helper function to produce the new sequence of the transformed
     structure. Algs is sort the position back to init and use the index
     to sort numbers.
     """
@@ -367,10 +367,10 @@ def lat_dict(lattice):
 
     return lat[lattice]
 
-# This function is used for remove the structures conflict with 
+# This function is used for remove the structures conflict with
 # the defined restricted condition
 # input: a generator to produce structures
-# output: a generator of structures satisfied with the restricted 
+# output: a generator of structures satisfied with the restricted
 # condition.
 def is_speckle_disjunct(cstru, speckle):
     m = cstru.m
@@ -402,7 +402,7 @@ def _dist(p,q):
 
 def _pool_sites(sites_arr):
     d, w, l = np.shape(sites_arr)
-    pool = sites_arr    
+    pool = sites_arr
     # pool the elements of outer dimension (depth)
     depth_d = pool[0, :, :].reshape(1,w,l)
     pool = np.concatenate((pool, depth_d), axis=0)
@@ -434,10 +434,10 @@ def _index2coor(ind, m):
     #                         help='Grid size of structure', type=int)
     # parser.add_argument('-s', '--speckle', dest='speckle', required=True,
     #                         help='Element abbreviation of the speckle specie')
-    # parser.add_argument('-n', '--num', dest='number', type=int, 
+    # parser.add_argument('-n', '--num', dest='number', type=int,
     #                         help=default('Number of speckles filled in the base'), default=2)
-    # parser.add_argument('-o', '--output-type', 
-    #                         help=default('Output type of generated non-duplicate periodic grid structure'), 
+    # parser.add_argument('-o', '--output-type',
+    #                         help=default('Output type of generated non-duplicate periodic grid structure'),
     #                             default='normal')
 
     # args = parser.parse_args()

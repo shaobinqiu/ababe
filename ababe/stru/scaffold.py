@@ -350,6 +350,20 @@ class GeneralCell(object):
         primitive_cell = spglib.find_primitive(self.spg_cell, symprec=1e-3)
         return primitive_cell[2].size == self.spg_cell[2].size
 
+    def get_refined_cell(self):
+        """
+        Using spglib's standardize_cell method to
+        refine the cell of giving.
+        If self is a non-primitive cell, the number of
+        atoms will reduced.
+        else will return a refined cell.
+        """
+        rcell = (self.lattice, self.positions, self.numbers)
+        lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=False,
+                                                              no_idealize=False, symprec=1e-4)
+
+        return self.__class__(lattice, positions, numbers)
+
     def get_cartesian(self, ele=None):
         """
         Get the cartesian coordinates of the Cell
@@ -365,8 +379,6 @@ class GeneralCell(object):
             p_target = p
         cart_coor = np.matmul(p_target, self.lattice)
         return cart_coor
-
-
 
     def supercell(self, scale_mat):
         """
