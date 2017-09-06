@@ -72,6 +72,7 @@ def main():
     for i, outer_gen in enumerate(gg):
         for n_count, c in enumerate(outer_gen):
             if c.is_primitive():
+                c = c.get_refined_pcell()
                 poscar = VaspPOSCAR(c.spg_cell, zoom)
                 tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                                                  prefix='POSCAR_S{:}_'
