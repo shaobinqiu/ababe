@@ -58,7 +58,7 @@ class YamlOutput(object):
         """
         String representation of structure yaml file
         """
-        print(self.get_string())
+        # print(self.get_string())
         return self.get_string()
 
 
@@ -122,7 +122,7 @@ class VaspPOSCAR(object):
         """
         String representation of Poscar file
         """
-        print(self.get_string())
+        # print(self.get_string())
         return self.get_string()
 
     def write_POSCAR(self, filename):

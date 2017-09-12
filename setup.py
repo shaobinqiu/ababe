@@ -10,6 +10,7 @@ setup(
     author_email='unkcpz.yu@yahoo.com',
     license='MIT',
     packages=find_packages(),
+    include_package_data=True,
     package_data={"ababe.stru": ["*.json"]},
     install_requires=["nose2", "numpy==1.12", "aenum", "hat-trie",
                       "spglib==1.9.9.18", "PyYAML==3.11",
