@@ -15,9 +15,22 @@ class App(AppModel):
         upos = np.array(settings['positions'])
         unum = np.array(settings['numbers'])
         self.ucell = (ulat, upos, unum)
-        self.comment = comment
         self.v = volumn
+
+        if comment is None:
+            try:
+                comment = settings['comment']
+            except:
+                comment = 'default'
+        self.comment = comment
+
+        if zoom is None:
+            try:
+                zoom = settings['zoom']
+            except:
+                zoom = 1
         self.zoom = zoom
+
         self.outmode = outmode
 
     def run(self):

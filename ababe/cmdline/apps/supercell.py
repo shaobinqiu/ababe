@@ -16,6 +16,12 @@ class App(AppModel):
         numbers = np.array(settings['numbers'])
         self.cell = GeneralCell(lattice, positions, numbers)
         self.scale_matrix = np.array(scale_matrix)
+        
+        if zoom is None:
+            try:
+                zoom = settings['zoom']
+            except:
+                zoom = 1
         self.zoom = zoom
         self.outmode = outmode
 

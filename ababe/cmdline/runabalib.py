@@ -27,7 +27,7 @@ def exec_from_cmdline():
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)
-@click.option('--zoom', default=1)
+@click.option('--zoom', type=int, default=None)
 @click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')
 def supcell(input, scale_matrix, zoom, outmode):
     infile = click.format_filename(input)
@@ -39,9 +39,9 @@ def supcell(input, scale_matrix, zoom, outmode):
 
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
-@click.option('--comment', default='default')
+@click.option('--comment', default=None)
 @click.option('--volumn', type=int, default=1)
-@click.option('--zoom', default=1)
+@click.option('--zoom', type=int, default=None)
 @click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')
 def suplat(input, comment, volumn, zoom, outmode):
     infile = click.format_filename(input)
@@ -55,7 +55,7 @@ def suplat(input, comment, volumn, zoom, outmode):
 @click.option('--comment', default=None)
 @click.option('--element', default=None)
 @click.option('--speckle', default=None)
-@click.option('--number-speckle', 'nspeckle', default=None)
+@click.option('--number-speckle', 'nspeckle', type=int, default=None)
 @click.option('--zoom', type=int, default=None)
 @click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, int]), multiple=True)
 def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs):
