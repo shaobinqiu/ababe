@@ -76,7 +76,7 @@ class SitesGrid(object):
 
     @classmethod
     def from_array(cls, arr):
-        mfunc = np.vectorize(lambda n: Specie.to_sp(n))
+        mfunc = np.vectorize(lambda n: Specie.from_num(n))
         sarr = mfunc(arr)
         return cls(sarr.tolist())
 
