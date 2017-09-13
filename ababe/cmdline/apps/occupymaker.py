@@ -60,7 +60,8 @@ class App(AppModel):
         if trs != ():
             self.tr = trs[0]
         else:
-            self.tr = (tgt_ele, 0)
+            self.tr = (Specie.to_name(tgt_ele), 0)
+        import pdb; pdb.set_trace()
 
     def run(self):
         # Create directory contain POSCARs
