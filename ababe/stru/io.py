@@ -44,7 +44,7 @@ class YamlOutput(object):
 
         return yaml.dump(output)
 
-    def write_YAML(self, filename):
+    def write(self, filename):
         """
         Writes YAML to a file.
         """
@@ -125,7 +125,7 @@ class VaspPOSCAR(object):
         # print(self.get_string())
         return self.get_string()
 
-    def write_POSCAR(self, filename):
+    def write(self, filename):
         """
         Writes POSCAR to a file.
         """

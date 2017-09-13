@@ -43,7 +43,7 @@ zoom: 3
         origin input parameter. Using almostEqual
         """
         tmp_file = "YAML.testing"
-        self.a_yaml.write_YAML(tmp_file)
+        self.a_yaml.write(tmp_file)
 
         with open(tmp_file, 'r') as testing_file:
             data = testing_file.read()
@@ -146,7 +146,7 @@ direct
         poscar_bcu = VaspPOSCAR(bcu_stru.get_cell(), zoom=4)
 
         tmp_file = "POSCAR.testing"
-        poscar_bcu.write_POSCAR(tmp_file)
+        poscar_bcu.write(tmp_file)
 
         with open(tmp_file, 'r') as testing_file:
             data = testing_file.read()

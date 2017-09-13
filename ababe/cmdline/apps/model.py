@@ -1,7 +1,7 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
 
-class Appmodel(object):
+class AppModel(object):
 
     def __init__(self):
         pass
