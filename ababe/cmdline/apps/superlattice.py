@@ -14,7 +14,7 @@ class App(AppModel):
         ulat = np.array(settings['lattice'])
         upos = np.array(settings['positions'])
         unum = np.array(settings['numbers'])
-        self.ucell = (ulat, upos, unum)
+        self.ucell = GeneralCell(ulat, upos, unum)
         self.v = volumn
 
         if comment is None:

@@ -21,17 +21,17 @@ class SuperLatticeGenerator(object):
     row vectors.
     """
 
-    def __init__(self, unit_cell, lat_coeff):
-        self.ub = unit_cell[0]
-        self.upositions = unit_cell[1]
-        self.unumbers = unit_cell[2]
+    def __init__(self, unit_gcell, lat_coeff):
+        self.ub = unit_gcell.lattice
+        self.upositions = unit_gcell.positions
+        self.unumbers = unit_gcell.numbers
         self.lat_coeff = lat_coeff
-        self.unit_cell = unit_cell
+        self.unit_cell = unit_gcell.spg_cell
 
         self.sym = spglib.get_symmetry(self.unit_cell)
 
     @classmethod
-    def hnfs_from_n_dups(cls, unit_cell, n):
+    def hnfs_from_n_dups(cls, unit_gcell, n):
         def factors(n):
             return set(reduce(list.__add__,
                               ([i, n//i] for i in
@@ -44,12 +44,11 @@ class SuperLatticeGenerator(object):
             for c in c_list:
                 f = n//a//c
                 for b in range(c):
-                    # pdb.set_trace()
                     for d, e in itertools.product(range(f), repeat=2):
                         hnf = np.array([[a, b, d],
                                         [0, c, e],
                                         [0, 0, f]])
-                        l_HNFs.append(cls(unit_cell, hnf))
+                        l_HNFs.append(cls(unit_gcell, hnf))
 
         return l_HNFs
 
@@ -84,8 +83,8 @@ class SuperLatticeGenerator(object):
     #     return False
 
     @classmethod
-    def hnfs_from_n(cls, unit_cell, n):
-        hnfs = cls.hnfs_from_n_dups(unit_cell, n)
+    def hnfs_from_n(cls, unit_gcell, n):
+        hnfs = cls.hnfs_from_n_dups(unit_gcell, n)
         nodup_hnfs = []
         bar = ProgressBar()
         for hnf in bar(hnfs):

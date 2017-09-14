@@ -5,6 +5,7 @@ import unittest
 import numpy as np
 
 from ababe.stru.grid import SuperLatticeGenerator
+from ababe.stru.scaffold import GeneralCell
 
 
 class testSuperLatticeGenerator(unittest.TestCase):
@@ -15,9 +16,9 @@ class testSuperLatticeGenerator(unittest.TestCase):
                                   [0.5, -0.5, 0.5]])
         self.bcc_u_position = np.array([[0, 0, 0]])
         self.bcc_u_n = np.array([0])
-        self.bcc_uc = (self.bcc_base,
-                       self.bcc_u_position,
-                       self.bcc_u_n)
+        self.bcc_uc = GeneralCell(self.bcc_base,
+                                  self.bcc_u_position,
+                                  self.bcc_u_n)
 
     def test_HNFs_from_n_dups(self):
         hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 4)
@@ -50,7 +51,7 @@ class testSuperLatticeGenerator(unittest.TestCase):
         hcp_positions = np.array([[0.33333334,  0.66666669,  0.25],
                                   [0.66666663,  0.33333331,  0.75]])
         hcp_numbers = np.array([0, 0])
-        hcp_uc = (hcp_b, hcp_positions, hcp_numbers)
+        hcp_uc = GeneralCell(hcp_b, hcp_positions, hcp_numbers)
         result = SuperLatticeGenerator.hnfs_from_n(hcp_uc, 9)
         self.assertEqual(len(result), 23)
 
@@ -67,7 +68,7 @@ class testSuperLatticeGenerator(unittest.TestCase):
         zb_pos = np.array([[0., 0., 0.],
                            [0.25, 0.25, 0.25]])
         zb_num = np.array([30, 16])
-        zb_uc = (zb_b, zb_pos, zb_num)
+        zb_uc = GeneralCell(zb_b, zb_pos, zb_num)
         zbs = SuperLatticeGenerator.hnfs_from_n(zb_uc, 3)
         one_zb = zbs[1]
         cell = one_zb.to_general_cell()
