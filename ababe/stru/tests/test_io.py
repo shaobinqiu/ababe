@@ -8,6 +8,7 @@ import numpy as np
 from math import sqrt
 from ababe.stru.scaffold import CStru
 from ababe.stru.io import VaspPOSCAR, YamlOutput
+from ababe.stru.scaffold import GeneralCell
 
 
 class testYamlOutput(unittest.TestCase):
@@ -18,7 +19,7 @@ class testYamlOutput(unittest.TestCase):
                            [0.5, -0.5, 0.5]])
         a_pos = np.array([[0, 0, 0]])
         a_num = np.array([16])
-        a_cell = (a_latt, a_pos, a_num)
+        a_cell = GeneralCell(a_latt, a_pos, a_num)
         self.a_yaml = YamlOutput(a_cell, zoom=3)
 
     def test_get_string(self):
@@ -62,7 +63,7 @@ class testVaspPOSCAR(unittest.TestCase):
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         boron_stru = CStru.from_array(latt, boron_arr)
-        poscar = VaspPOSCAR(boron_stru.get_cell(), zoom=4)
+        poscar = VaspPOSCAR(boron_stru.get_gcell(), zoom=4)
 
         expected_str = '''B16
 4
@@ -98,7 +99,7 @@ direct
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru.get_cell(), zoom=4)
+        poscar_bcu = VaspPOSCAR(bcu_stru.get_gcell(), zoom=4)
 
         expected_str_bcu = '''B16Cu2
 4
@@ -143,7 +144,7 @@ direct
                 [1, 0, 0],
                 [0.5, sqrt(3)/2, 0]]
         bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru.get_cell(), zoom=4)
+        poscar_bcu = VaspPOSCAR(bcu_stru.get_gcell(), zoom=4)
 
         tmp_file = "POSCAR.testing"
         poscar_bcu.write(tmp_file)

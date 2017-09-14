@@ -177,6 +177,11 @@ class CStru(object):
 
         return (arr_bas, arr_pos, arr_num)
 
+    def get_gcell(self):
+        spg_cell = self.get_cell()
+        gcell = GeneralCell(spg_cell[0], spg_cell[1], spg_cell[2])
+        return gcell
+
     def get_lattice(self):
         arr_bas, arr_pos, arr_num = self.get_cell()
         return arr_bas

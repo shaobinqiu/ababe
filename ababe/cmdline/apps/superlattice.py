@@ -57,7 +57,7 @@ class App(AppModel):
 
         for hnf in hnfs:
             sl = hnf.to_general_cell()
-            out = Output(sl.spg_cell, self.zoom)
+            out = Output(sl, self.zoom)
             tf = tempfile.NamedTemporaryFile(mode='w+b', dir=suplat_dir,
                                              prefix='SUPLAT_{:}_'.
                                              format(self.v),

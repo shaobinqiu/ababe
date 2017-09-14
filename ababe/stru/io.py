@@ -11,11 +11,10 @@ import yaml
 
 class YamlOutput(object):
 
-    def __init__(self, spg_cell, zoom=1):
-        self.structure = spg_cell
-        self.lattice = spg_cell[0]
-        self.positions = spg_cell[1]
-        self.numbers = spg_cell[2]
+    def __init__(self, gcell, zoom=1):
+        self.lattice = gcell.lattice
+        self.positions = gcell.positions
+        self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
                                         list(self.numbers)))
@@ -64,14 +63,13 @@ class YamlOutput(object):
 
 class VaspPOSCAR(object):
 
-    def __init__(self, spg_cell, zoom=1):
-        self.structure = spg_cell
-        self.lattice = spg_cell[0]
-        self.positions = spg_cell[1]
-        self.atoms = spg_cell[2]
+    def __init__(self, gcell, zoom=1):
+        self.lattice = gcell.lattice
+        self.positions = gcell.positions
+        self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
-                                        list(self.atoms)))
+                                        list(self.numbers)))
 
         self.zoom = zoom
 
@@ -100,7 +98,7 @@ class VaspPOSCAR(object):
         lines.append(" ".join([str(x) for x in ordered_atoms.keys()]))
         lines.append(" ".join([str(x) for x in ordered_atoms.values()]))
 
-        zipped_list = list(zip(self.atoms, self.positions,
+        zipped_list = list(zip(self.numbers, self.positions,
                                self.atoms_name_list))
         sorted_position = sorted(zipped_list, key=itemgetter(0))
 

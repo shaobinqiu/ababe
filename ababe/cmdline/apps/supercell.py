@@ -16,7 +16,7 @@ class App(AppModel):
         numbers = np.array(settings['numbers'])
         self.cell = GeneralCell(lattice, positions, numbers)
         self.scale_matrix = np.array(scale_matrix)
-        
+
         if zoom is None:
             try:
                 zoom = settings['zoom']
@@ -30,8 +30,8 @@ class App(AppModel):
         # print(self.setting)
         sc = self.cell.supercell(self.scale_matrix)
         if self.outmode == 'yaml':
-            beprint = YamlOutput(sc.spg_cell, self.zoom)
+            beprint = YamlOutput(sc, self.zoom)
             print(beprint)
         elif self.outmode == 'vasp':
-            beprint = VaspPOSCAR(sc.spg_cell, self.zoom)
+            beprint = VaspPOSCAR(sc, self.zoom)
             print(beprint)

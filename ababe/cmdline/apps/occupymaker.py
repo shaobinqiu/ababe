@@ -61,7 +61,6 @@ class App(AppModel):
             self.tr = trs[0]
         else:
             self.tr = (Specie.to_name(tgt_ele), 0)
-        import pdb; pdb.set_trace()
 
     def run(self):
         # Create directory contain POSCARs
@@ -92,7 +91,7 @@ class App(AppModel):
             for n_count, c in enumerate(outer_gen):
                 if c.is_primitive() and applied_restriction.is_satisfied(c):
                     c = c.get_refined_cell()
-                    poscar = VaspPOSCAR(c.spg_cell, 1)
+                    poscar = VaspPOSCAR(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                                                      prefix='POSCAR_S{:}_'
                                                             .format(i+1),
