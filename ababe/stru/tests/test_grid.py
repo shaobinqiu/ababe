@@ -4,7 +4,8 @@
 import unittest
 import numpy as np
 
-from ababe.stru.grid import SuperLatticeGenerator
+from ababe.stru.grid import SuperLatticeGenerator, SuperLatticeCell
+from ababe.stru.grid import SuperLatticeGenerator2D
 from ababe.stru.scaffold import GeneralCell
 
 
@@ -78,9 +79,23 @@ class testSuperLatticeGenerator(unittest.TestCase):
         h = np.array([[1, 0, 3],
                       [0, 2, 2],
                       [0, 0, 4]])
-        strange_hnf = SuperLatticeGenerator(self.bcc_uc, h)
+        strange_hnf = SuperLatticeCell(self.bcc_uc, h)
         shnf = strange_hnf.to_general_cell()
         self.assertEqual(len(shnf.spg_cell[2]), 8)
+
+
+class testSuperLatticeGenerator2D(unittest.TestCase):
+
+    def test_test(self):
+        zb_b = np.array([[3.82863, 0., 0.],
+                         [1.91431, 3.31569, 0.],
+                         [1.91431, 1.10523, 3.12606]])
+        zb_pos = np.array([[0., 0., 0.],
+                           [0.25, 0.25, 0.25]])
+        zb_num = np.array([30, 16])
+        zb_uc = GeneralCell(zb_b, zb_pos, zb_num)
+        # s2d = SuperLatticeGenerator2D(zb_uc, 1)
+
 
 
 if __name__ == "__main__":

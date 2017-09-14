@@ -3,18 +3,23 @@
 from .model import AppModel
 from ababe.stru.scaffold import GeneralCell
 from ababe.stru.io import YamlOutput, VaspPOSCAR
-from ababe.stru.grid import SuperLatticeGenerator
+from ababe.stru.grid import SuperLatticeGenerator, SuperLatticeGenerator2D
 import numpy as np
 import os
 import shutil
 
 class App(AppModel):
 
-    def __init__(self, settings, comment, volumn, zoom, outmode):
+    def __init__(self, settings, comment, volumn, zoom, ld, outmode):
         ulat = np.array(settings['lattice'])
         upos = np.array(settings['positions'])
         unum = np.array(settings['numbers'])
         self.ucell = GeneralCell(ulat, upos, unum)
+        # check whether input a unit cell
+        if not self.ucell.is_primitive():
+            raise ValueError('Lattice in setting file are not primitive.\n'
+                             'You can reinput OR get the primitive lattice\n'
+                             'by using run2pcell.py <INPUT>\n')
         self.v = volumn
 
         if comment is None:
@@ -33,10 +38,17 @@ class App(AppModel):
 
         self.outmode = outmode
 
+        if ld:
+            LatticeGen = SuperLatticeGenerator2D
+        else:
+            LatticeGen = SuperLatticeGenerator
+        import pdb; pdb.set_trace()
+
+        self.hnfs = LatticeGen.hnfs_from_n(self.ucell, self.v)
+
     def run(self):
         import tempfile
 
-        hnfs = SuperLatticeGenerator.hnfs_from_n(self.ucell, self.v)
         # Create a dir contains suplat files
         working_path = os.getcwd()
         suplat_dir = os.path.join(working_path,
@@ -55,7 +67,7 @@ class App(AppModel):
             Output = YamlOutput
             suffix = '.yaml'
 
-        for hnf in hnfs:
+        for hnf in self.hnfs:
             sl = hnf.to_general_cell()
             out = Output(sl, self.zoom)
             tf = tempfile.NamedTemporaryFile(mode='w+b', dir=suplat_dir,

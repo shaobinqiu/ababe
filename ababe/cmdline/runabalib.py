@@ -42,12 +42,13 @@ def supcell(input, scale_matrix, zoom, outmode):
 @click.option('--comment', default=None)
 @click.option('--volumn', type=int, default=1)
 @click.option('--zoom', type=int, default=None)
+@click.option('--ld/--no-ld', '-L/', default=False)
 @click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')
-def suplat(input, comment, volumn, zoom, outmode):
+def suplat(input, comment, volumn, zoom, ld, outmode):
     infile = click.format_filename(input)
     y = yaml.load(open(infile, "r"))
 
-    appsuperlattice = superlattice.App(y, comment, volumn, zoom, outmode)
+    appsuperlattice = superlattice.App(y, comment, volumn, zoom, ld, outmode)
     appsuperlattice.run()
 
 @exec_from_cmdline.command()
