@@ -11,11 +11,10 @@ import yaml
 
 class YamlOutput(object):
 
-    def __init__(self, spg_cell, zoom=1):
-        self.structure = spg_cell
-        self.lattice = spg_cell[0]
-        self.positions = spg_cell[1]
-        self.numbers = spg_cell[2]
+    def __init__(self, gcell, zoom=1):
+        self.lattice = gcell.lattice
+        self.positions = gcell.positions
+        self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
                                         list(self.numbers)))
@@ -44,7 +43,7 @@ class YamlOutput(object):
 
         return yaml.dump(output)
 
-    def write_YAML(self, filename):
+    def write(self, filename):
         """
         Writes YAML to a file.
         """
@@ -58,20 +57,19 @@ class YamlOutput(object):
         """
         String representation of structure yaml file
         """
-        print(self.get_string())
+        # print(self.get_string())
         return self.get_string()
 
 
 class VaspPOSCAR(object):
 
-    def __init__(self, spg_cell, zoom=1):
-        self.structure = spg_cell
-        self.lattice = spg_cell[0]
-        self.positions = spg_cell[1]
-        self.atoms = spg_cell[2]
+    def __init__(self, gcell, zoom=1):
+        self.lattice = gcell.lattice
+        self.positions = gcell.positions
+        self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
-                                        list(self.atoms)))
+                                        list(self.numbers)))
 
         self.zoom = zoom
 
@@ -100,7 +98,7 @@ class VaspPOSCAR(object):
         lines.append(" ".join([str(x) for x in ordered_atoms.keys()]))
         lines.append(" ".join([str(x) for x in ordered_atoms.values()]))
 
-        zipped_list = list(zip(self.atoms, self.positions,
+        zipped_list = list(zip(self.numbers, self.positions,
                                self.atoms_name_list))
         sorted_position = sorted(zipped_list, key=itemgetter(0))
 
@@ -122,10 +120,10 @@ class VaspPOSCAR(object):
         """
         String representation of Poscar file
         """
-        print(self.get_string())
+        # print(self.get_string())
         return self.get_string()
 
-    def write_POSCAR(self, filename):
+    def write(self, filename):
         """
         Writes POSCAR to a file.
         """

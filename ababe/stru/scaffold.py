@@ -76,7 +76,7 @@ class SitesGrid(object):
 
     @classmethod
     def from_array(cls, arr):
-        mfunc = np.vectorize(lambda n: Specie.to_sp(n))
+        mfunc = np.vectorize(lambda n: Specie.from_num(n))
         sarr = mfunc(arr)
         return cls(sarr.tolist())
 
@@ -176,6 +176,11 @@ class CStru(object):
         arr_num = np.array([i for i in g_arr.flat])
 
         return (arr_bas, arr_pos, arr_num)
+
+    def get_gcell(self):
+        spg_cell = self.get_cell()
+        gcell = GeneralCell(spg_cell[0], spg_cell[1], spg_cell[2])
+        return gcell
 
     def get_lattice(self):
         arr_bas, arr_pos, arr_num = self.get_cell()

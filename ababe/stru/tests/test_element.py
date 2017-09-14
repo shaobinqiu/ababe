@@ -18,8 +18,8 @@ class SpecieTestCase(unittest.TestCase):
         self.assertEqual(self.b.atom_radius, 0.85)
 
     def test_to_sp(self):
-        self.assertEqual(Specie.to_sp(5), Specie("B"))
-        self.assertEqual(Specie.to_sp(0), GhostSpecie())
+        self.assertEqual(Specie.from_num(5), Specie("B"))
+        self.assertEqual(Specie.from_num(0), GhostSpecie())
 
     def test_to_name(self):
         self.assertEqual(Specie.to_name(5), "B")

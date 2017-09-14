@@ -31,8 +31,8 @@ class testMinDistanceRestriction(unittest.TestCase):
                                 6, 6, 6, 6, 6, 6])
         self.cell = GeneralCell(arr_lat, arr_positions, arr_numbers)
 
-        self.carbon_restrc = MinDistanceRestriction(Specie('C'), 0.85)
-        self.boron_restrc = MinDistanceRestriction(Specie('B'), 1.01)
+        self.carbon_restrc = MinDistanceRestriction((Specie('C'), 0.85))
+        self.boron_restrc = MinDistanceRestriction((Specie('B'), 1.01))
 
     def test_is_satisfied(self):
         self.assertTrue(self.carbon_restrc.is_satisfied(self.cell))

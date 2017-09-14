@@ -30,7 +30,7 @@ class Specie(object):
         return self.symbol
 
     @staticmethod
-    def to_sp(an):
+    def from_num(an):
         if an == 0:
             sp = GhostSpecie()
         else:

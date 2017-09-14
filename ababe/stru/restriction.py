@@ -26,9 +26,9 @@ class MinDistanceRestriction(Restriction):
     else output False
     """
 
-    def __init__(self, ele, dist):
-        self.target_ele = ele
-        self.target_dist = dist
+    def __init__(self, tr):
+        self.target_ele = tr[0]
+        self.target_dist = tr[1]
 
     def is_satisfied(self, gcell):
         scale = np.array([[2, 0, 0],
