@@ -1,7 +1,9 @@
 # coding: utf-8
 # Distributed under the terms of the MIT License.
 
-from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell
+from ababe.stru.scaffold import SitesGrid, CStru, GeneralCell \
+                                ModifiedCell
+from ababe.stru.site import Site
 from ababe.stru.element import GhostSpecie, Specie
 import numpy as np
 
@@ -300,6 +302,81 @@ class testGeneralCell(unittest.TestCase):
         arr_numbers = np.array([6]*24)
         ans_scell = GeneralCell(arr_lat, arr_positions, arr_numbers)
         self.assertTrue(np.allclose(scell.positions, arr_positions))
+
+
+class testModifiedCell(unittest.TestCase):
+
+
+    def setUp(self):
+        self.latt = np.array([[12.,2.,14.],[16.,0.,16.],[2.,2.,0.]])
+        self.pos = np.array([[0.0, 0.0, 0.0],
+                             [0.0, 0.125, 0.0],
+                             [0.0, 0.25, 0.0],
+                             [0.0, 0.375, 0.0],
+                             [0.0, 0.5, 0.0],
+                             [0.0, 0.625, 0.0],
+                             [0.0, 0.75, 0.0],
+                             [0.0, 0.875, 0.0],
+                             [0.25, 0.09375, 0.25],
+                             [0.25, 0.21875, 0.25],
+                             [0.25, 0.34375, 0.25],
+                             [0.25, 0.46875, 0.25],
+                             [0.25, 0.59375, 0.25],
+                             [0.25, 0.71875, 0.25],
+                             [0.25, -0.15625, 0.25],
+                             [0.25, -0.03125, 0.25]]
+                             )
+        self.numbers = np.array([30, 30, 30, 30, 30, 30, 30, 30, 16, 16, 16, 16, 16, 16, 16, 16])
+        self.initstru = ModifiedCell(latt)
+        self.full_initzb = ModifiedCell(latt, pos, numbers)
+
+    def test_get_points_in_sphere(self):
+        pass
+
+    def test_append(self):
+        site_s = Site((0,0,0.222), 'S')
+        zb = self.full_initzb.copy()
+        zb._append(site_s)
+        gcell = zb.to_gcell()
+        new_pos = np.append(self.pos, [[0,0,0.222]], axis=0)
+        new_numbers = np.append(self.numbers, [16])
+        self.assertTrue(np.array_equal(gcell.positions), new_pos)
+        self.assertTrue(np.array_equal(gcell.numbers), new_numbers)
+
+    def test_remove_site(self):
+        new_stru = self.full_initzb.remove_site()
+        gcell = new_stru.to_gcell()
+        new_pos = np.delete(self.pos, -1, 0)
+        self.assertTrue(np.array_equal(gcell.positions), new_pos)
+
+    def test_append_site(self):
+        site_s = Site((0,0,0.222), 'S')
+        initstru = self.initstru.copy()
+        new_stru = initstru.append_site(site_s)
+        gcell = new_stru.to_gcell()
+        new_pos = np.append([[0,0,0]], [[0,0,0.222]], axis=0)
+        self.assertTrue(new_stru is initstru)
+        self.assertTrue(np.array_equal(gcell.positions, new_pos))
+
+    def test_remove_sites(self):
+        new_stru = self.full_initzb.remove_sites([-1, -2])
+        gcell = new_stru.to_gcell()
+        new_pos = np.delete(self.pos, [-1, -2], 0)
+        self.assertTrue(np.array_equal(gcell.positions), new_pos)
+
+    def test_append_sites(self):
+        l_sites = [Site((0,0,k), 'S') for k in [0.1, 0.2, 0.3]]
+        initstru = self.initstru.copy()
+        new_stru = initstru.append_sites(l_sites)
+        gcell = new_stru.to_gcell()
+        new_pos = np.array([[0,0,0.1],[0,0,0.2],[0,0,0.3]])
+        self.assertTrue(np.array_equal(gcell.positions), new_pos)
+
+    def test_copy(self):
+        new_zb = self.full_initzb.copy()
+        self.assertEqual(new_zb, self.full_initzb)
+        self.assertFalse(new_zb is self.full_initzb)
+
 
 if __name__ == "__main__":
     import nose2

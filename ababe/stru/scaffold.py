@@ -11,6 +11,7 @@ from itertools import combinations
 
 from scipy.spatial import cKDTree
 from operator import itemgetter
+from collections import MutableSequence
 import spglib
 import xxhash
 
@@ -419,3 +420,56 @@ class GeneralCell(object):
         ind = np.where(is_incell)[0]
         # pdb.set_trace()
         return frac_all[ind]
+
+
+class ModifiedCell(MutableSequence):
+    """ A cell can converted with gcell:
+
+        A cell which can be modified, rather than re-created
+        a new object from class.
+        Is a special kind of mutable sequence containing only
+        :class:`Site`.
+    """
+
+
+    def __init__(self, lattice, positions=np.array([[0,0,0]]), numbers=np.array([0])):
+        self._lattice = lattice
+        self._sites =
+
+    def __setitem__(self, index, site):
+        pass
+
+    def __getitem__(self, index):
+        pass
+
+    def __delitem__(self, index):
+        pass
+
+    def from_gcell(self, gcell):
+        pass
+
+    def to_gcell(self):
+        pass
+
+    def get_points_in_sphere(self, frac_points, center, r):
+        pass
+
+    def _append(self, site):
+        pass
+
+    def remove_site(self, index=-1):
+        pass
+
+    def append_site(self, site):
+        pass
+
+    def remove_sites(self, indexs):
+        pass
+
+    def append_sites(self, sites):
+        pass
+
+    def copy(self):
+        """ A deepcopy of self been returned"""
+        from copy import deepcopy
+        return deepcopy(self)
