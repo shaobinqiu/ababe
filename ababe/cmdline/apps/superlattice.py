@@ -42,7 +42,6 @@ class App(AppModel):
             LatticeGen = SuperLatticeGenerator2D
         else:
             LatticeGen = SuperLatticeGenerator
-        import pdb; pdb.set_trace()
 
         self.hnfs = LatticeGen.hnfs_from_n(self.ucell, self.v)
 
