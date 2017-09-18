@@ -142,13 +142,12 @@ class SuperLatticeGenerator2D(object):
         l_HNFs = []
         a_list = list(factors(n))
         for a in a_list:
-            c_list = list(factors(n//a))
-            for c in c_list:
-                for b in range(c):
-                    hnf = np.array([[a, b, 0],
-                                    [0, c, 0],
-                                    [0, 0, 1]])
-                    l_HNFs.append(SuperLatticeCell(unit_gcell, hnf))
+            c = n//a
+            for b in range(c):
+                hnf = np.array([[a, b, 0],
+                                [0, c, 0],
+                                [0, 0, 1]])
+                l_HNFs.append(SuperLatticeCell(unit_gcell, hnf))
 
         return l_HNFs
 

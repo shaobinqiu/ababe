@@ -96,6 +96,12 @@ class testSuperLatticeGenerator2D(unittest.TestCase):
         zb_uc = GeneralCell(zb_b, zb_pos, zb_num)
         # s2d = SuperLatticeGenerator2D(zb_uc, 1)
 
+    def test_fatal(self):
+        """
+        make sure the number of output is right
+        """
+        pass
+
 
 
 if __name__ == "__main__":
