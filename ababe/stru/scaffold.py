@@ -7,6 +7,7 @@ from itertools import product
 # import collections
 
 from ababe.stru.element import Specie, GhostSpecie
+from ababe.stru.site import Site
 from itertools import combinations
 
 from scipy.spatial import cKDTree
@@ -434,40 +435,82 @@ class ModifiedCell(MutableSequence):
 
     def __init__(self, lattice, positions=np.array([[0,0,0]]), numbers=np.array([0])):
         self._lattice = lattice
-        self._sites =
+        lsites = [s for s in zip(positions.tolist(), numbers.tolist())]
+        self._sites = [Site(s[0], s[1]) for s in lsites]
+
+    def __iter__(self):
+        """Must be for Sequence ABC,
+           Iterates over sites.
+        """
+        return self.__sites.__iter__()
+
+    def __len__(self):
+        """Must be for Sequence ABC,
+           Number of sites in structure.
+        """
+        return len(self._sites)
 
     def __setitem__(self, index, site):
-        pass
+
+        return self._sites.__setitem__(index, site)
 
     def __getitem__(self, index):
-        pass
+        return self._sites.__getitem__(index)
 
     def __delitem__(self, index):
-        pass
+        return self._sites.__delitem__(index)
 
-    def from_gcell(self, gcell):
-        pass
+    def __eq__(self, other):
+        if np.allclose(self._lattice, other._lattice) and \
+            np.allclose(self._positions, other._positions) and \
+             np.allclose(self._numbers, other._numbers):
+
+             return True
+        else:
+            return False
+
+    def append(self, site):
+        self._sites.append(site)
+
+    def insert(self, index, site):
+        self._sites.insert(index, site)
+
+    def pop(self, index=-1):
+        return self._sites.pop(index)
+
+    def extend(self, sites):
+        """ Adds atoms to structure """
+        for s in sites:
+            self._sites.append(s)
+
+    @classmethod
+    def from_gcell(cls, gcell):
+        return cls(gcell.lattice, gcell.positions, gcell.numbers)
 
     def to_gcell(self):
-        pass
+        positions = np.array([s.position for s in self._sites])
+        numbers = np.array([s.element.Z for s in self._sites])
+        return GeneralCell(self._lattice, positions, numbers)
 
     def get_points_in_sphere(self, frac_points, center, r):
         pass
 
-    def _append(self, site):
-        pass
+    def append_site(self, site):
+        self.append(site)
+        return self
 
     def remove_site(self, index=-1):
-        pass
-
-    def append_site(self, site):
-        pass
+        self.pop(index)
+        return self
 
     def remove_sites(self, indexs):
-        pass
+        for i in indexs:
+            self.pop(i)
+        return self
 
     def append_sites(self, sites):
-        pass
+        self.extend(sites)
+        return self
 
     def copy(self):
         """ A deepcopy of self been returned"""

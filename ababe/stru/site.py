@@ -6,7 +6,7 @@ import numpy as np
 class Site(object):
 
     def __init__(self, position, ele):
-        self._position = position
+        self._position = tuple(position)
         if isinstance(ele, Specie):
             self._element = ele
         elif isinstance(ele, int):
@@ -16,16 +16,16 @@ class Site(object):
 
     @property
     def position(self):
-        return self._positon
+        return self._position
 
     @position.setter
     def position(self, atuple):
-        self._positon = atuple
+        self._position = tuple(atuple)
 
     @property
     def element(self):
-        return self._positon
+        return self._element
 
     @element.setter
     def element(self, ele):
-        self._positon = ele
+        self._element = ele
