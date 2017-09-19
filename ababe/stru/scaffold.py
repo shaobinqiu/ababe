@@ -495,7 +495,7 @@ class ModifiedCell(MutableSequence):
         numbers = np.array([s.element.Z for s in self._sites])
         return GeneralCell(self._lattice, positions, numbers)
 
-    def get_points_in_sphere(self, frac_points, center, r):
+    def get_points_in_sphere(self, center, r):
         pass
 
     def append_site(self, site):
