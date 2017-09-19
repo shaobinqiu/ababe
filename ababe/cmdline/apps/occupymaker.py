@@ -90,7 +90,7 @@ class App(AppModel):
             # print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
             for n_count, c in enumerate(outer_gen):
                 if c.is_primitive() and applied_restriction.is_satisfied(c):
-                    c = c.get_refined_cell()
+                    c = c.get_refined_pcell()
                     poscar = VaspPOSCAR(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                                                      prefix='POSCAR_S{:}_'

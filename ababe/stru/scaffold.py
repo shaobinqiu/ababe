@@ -371,6 +371,21 @@ class GeneralCell(object):
 
         return self.__class__(lattice, positions, numbers)
 
+    def get_refined_pcell(self):
+        """
+        Using spglib's standardize_cell method to
+        refine the cell of giving.
+        If self is a non-primitive cell, the number of
+        atoms will reduced.
+        else will return a refined primitive cell.
+        """
+        rcell = (self.lattice, self.positions, self.numbers)
+        lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=True,
+                                                              no_idealize=False, symprec=1e-4)
+
+        return self.__class__(lattice, positions, numbers)
+
+
     def get_cartesian(self, ele=None):
         """
         Get the cartesian coordinates of the Cell
