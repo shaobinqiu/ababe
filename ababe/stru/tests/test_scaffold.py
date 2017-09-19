@@ -350,9 +350,16 @@ class testModifiedCell(unittest.TestCase):
         self.assertTrue(np.array_equal(gcell.numbers, new_numbers))
 
     def test_remove_site(self):
-        new_stru = self.full_initzb.remove_site()
+        stru = self.full_initzb.copy()
+        new_stru = stru.remove_site()
         gcell = new_stru.to_gcell()
         new_pos = np.delete(self.pos, 15, 0)
+        self.assertTrue(np.array_equal(gcell.positions, new_pos))
+
+        stru = self.full_initzb.copy()
+        new_stru = stru.remove_site(2)
+        gcell = new_stru.to_gcell()
+        new_pos = np.delete(self.pos, 2, 0)
         self.assertTrue(np.array_equal(gcell.positions, new_pos))
 
     def test_append_site(self):
@@ -365,17 +372,14 @@ class testModifiedCell(unittest.TestCase):
         self.assertTrue(np.array_equal(gcell.positions, new_pos))
 
     def test_remove_sites(self):
-        new_stru = self.full_initzb.remove_sites([-1, -2])
-        gcell = new_stru.to_gcell()
-        new_pos = np.delete(self.pos, [15, 14], 0)
-        self.assertTrue(np.array_equal(gcell.positions, new_pos))
+        pass
 
     def test_append_sites(self):
         l_sites = [Site((0,0,k), 'S') for k in [0.1, 0.2, 0.3]]
         initstru = self.initstru.copy()
         new_stru = initstru.append_sites(l_sites)
         gcell = new_stru.to_gcell()
-        new_pos = np.array([[0,0,0.1],[0,0,0.2],[0,0,0.3]])
+        new_pos = np.array([[0,0,0],[0,0,0.1],[0,0,0.2],[0,0,0.3]])
         self.assertTrue(np.array_equal(gcell.positions, new_pos))
 
     def test_copy(self):

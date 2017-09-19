@@ -461,13 +461,16 @@ class ModifiedCell(MutableSequence):
         return self._sites.__delitem__(index)
 
     def __eq__(self, other):
-        if np.allclose(self._lattice, other._lattice) and \
-            np.allclose(self._positions, other._positions) and \
-             np.allclose(self._numbers, other._numbers):
+        is_equ = False
+        selfp = np.array([s.position for s in self._sites])
+        selfn = np.array([s.element.Z for s in self._sites])
+        otherp = np.array([s.position for s in other._sites])
+        othern = np.array([s.element.Z for s in other._sites])
+        if np.allclose(self._lattice, other._lattice):
+            if np.allclose(selfp, otherp) and np.allclose(selfn, othern):
+                is_equ = True
 
-             return True
-        else:
-            return False
+        return is_equ
 
     def append(self, site):
         self._sites.append(site)
@@ -504,9 +507,10 @@ class ModifiedCell(MutableSequence):
         return self
 
     def remove_sites(self, indexs):
-        for i in indexs:
-            self.pop(i)
-        return self
+        """ TODO:
+            can't use pop, for when one pop a new object return.
+        """
+        pass
 
     def append_sites(self, sites):
         self.extend(sites)
