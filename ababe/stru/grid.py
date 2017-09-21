@@ -28,7 +28,7 @@ class SuperLatticeCell(object):
         self.lat_coeff = lat_coeff
         self.unit_cell = unit_gcell.spg_cell
 
-        self.sym = spglib.get_symmetry(self.unit_cell)
+        self.sym = spglib.get_symmetry(self.unit_cell, symprec=1e-3)
 
     def __eq__(self, other):
         # H_j * R.T ^-1 * H ^-1 should be an int matrix
