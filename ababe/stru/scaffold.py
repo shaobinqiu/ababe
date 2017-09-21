@@ -385,6 +385,20 @@ class GeneralCell(object):
 
         return self.__class__(lattice, positions, numbers)
 
+    def get_shaped_cell(self):
+        """
+        The numbers of atoms is not changed, but the lattice shape
+        is optimized to be fulled.
+        """
+        n = self.numbers.size
+        numbers = self.numbers.copy()
+        index = np.array([i for i in range(n)])
+        rcell = (self.lattice, self.positions, index)
+        lattice, positions, new_index = spglib.standardize_cell(rcell, to_primitive=True,
+                                                              no_idealize=False, symprec=1e-4)
+
+        numbers = numbers[new_index]
+        return self.__class__(lattice, positions, numbers)
 
     def get_cartesian(self, ele=None):
         """

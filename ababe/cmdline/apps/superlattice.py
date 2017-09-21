@@ -67,7 +67,9 @@ class App(AppModel):
             suffix = '.yaml'
 
         for hnf in self.hnfs:
-            sl = hnf.to_general_cell()
+            sl_origin = hnf.to_general_cell()
+            sl = sl_origin.get_shaped_cell()
+
             out = Output(sl, self.zoom)
             tf = tempfile.NamedTemporaryFile(mode='w+b', dir=suplat_dir,
                                              prefix='SUPLAT_{:}_'.

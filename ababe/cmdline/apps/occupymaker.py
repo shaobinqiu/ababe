@@ -60,7 +60,7 @@ class App(AppModel):
         if trs != ():
             self.tr = trs[0]
         else:
-            self.tr = (Specie.to_name(tgt_ele), 0)
+            self.tr = None
 
     def run(self):
         # Create directory contain POSCARs
@@ -83,14 +83,20 @@ class App(AppModel):
         ogg = OccupyGenerator(self.cell)
         gg = ogg.all_speckle_gen_of_ele(self.nmax, self.ele, self.speckle)
 
-        tr = (Specie(self.tr[0]), self.tr[1])
-        applied_restriction = MinDistanceRestriction(tr)
+        if self.tr is not None:
+            tr = (Specie(self.tr[0]), self.tr[1])
+            applied_restriction = MinDistanceRestriction(tr)
 
         for i, outer_gen in enumerate(gg):
             # print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
             for n_count, c in enumerate(outer_gen):
-                if c.is_primitive() and applied_restriction.is_satisfied(c):
-                    c = c.get_refined_pcell()
+                if self.tr is not None:
+                    condition = c.is_primitive() and applied_restriction.is_satisfied(c)
+                else:
+                    condition = c.is_primitive()
+
+                if condition:
+                    # c = c.get_refined_pcell()
                     poscar = VaspPOSCAR(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                                                      prefix='POSCAR_S{:}_'
