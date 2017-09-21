@@ -155,6 +155,16 @@ direct
         self.assertEqual(data, str(poscar_bcu))
         os.remove(tmp_file)
 
+class TestGeneralCellInput(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def test_init(self):
+        pass
+
+    def test_to_gcell(self):
+        pass
 
 if __name__ == "__main__":
     import nose2
