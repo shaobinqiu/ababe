@@ -491,15 +491,23 @@ class ModifiedCell(MutableSequence):
 
     def __eq__(self, other):
         is_equ = False
-        selfp = np.array([s.position for s in self._sites])
-        selfn = np.array([s.element.Z for s in self._sites])
-        otherp = np.array([s.position for s in other._sites])
-        othern = np.array([s.element.Z for s in other._sites])
         if np.allclose(self._lattice, other._lattice):
-            if np.allclose(selfp, otherp) and np.allclose(selfn, othern):
+            if np.allclose(self.positions, other.positions) and np.allclose(self.numbers, other.numbers):
                 is_equ = True
 
         return is_equ
+
+    @property
+    def lattice(self):
+        return self._lattice
+
+    @property
+    def positions(self):
+        return np.array([s.position for s in self._sites])
+
+    @property
+    def numbers(self):
+        return np.array([s.element.Z for s in self._sites])
 
     def append(self, site):
         self._sites.append(site)
@@ -520,12 +528,25 @@ class ModifiedCell(MutableSequence):
         return cls(gcell.lattice, gcell.positions, gcell.numbers)
 
     def to_gcell(self):
-        positions = np.array([s.position for s in self._sites])
-        numbers = np.array([s.element.Z for s in self._sites])
-        return GeneralCell(self._lattice, positions, numbers)
+        return GeneralCell(self._lattice, self.positions, self.numbers)
 
-    def get_points_in_sphere(self, center, r, zip_result=True):
-        pass
+    def get_points_incell_insphere(self, center, r):
+        """ find all sites in a circle of radius r
+            not in supercell, but in cell.
+            Return: a list of sites; [sites]
+        """
+        cart_center = self.get_cartesian_from_frac(center)
+        sites = []
+        for ind, site in enumerate(self._sites):
+            cart_site = self.get_cartesian_from_frac(site.position)
+            from scipy.spatial.distance import euclidean as euclidean_discance
+            if euclidean_discance(cart_site, cart_center) < r:
+                sites.append(site)
+        return sites
+
+    def get_cartesian_from_frac(self, frac_coor):
+        cart_coor = np.matmul(frac_coor, self.lattice)
+        return cart_coor
 
     def append_site(self, site):
         self.append(site)

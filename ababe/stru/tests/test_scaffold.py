@@ -337,7 +337,29 @@ class testModifiedCell(unittest.TestCase):
         self.assertTrue(np.allclose(new_gcell.positions, gcell.positions))
 
     def test_get_points_in_sphere(self):
-        pass
+        latt = np.array([[4.898979, 0.000000, 0.000000],
+                         [2.449490,  4.242641, 0.000000],
+                         [1.632993, -0.000000, 4.618802]])
+        pos = np.array([[0.208333, 0.333333, 0.375000],
+                        [0.375000, 0.000000, 0.875000],
+                        [0.541667, 0.666667, 0.375000],
+                        [0.708333, 0.333333, 0.875000],
+                        [0.875000, 0.000000, 0.375000],
+                        [0.000000, 0.000000, 0.000000],
+                        [0.166667, 0.666667, 0.500000],
+                        [0.333333, 0.333333, 0.000000],
+                        [0.500000, 0.000000, 0.500000],
+                        [0.666667, 0.666667, 0.000000],
+                        [0.833333, 0.333333, 0.500000],
+                        [0.041667, 0.666667, 0.875000]])
+        numbers = np.array([16,16,16,16,16,30,30,30,30,30,30,55])
+        modcell = ModifiedCell(latt, pos, numbers)
+        lsites = modcell.get_points_incell_insphere(np.array([0.041667, 0.666667, 0.875000]), 2)
+
+        sites = [Sites(pos[4],, lsites[9], lsites[7], lsites[6], lsites[11]]
+        self.assertEqual(len(lsites), 5)
+        for s in lsites:
+            self.assertTrue(s in sites)
 
     def test_append(self):
         site_s = Site((0,0,0.222), 'S')

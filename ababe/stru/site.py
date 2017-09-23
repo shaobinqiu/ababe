@@ -14,6 +14,9 @@ class Site(object):
         else:
             self._element = Specie(ele)
 
+    def __eq__(self, other):
+        return self.position == other.position and self.element == other.element
+
     @property
     def position(self):
         return self._position
