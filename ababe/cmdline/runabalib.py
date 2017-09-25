@@ -66,3 +66,16 @@ def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs, outmode):
 
     appoccupymaker = occupymaker.App(y, comment, element, speckle, nspeckle, zoom, trs, outmode)
     appoccupymaker.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--center-element', '-c', 'cenele', required=True)
+@click.option('--radius', '-r', default=0)
+@click.option('--element-remove', '-e', 'ele', required=True)
+def atclear(input, cenele, radius, ele):
+    infile = click.format_filename(input)
+    filename = infile
+    y = yaml.load(open(infile, "r"))
+
+    appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele)
+    appatomclarifier.run()
