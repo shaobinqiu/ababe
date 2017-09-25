@@ -354,11 +354,27 @@ class testModifiedCell(unittest.TestCase):
                         [0.041667, 0.666667, 0.875000]])
         numbers = np.array([16,16,16,16,16,30,30,30,30,30,30,55])
         modcell = ModifiedCell(latt, pos, numbers)
-        lsites = modcell.get_points_incell_insphere(np.array([0.041667, 0.666667, 0.875000]), 2)
+        dict_sites = modcell.get_points_incell_insphere(np.array([0.041667, 0.666667, 0.875000]), 2)
 
-        sites = [Sites(pos[4],, lsites[9], lsites[7], lsites[6], lsites[11]]
-        self.assertEqual(len(lsites), 5)
-        for s in lsites:
+        sites = [Site(pos[5], 'Zn'),
+                 Site(pos[9], 'Zn'),
+                 Site(pos[7], 'Zn'),
+                 Site(pos[6], 'Zn'),
+                 Site(pos[11], 'Cs')]
+        self.assertEqual(len(dict_sites), 5)
+        for s in dict_sites.values():
+            self.assertTrue(s in sites)
+
+        #  Test for find giving element
+        modcell = ModifiedCell(latt, pos, numbers)
+        dict_sites = modcell.get_points_incell_insphere(np.array([0.041667, 0.666667, 0.875000]), 2, Specie('Zn'))
+
+        sites = [Site(pos[5], 'Zn'),
+                 Site(pos[9], 'Zn'),
+                 Site(pos[7], 'Zn'),
+                 Site(pos[6], 'Zn')]
+        self.assertEqual(len(dict_sites), 4)
+        for s in dict_sites.values():
             self.assertTrue(s in sites)
 
     def test_append(self):
@@ -394,7 +410,11 @@ class testModifiedCell(unittest.TestCase):
         self.assertTrue(np.array_equal(gcell.positions, new_pos))
 
     def test_remove_sites(self):
-        pass
+        stru = self.full_initzb.copy()
+        new_stru = stru.remove_sites([2, 14, 3, 5])
+        gcell = new_stru.to_gcell()
+        new_pos = np.delete(self.pos, [2, 14, 3, 5], 0)
+        self.assertTrue(np.array_equal(gcell.positions, new_pos))
 
     def test_append_sites(self):
         l_sites = [Site((0,0,k), 'S') for k in [0.1, 0.2, 0.3]]

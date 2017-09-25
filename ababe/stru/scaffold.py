@@ -530,23 +530,46 @@ class ModifiedCell(MutableSequence):
     def to_gcell(self):
         return GeneralCell(self._lattice, self.positions, self.numbers)
 
-    def get_points_incell_insphere(self, center, r):
+    def get_points_incell_insphere(self, center, r, ele=None):
         """ find all sites in a circle of radius r
             not in supercell, but in cell.
             Return: a list of sites; [sites]
         """
-        cart_center = self.get_cartesian_from_frac(center)
-        sites = []
+        dict_sites = {}
+
         for ind, site in enumerate(self._sites):
-            cart_site = self.get_cartesian_from_frac(site.position)
-            from scipy.spatial.distance import euclidean as euclidean_discance
-            if euclidean_discance(cart_site, cart_center) < r:
-                sites.append(site)
-        return sites
+            if ele is None:
+                condition = self.in_euclidean_discance(site.position, center, r)
+            else:
+                condition = self.in_euclidean_discance(site.position, center, r) and (site.element == ele)
+
+            if condition:
+                dict_sites[ind] = site
+        return dict_sites
 
     def get_cartesian_from_frac(self, frac_coor):
         cart_coor = np.matmul(frac_coor, self.lattice)
         return cart_coor
+
+    def in_euclidean_discance(self, pos, center, r):
+        """
+            A helper function to return true or false.
+            Decided whether a position(frac) inside a
+            distance restriction.
+        """
+        from scipy.spatial.distance import euclidean as euclidean_discance
+        from itertools import product
+
+        cart_cent = self.get_cartesian_from_frac(center)
+        trans = np.array([i for i in product([-1, 0, 1], repeat=3)])
+        allpos = pos + trans
+        for p in allpos:
+            cart_p = self.get_cartesian_from_frac(p)
+            if euclidean_discance(cart_p, cart_cent) < r:
+                return True
+                break
+
+        return False
 
     def append_site(self, site):
         self.append(site)
@@ -557,10 +580,13 @@ class ModifiedCell(MutableSequence):
         return self
 
     def remove_sites(self, indexs):
-        """ TODO:
-            can't use pop, for when one pop a new object return.
+        """ NOT NEED TO IMPLEMT
+            CAN BE IMPLEMTED BY [i for i in lst if not ... in ...]
+            OR AS FOLLOWING
         """
-        pass
+        index_set = set(indexs)
+        self._sites = [s for i, s in enumerate(self._sites) if i not in index_set]
+        return self
 
     def append_sites(self, sites):
         self.extend(sites)
