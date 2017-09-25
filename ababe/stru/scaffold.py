@@ -471,7 +471,7 @@ class ModifiedCell(MutableSequence):
         """Must be for Sequence ABC,
            Iterates over sites.
         """
-        return self.__sites.__iter__()
+        return self._sites.__iter__()
 
     def __len__(self):
         """Must be for Sequence ABC,
