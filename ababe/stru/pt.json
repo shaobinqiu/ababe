@@ -27,10 +27,18 @@
 		"Atomic no": 28,
 		"Atomic mass": 58.693,
 		"Atomic radius": 1.24},
+	"Ag":{
+		"Atomic no": 47,
+		"Atomic mass": 107.8682,
+		"Atomic radius": 1.44},
 	"Sn":{
 		"Atomic no": 50,
 		"Atomic mass": 118.71,
 		"Atomic radius": 1.40},
+	"Au":{
+		"Atomic no": 79,
+		"Atomic mass": 196.97,
+		"Atomic radius": 1.79},
 	"Sb":{
 		"Atomic no": 51,
 		"Atomic mass": 121.760,
@@ -43,6 +51,10 @@
 		"Atomic no": 23,
 		"Atomic mass": 50.942,
 		"Atomic radius": 1.34},
+	"Mn":{
+		"Atomic no": 25,
+		"Atomic mass": 54.938,
+		"Atomic radius": 1.19},
 	"Cs":{
 		"Atomic no": 55,
 		"Atomic mass": 132.905,
