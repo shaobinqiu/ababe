@@ -12,7 +12,7 @@ import os
 
 class App(AppModel):
 
-    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs, outmode):
+    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs, refined, outmode):
         # read comment & zoom from setting file first
         # if not exist, read from cmd args, then default
         if zoom is None:
@@ -62,6 +62,7 @@ class App(AppModel):
         else:
             self.tr = None
 
+        self.refined = refined
         self.outmode = outmode
 
     def run(self):
@@ -106,7 +107,8 @@ class App(AppModel):
                     condition = c.is_primitive()
 
                 if condition:
-                    # c = c.get_refined_pcell()
+                    if self.refined:
+                        c = c.get_refined_pcell()
                     poscar = Output(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
                                                      prefix='STRUCTURE_S{:}_'
