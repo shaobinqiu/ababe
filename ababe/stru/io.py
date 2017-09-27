@@ -129,3 +129,16 @@ class VaspPOSCAR(object):
         """
         with open(filename, "w") as f:
             f.write(self.get_string())
+
+
+class GeneralCellInput(object):
+    """ read files and get GeneralCell
+
+        Input: filename
+    """
+
+    def __init__(self, filename):
+        pass
+
+    def get_gcell(self):
+        pass

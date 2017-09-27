@@ -59,9 +59,26 @@ def suplat(input, comment, volumn, zoom, ld, outmode):
 @click.option('--number-speckle', '-n', 'nspeckle', type=int, default=None)
 @click.option('--zoom', type=float, default=None)
 @click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
-def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs):
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode):
     infile = click.format_filename(input)
     y = yaml.load(open(infile, "r"))
 
-    appoccupymaker = occupymaker.App(y, comment, element, speckle, nspeckle, zoom, trs)
+    appoccupymaker = occupymaker.App(y, comment, element, speckle,
+                                     nspeckle, zoom, trs, refined, outmode)
     appoccupymaker.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--center-element', '-c', 'cenele', required=True)
+@click.option('--radius', '-r', type=float, default=0)
+@click.option('--element-remove', '-e', 'ele', required=True)
+@click.option('--refined/--no-refined', default=True)
+def atclear(input, cenele, radius, ele, refined):
+    infile = click.format_filename(input)
+    filename = infile
+    y = yaml.load(open(infile, "r"))
+
+    appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
+    appatomclarifier.run()

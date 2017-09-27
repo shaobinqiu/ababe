@@ -7,10 +7,12 @@ from itertools import product
 # import collections
 
 from ababe.stru.element import Specie, GhostSpecie
+from ababe.stru.site import Site
 from itertools import combinations
 
 from scipy.spatial import cKDTree
 from operator import itemgetter
+from collections import MutableSequence
 import spglib
 import xxhash
 
@@ -448,3 +450,149 @@ class GeneralCell(object):
         ind = np.where(is_incell)[0]
         # pdb.set_trace()
         return frac_all[ind]
+
+
+class ModifiedCell(MutableSequence):
+    """ A cell can converted with gcell:
+
+        A cell which can be modified, rather than re-created
+        a new object from class.
+        Is a special kind of mutable sequence containing only
+        :class:`Site`.
+    """
+
+
+    def __init__(self, lattice, positions=np.array([[0,0,0]]), numbers=np.array([0])):
+        self._lattice = lattice
+        lsites = [s for s in zip(positions.tolist(), numbers.tolist())]
+        self._sites = [Site(s[0], s[1]) for s in lsites]
+
+    def __iter__(self):
+        """Must be for Sequence ABC,
+           Iterates over sites.
+        """
+        return self._sites.__iter__()
+
+    def __len__(self):
+        """Must be for Sequence ABC,
+           Number of sites in structure.
+        """
+        return len(self._sites)
+
+    def __setitem__(self, index, site):
+
+        return self._sites.__setitem__(index, site)
+
+    def __getitem__(self, index):
+        return self._sites.__getitem__(index)
+
+    def __delitem__(self, index):
+        return self._sites.__delitem__(index)
+
+    def __eq__(self, other):
+        is_equ = False
+        if np.allclose(self._lattice, other._lattice):
+            if np.allclose(self.positions, other.positions) and np.allclose(self.numbers, other.numbers):
+                is_equ = True
+
+        return is_equ
+
+    @property
+    def lattice(self):
+        return self._lattice
+
+    @property
+    def positions(self):
+        return np.array([s.position for s in self._sites])
+
+    @property
+    def numbers(self):
+        return np.array([s.element.Z for s in self._sites])
+
+    def append(self, site):
+        self._sites.append(site)
+
+    def insert(self, index, site):
+        self._sites.insert(index, site)
+
+    def pop(self, index=-1):
+        return self._sites.pop(index)
+
+    def extend(self, sites):
+        """ Adds atoms to structure """
+        for s in sites:
+            self._sites.append(s)
+
+    @classmethod
+    def from_gcell(cls, gcell):
+        return cls(gcell.lattice, gcell.positions, gcell.numbers)
+
+    def to_gcell(self):
+        return GeneralCell(self._lattice, self.positions, self.numbers)
+
+    def get_points_incell_insphere(self, center, r, ele=None):
+        """ find all sites in a circle of radius r
+            not in supercell, but in cell.
+            Return: a list of sites; [sites]
+        """
+        dict_sites = {}
+
+        for ind, site in enumerate(self._sites):
+            if ele is None:
+                condition = self.in_euclidean_discance(site.position, center, r)
+            else:
+                condition = self.in_euclidean_discance(site.position, center, r) and (site.element == ele)
+
+            if condition:
+                dict_sites[ind] = site
+        return dict_sites
+
+    def get_cartesian_from_frac(self, frac_coor):
+        cart_coor = np.matmul(frac_coor, self.lattice)
+        return cart_coor
+
+    def in_euclidean_discance(self, pos, center, r):
+        """
+            A helper function to return true or false.
+            Decided whether a position(frac) inside a
+            distance restriction.
+        """
+        from scipy.spatial.distance import euclidean as euclidean_discance
+        from itertools import product
+
+        cart_cent = self.get_cartesian_from_frac(center)
+        trans = np.array([i for i in product([-1, 0, 1], repeat=3)])
+        allpos = pos + trans
+        for p in allpos:
+            cart_p = self.get_cartesian_from_frac(p)
+            if euclidean_discance(cart_p, cart_cent) < r:
+                return True
+                break
+
+        return False
+
+    def append_site(self, site):
+        self.append(site)
+        return self
+
+    def remove_site(self, index=-1):
+        self.pop(index)
+        return self
+
+    def remove_sites(self, indexs):
+        """ NOT NEED TO IMPLEMT
+            CAN BE IMPLEMTED BY [i for i in lst if not ... in ...]
+            OR AS FOLLOWING
+        """
+        index_set = set(indexs)
+        self._sites = [s for i, s in enumerate(self._sites) if i not in index_set]
+        return self
+
+    def append_sites(self, sites):
+        self.extend(sites)
+        return self
+
+    def copy(self):
+        """ A deepcopy of self been returned"""
+        from copy import deepcopy
+        return deepcopy(self)
