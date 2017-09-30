@@ -29,6 +29,7 @@ class App(AppModel):
 
         new_mcell = self.clarifier.clarify(self.mcell)
         gcell = new_mcell.to_gcell()
+        # todo: add feature- to convcell.
         if self.refined:
             gcell = gcell.get_refined_pcell()
 

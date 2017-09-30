@@ -93,9 +93,11 @@ class App(AppModel):
         # For diff outmode
         if self.outmode == 'vasp':
             Output = VaspPOSCAR
+            prefix = 'POSCAR_S{:}_'
             suffix = '.vasp'
         else:
             Output = YamlOutput
+            prefix = 'STRUCTURE_S{:}_'
             suffix = '.yaml'
 
         for i, outer_gen in enumerate(gg):
@@ -111,7 +113,6 @@ class App(AppModel):
                         c = c.get_refined_pcell()
                     poscar = Output(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
-                                                     prefix='STRUCTURE_S{:}_'
-                                                            .format(i+1),
+                                                     prefix=prefix.format(i+1),
                                                      suffix=suffix, delete=False)
                     poscar.write(tf.name)
