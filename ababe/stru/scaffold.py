@@ -247,7 +247,7 @@ class GeneralCell(object):
     A Cell data structure used for generate all nonduplicated structure.
     Initialized by three np.array
     """
-    def __init__(self, lattice, positions, numbers):
+    def __init__(self, lattice, positions, numbers, symprec=1e-3):
         self._lattice = lattice
         init_index = self._get_new_id_seq(positions, numbers)
 
@@ -257,6 +257,7 @@ class GeneralCell(object):
 
         self._spg_cell = (self._lattice, self._positions, self._numbers)
         self._num_count = numbers.size
+        self.symprec = symprec
 
     def get_speckle_num(self, sp):
         from collections import Counter
@@ -315,7 +316,7 @@ class GeneralCell(object):
         return num_id
 
     def get_spacegroup(self):
-        return spglib.get_spacegroup(self._spg_cell, symprec=1e-4)
+        return spglib.get_spacegroup(self._spg_cell, symprec=self.symprec)
 
     def get_symmetry(self):
         """
@@ -325,7 +326,7 @@ class GeneralCell(object):
         The key translation contains a numpy array of float,
         which is “number of symmetry operations” x “vectors”.
         """
-        symmetry = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        symmetry = spglib.get_symmetry(self._spg_cell, symprec=self.symprec)
         return symmetry
 
     def get_symmetry_permutation(self):
@@ -335,7 +336,7 @@ class GeneralCell(object):
         """
         sym_perm = []
         numbers = [i for i in range(self.num_count)]
-        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=self.symprec)
         ops = [(r, t) for r, t in zip(sym_mat['rotations'],
                                       sym_mat['translations'])]
         for r, t in ops:
@@ -346,7 +347,7 @@ class GeneralCell(object):
         return sym_perm
 
     def get_wyckoffs(self):
-        symdb = spglib.get_symmetry_dataset(self._spg_cell, symprec=1e-4)
+        symdb = spglib.get_symmetry_dataset(self._spg_cell, symprec=self.symprec)
         return symdb['wyckoffs']
 
     @classmethod
@@ -354,7 +355,7 @@ class GeneralCell(object):
         pass
 
     def is_primitive(self):
-        primitive_cell = spglib.find_primitive(self.spg_cell, symprec=1e-3)
+        primitive_cell = spglib.find_primitive(self.spg_cell, symprec=self.symprec)
         return primitive_cell[2].size == self.spg_cell[2].size
 
     def get_refined_cell(self):
@@ -367,7 +368,7 @@ class GeneralCell(object):
         """
         rcell = (self.lattice, self.positions, self.numbers)
         lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=False,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         return self.__class__(lattice, positions, numbers)
 
@@ -381,7 +382,7 @@ class GeneralCell(object):
         """
         rcell = (self.lattice, self.positions, self.numbers)
         lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=True,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         return self.__class__(lattice, positions, numbers)
 
@@ -395,7 +396,7 @@ class GeneralCell(object):
         index = np.array([i for i in range(n)])
         rcell = (self.lattice, self.positions, index)
         lattice, positions, new_index = spglib.standardize_cell(rcell, to_primitive=True,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         numbers = numbers[new_index]
         return self.__class__(lattice, positions, numbers)
