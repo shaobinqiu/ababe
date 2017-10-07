@@ -62,7 +62,7 @@
 	"S":{
 		"Atomic no": 16,
 		"Atomic mass": 32.06,
-		"Atomic radius": 1.09}
+		"Atomic radius": 1.09},
 	"Cl":{
 		"Atomic no": 17,
 		"Atomic mass": 35.453,
@@ -126,7 +126,7 @@
 	"Ge":{
 		"Atomic no": 32,
 		"Atomic mass": 72.61,
-		"Atomic radius": 1.52}
+		"Atomic radius": 1.52},
 	"As":{
 		"Atomic no": 33,
 		"Atomic mass": 74.922,
@@ -194,7 +194,7 @@
 	"In":{
 		"Atomic no": 49,
 		"Atomic mass": 114.818,
-		"Atomic radius": 2}
+		"Atomic radius": 2},
 	"Sn":{
 		"Atomic no": 50,
 		"Atomic mass": 118.710,
@@ -258,7 +258,7 @@
 	"Hg":{
 		"Atomic no": 80,
 		"Atomic mass": 200.59,
-		"Atomic radius": 1.76}
+		"Atomic radius": 1.76},
 	"Tl":{
 		"Atomic no": 81,
 		"Atomic mass": 204.383,
