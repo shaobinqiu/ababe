@@ -53,8 +53,9 @@ class testSuperLatticeGenerator(unittest.TestCase):
                                   [0.66666663,  0.33333331,  0.75]])
         hcp_numbers = np.array([0, 0])
         hcp_uc = GeneralCell(hcp_b, hcp_positions, hcp_numbers)
-        result = SuperLatticeGenerator.hnfs_from_n(hcp_uc, 9)
-        self.assertEqual(len(result), 23)
+        # import pdb; pdb.set_trace()
+        result = [len(SuperLatticeGenerator.hnfs_from_n(hcp_uc, i)) for i in range(1,10)]
+        self.assertEqual(result, [1, 3, 5, 11, 7, 9, 11, 34, 23])
 
     def test_to_general_cell(self):
         hnfs = SuperLatticeGenerator.hnfs_from_n_dups(self.bcc_uc, 4)

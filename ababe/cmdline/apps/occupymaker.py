@@ -4,7 +4,7 @@ from .model import AppModel
 from ababe.stru.element import Specie
 from ababe.stru.scaffold import GeneralCell
 from ababe.stru.sogen import OccupyGenerator
-from ababe.stru.io import VaspPOSCAR
+from ababe.stru.io import VaspPOSCAR, YamlOutput
 from ababe.stru.restriction import MinDistanceRestriction
 
 import numpy as np
@@ -12,7 +12,7 @@ import os
 
 class App(AppModel):
 
-    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs):
+    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs, refined, outmode):
         # read comment & zoom from setting file first
         # if not exist, read from cmd args, then default
         if zoom is None:
@@ -60,7 +60,10 @@ class App(AppModel):
         if trs != ():
             self.tr = trs[0]
         else:
-            self.tr = (Specie.to_name(tgt_ele), 0)
+            self.tr = None
+
+        self.refined = refined
+        self.outmode = outmode
 
     def run(self):
         # Create directory contain POSCARs
@@ -72,7 +75,7 @@ class App(AppModel):
                                            + string.digits, k=5))
         working_path = os.getcwd()
         poscars_dir = os.path.join(working_path,
-                                   'POSCARs_{0:}_{1:}'.format(self.comment,
+                                   'STRUCTURES_{0:}_{1:}'.format(self.comment,
                                                               rd_suffix))
         if not os.path.exists(poscars_dir):
             os.makedirs(poscars_dir)
@@ -83,17 +86,32 @@ class App(AppModel):
         ogg = OccupyGenerator(self.cell)
         gg = ogg.all_speckle_gen_of_ele(self.nmax, self.ele, self.speckle)
 
-        tr = (Specie(self.tr[0]), self.tr[1])
-        applied_restriction = MinDistanceRestriction(tr)
+        if self.tr is not None:
+            tr = (Specie(self.tr[0]), self.tr[1])
+            applied_restriction = MinDistanceRestriction(tr)
+
+        # For diff outmode
+        if self.outmode == 'vasp':
+            Output = VaspPOSCAR
+            suffix = '.vasp'
+        else:
+            Output = YamlOutput
+            suffix = '.yaml'
 
         for i, outer_gen in enumerate(gg):
             # print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
             for n_count, c in enumerate(outer_gen):
-                if c.is_primitive() and applied_restriction.is_satisfied(c):
-                    c = c.get_refined_pcell()
-                    poscar = VaspPOSCAR(c, 1)
+                if self.tr is not None:
+                    condition = c.is_primitive() and applied_restriction.is_satisfied(c)
+                else:
+                    condition = c.is_primitive()
+
+                if condition:
+                    if self.refined:
+                        c = c.get_refined_pcell()
+                    poscar = Output(c, 1)
                     tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
-                                                     prefix='POSCAR_S{:}_'
+                                                     prefix='STRUCTURE_S{:}_'
                                                             .format(i+1),
-                                                     suffix='.vasp', delete=False)
+                                                     suffix=suffix, delete=False)
                     poscar.write(tf.name)
