@@ -82,3 +82,23 @@ def atclear(input, cenele, radius, ele, refined):
 
     appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
     appatomclarifier.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', default=None)
+@click.option('--number-speckle', '-n', 'nspeckle', type=int, default=None)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+@click.option('--move-supercell/--no-move-supercell', '-S/-N', 'mpr', default=True,
+              help='Whether move no primitive structures')
+def ocubiter(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode, mpr):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupybiter = occupybiter.App(y, comment, element, speckle,
+                                     nspeckle, zoom, trs, refined, outmode, mpr)
+    appoccupybiter.run()
