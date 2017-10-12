@@ -24,6 +24,10 @@ def exec_from_cmdline():
 ## And then call the modules in directory
 ## ababe/cmdline/command
 #######################################################################
+
+## supcell is moving to runatilib
+## this function will be remove in
+## the future
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)

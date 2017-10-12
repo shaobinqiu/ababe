@@ -25,7 +25,8 @@ setup(
     scripts=[],
     entry_points={
         'console_scripts': [
-            'runaba=ababe.cmdline.runabalib:run'
+            'runaba=ababe.cmdline.runabalib:run',
+            'runati=ababe.cmdline.runatilib:run'
         ]
     }
     )
