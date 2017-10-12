@@ -102,3 +102,40 @@ def ocubiter(input, comment, element, speckle, nspeckle, zoom, trs, refined, out
     appoccupybiter = occupybiter.App(y, comment, element, speckle,
                                      nspeckle, zoom, trs, refined, outmode, mpr)
     appoccupybiter.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', nargs=2)
+@click.option('--number-speckle', '-n', 'nspeckle', type=int, nargs=2)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+@click.option('--move-supercell/--no-move-supercell', '-S/-N', 'mpr', default=True,
+              help='Whether move no primitive structures')
+def ocutenter(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode, mpr):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupytenter = occupytenter.App(y, comment, element, speckle,
+                                       nspeckle, zoom, trs, refined, outmode, mpr)
+    appoccupytenter.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', nargs=2)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+def ocumakert(input, comment, element, speckle, zoom, trs, refined, outmode):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupymakert = occupymakert.App(y, comment, element, speckle,
+                                       zoom, trs, refined, outmode)
+    appoccupymakert.run()
