@@ -7,10 +7,12 @@ from itertools import product
 # import collections
 
 from ababe.stru.element import Specie, GhostSpecie
+from ababe.stru.site import Site
 from itertools import combinations
 
 from scipy.spatial import cKDTree
 from operator import itemgetter
+from collections import MutableSequence
 import spglib
 import xxhash
 
@@ -245,7 +247,7 @@ class GeneralCell(object):
     A Cell data structure used for generate all nonduplicated structure.
     Initialized by three np.array
     """
-    def __init__(self, lattice, positions, numbers):
+    def __init__(self, lattice, positions, numbers, symprec=1e-3):
         self._lattice = lattice
         init_index = self._get_new_id_seq(positions, numbers)
 
@@ -255,6 +257,7 @@ class GeneralCell(object):
 
         self._spg_cell = (self._lattice, self._positions, self._numbers)
         self._num_count = numbers.size
+        self.symprec = symprec
 
     def get_speckle_num(self, sp):
         from collections import Counter
@@ -313,7 +316,7 @@ class GeneralCell(object):
         return num_id
 
     def get_spacegroup(self):
-        return spglib.get_spacegroup(self._spg_cell, symprec=1e-4)
+        return spglib.get_spacegroup(self._spg_cell, symprec=self.symprec)
 
     def get_symmetry(self):
         """
@@ -323,7 +326,7 @@ class GeneralCell(object):
         The key translation contains a numpy array of float,
         which is “number of symmetry operations” x “vectors”.
         """
-        symmetry = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        symmetry = spglib.get_symmetry(self._spg_cell, symprec=self.symprec)
         return symmetry
 
     def get_symmetry_permutation(self):
@@ -333,18 +336,17 @@ class GeneralCell(object):
         """
         sym_perm = []
         numbers = [i for i in range(self.num_count)]
-        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=1e-4)
+        sym_mat = spglib.get_symmetry(self._spg_cell, symprec=self.symprec)
         ops = [(r, t) for r, t in zip(sym_mat['rotations'],
                                       sym_mat['translations'])]
         for r, t in ops:
             pos_new = np.transpose(np.matmul(r, self._positions.T)) + t
             perm = self._get_new_id_seq(pos_new, numbers)
             sym_perm.append(perm)
-
         return sym_perm
 
     def get_wyckoffs(self):
-        symdb = spglib.get_symmetry_dataset(self._spg_cell, symprec=1e-4)
+        symdb = spglib.get_symmetry_dataset(self._spg_cell, symprec=self.symprec)
         return symdb['wyckoffs']
 
     @classmethod
@@ -352,7 +354,7 @@ class GeneralCell(object):
         pass
 
     def is_primitive(self):
-        primitive_cell = spglib.find_primitive(self.spg_cell, symprec=1e-3)
+        primitive_cell = spglib.find_primitive(self.spg_cell, symprec=self.symprec)
         return primitive_cell[2].size == self.spg_cell[2].size
 
     def get_refined_cell(self):
@@ -365,7 +367,7 @@ class GeneralCell(object):
         """
         rcell = (self.lattice, self.positions, self.numbers)
         lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=False,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         return self.__class__(lattice, positions, numbers)
 
@@ -379,7 +381,7 @@ class GeneralCell(object):
         """
         rcell = (self.lattice, self.positions, self.numbers)
         lattice, positions, numbers = spglib.standardize_cell(rcell, to_primitive=True,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         return self.__class__(lattice, positions, numbers)
 
@@ -393,7 +395,7 @@ class GeneralCell(object):
         index = np.array([i for i in range(n)])
         rcell = (self.lattice, self.positions, index)
         lattice, positions, new_index = spglib.standardize_cell(rcell, to_primitive=True,
-                                                              no_idealize=False, symprec=1e-4)
+                                                              no_idealize=False, symprec=self.symprec)
 
         numbers = numbers[new_index]
         return self.__class__(lattice, positions, numbers)
@@ -448,3 +450,179 @@ class GeneralCell(object):
         ind = np.where(is_incell)[0]
         # pdb.set_trace()
         return frac_all[ind]
+
+
+class ModifiedCell(MutableSequence):
+    """ A cell can converted with gcell:
+
+        A cell which can be modified, rather than re-created
+        a new object from class.
+        Is a special kind of mutable sequence containing only
+        :class:`Site`.
+    """
+
+
+    def __init__(self, lattice, positions=np.array([[0,0,0]]), numbers=np.array([0])):
+        self._lattice = lattice
+        lsites = [s for s in zip(positions.tolist(), numbers.tolist())]
+        self._sites = [Site(s[0], s[1]) for s in lsites]
+
+    def __iter__(self):
+        """Must be for Sequence ABC,
+           Iterates over sites.
+        """
+        return self._sites.__iter__()
+
+    def __len__(self):
+        """Must be for Sequence ABC,
+           Number of sites in structure.
+        """
+        return len(self._sites)
+
+    def __setitem__(self, index, site):
+
+        return self._sites.__setitem__(index, site)
+
+    def __getitem__(self, index):
+        return self._sites.__getitem__(index)
+
+    def __delitem__(self, index):
+        return self._sites.__delitem__(index)
+
+    def __eq__(self, other):
+        is_equ = False
+        if np.allclose(self._lattice, other._lattice):
+            if np.allclose(self.positions, other.positions) and np.allclose(self.numbers, other.numbers):
+                is_equ = True
+
+        return is_equ
+
+    @property
+    def lattice(self):
+        return self._lattice
+
+    @property
+    def positions(self):
+        return np.array([s.position for s in self._sites])
+
+    @property
+    def numbers(self):
+        return np.array([s.element.Z for s in self._sites])
+
+    def append(self, site):
+        self._sites.append(site)
+
+    def insert(self, index, site):
+        self._sites.insert(index, site)
+
+    def pop(self, index=-1):
+        return self._sites.pop(index)
+
+    def extend(self, sites):
+        """ Adds atoms to structure """
+        for s in sites:
+            self._sites.append(s)
+
+    @classmethod
+    def from_gcell(cls, gcell):
+        return cls(gcell.lattice, gcell.positions, gcell.numbers)
+
+    def to_gcell(self):
+        return GeneralCell(self._lattice, self.positions, self.numbers)
+
+    def get_points_incell_insphere(self, center, r, ele=None):
+        """ find all sites in a circle of radius r
+            not in supercell, but in cell.
+            Return: a list of sites; [sites]
+        """
+        dict_sites = {}
+
+        for ind, site in enumerate(self._sites):
+            if ele is None:
+                condition = self.in_euclidean_discance(site.position, center, r)
+            else:
+                condition = self.in_euclidean_discance(site.position, center, r) and (site.element == ele)
+
+            if condition:
+                dict_sites[ind] = site
+        return dict_sites
+
+    def get_cartesian_from_frac(self, frac_coor):
+        cart_coor = np.matmul(frac_coor, self.lattice)
+        return cart_coor
+
+    def get_frac_from_cart(self, cart_coor):
+        frac_coor = np.matmul(cart_coor, np.linalg.inv(self.lattice))
+        return frac_coor
+
+    def perturb(self, distance=0.2):
+        """
+        Performs a random perturbation of the sites in a structure to break
+        symmetries.
+
+        Args:
+            distance (float): Distance in angstroms by which to perturb each
+                site.
+        """
+
+        def get_rand_vec():
+            # deals with zero vectors.
+            vector = np.random.randn(3)
+            vnorm = np.linalg.norm(vector)
+            return vector / vnorm * distance if vnorm != 0 else get_rand_vec()
+
+        for i in range(len(self._sites)):
+            self.translate_sites(i, get_rand_vec())
+
+    def translate_sites(self, idx, vector):
+        target_site = self._sites[idx]
+        o_frac_coor = np.array(target_site.position)
+        new_cart = self.get_cartesian_from_frac(o_frac_coor) + vector
+        new_frac = self.get_frac_from_cart(new_cart)
+        target_site.position = tuple(new_frac)
+
+    def in_euclidean_discance(self, pos, center, r):
+        """
+            A helper function to return true or false.
+            Decided whether a position(frac) inside a
+            distance restriction.
+        """
+        from scipy.spatial.distance import euclidean as euclidean_discance
+        from itertools import product
+
+        cart_cent = self.get_cartesian_from_frac(center)
+        trans = np.array([i for i in product([-1, 0, 1], repeat=3)])
+        allpos = pos + trans
+        for p in allpos:
+            cart_p = self.get_cartesian_from_frac(p)
+            if euclidean_discance(cart_p, cart_cent) < r:
+                return True
+                break
+
+        return False
+
+    def append_site(self, site):
+        self.append(site)
+        return self
+
+    def remove_site(self, index=-1):
+        self.pop(index)
+        return self
+
+    def remove_sites(self, indexs):
+        """ NOT NEED TO IMPLEMT
+            CAN BE IMPLEMTED BY [i for i in lst if not ... in ...]
+            OR AS FOLLOWING
+        """
+        index_set = set(indexs)
+        self._sites = [s for i, s in enumerate(self._sites) if i not in index_set]
+        return self
+
+    def append_sites(self, sites):
+        self.extend(sites)
+        return self
+
+    def copy(self):
+        """ A deepcopy of self been returned"""
+        from copy import deepcopy
+        return deepcopy(self)

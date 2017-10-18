@@ -24,6 +24,12 @@ def exec_from_cmdline():
 ## And then call the modules in directory
 ## ababe/cmdline/command
 #######################################################################
+
+"""
+supcell is moving to runatilib
+this function will be remove in
+the future
+"""
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)
@@ -59,9 +65,88 @@ def suplat(input, comment, volumn, zoom, ld, outmode):
 @click.option('--number-speckle', '-n', 'nspeckle', type=int, default=None)
 @click.option('--zoom', type=float, default=None)
 @click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
-def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs):
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode):
     infile = click.format_filename(input)
     y = yaml.load(open(infile, "r"))
 
-    appoccupymaker = occupymaker.App(y, comment, element, speckle, nspeckle, zoom, trs)
+    appoccupymaker = occupymaker.App(y, comment, element, speckle,
+                                     nspeckle, zoom, trs, refined, outmode)
     appoccupymaker.run()
+
+"""
+atclear is moving to runatilib
+this function will be remove in
+the future
+"""
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--center-element', '-c', 'cenele', required=True)
+@click.option('--radius', '-r', type=float, default=0)
+@click.option('--element-remove', '-e', 'ele', required=True)
+@click.option('--refined/--no-refined', default=True)
+def atclear(input, cenele, radius, ele, refined):
+    infile = click.format_filename(input)
+    filename = infile
+    y = yaml.load(open(infile, "r"))
+
+    appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
+    appatomclarifier.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', default=None)
+@click.option('--number-speckle', '-n', 'nspeckle', type=int, default=None)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+@click.option('--move-supercell/--no-move-supercell', '-S/-N', 'mpr', default=True,
+              help='Whether move no primitive structures')
+def ocubiter(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode, mpr):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupybiter = occupybiter.App(y, comment, element, speckle,
+                                     nspeckle, zoom, trs, refined, outmode, mpr)
+    appoccupybiter.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', nargs=2)
+@click.option('--number-speckle', '-n', 'nspeckle', type=int, nargs=2)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+@click.option('--move-supercell/--no-move-supercell', '-S/-N', 'mpr', default=True,
+              help='Whether move no primitive structures')
+def ocutenter(input, comment, element, speckle, nspeckle, zoom, trs, refined, outmode, mpr):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupytenter = occupytenter.App(y, comment, element, speckle,
+                                       nspeckle, zoom, trs, refined, outmode, mpr)
+    appoccupytenter.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--element', default=None)
+@click.option('--speckle', nargs=2)
+@click.option('--zoom', type=float, default=None)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+def ocumakert(input, comment, element, speckle, zoom, trs, refined, outmode):
+    infile=click.format_filename(input)
+    y = yaml.load(open(infile, "r"))
+
+    appoccupymakert = occupymakert.App(y, comment, element, speckle,
+                                       zoom, trs, refined, outmode)
+    appoccupymakert.run()

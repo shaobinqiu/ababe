@@ -12,7 +12,8 @@ import os
 
 class App(AppModel):
 
-    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs, refined, outmode):
+    def __init__(self, settings, comment, element, speckle, nspeckle, zoom, trs,
+                 refined, outmode, mpr):
         # read comment & zoom from setting file first
         # if not exist, read from cmd args, then default
         if zoom is None:
@@ -43,19 +44,11 @@ class App(AppModel):
             tgt_ele = Specie(element).Z
         tgt_ele_index = np.where(num == tgt_ele)[0]
 
-        if speckle is None:
-            self.speckle = Specie('G')
-        else:
-            self.speckle = Specie(speckle)
-
+        self.s1, self.s2 = speckle
+        self.n1, self.n2 = nspeckle
         # self.ele for function all-speckle-gen-of-ele in run
         self.ele = Specie.from_num(tgt_ele)
 
-        if nspeckle is None:
-            # If not given speckle to number most - 1
-            self.nmax = tgt_ele_index.size - 1
-        else:
-            self.nmax = nspeckle
         # if there no restriction given then no restriction
         if trs != ():
             self.tr = trs[0]
@@ -64,6 +57,9 @@ class App(AppModel):
 
         self.refined = refined
         self.outmode = outmode
+        self.mpr = mpr
+
+        self.n0 = tgt_ele_index.size - self.n1 - self.n2
 
     def run(self):
         # Create directory contain POSCARs
@@ -84,7 +80,8 @@ class App(AppModel):
             os.makedirs(poscars_dir)
 
         ogg = OccupyGenerator(self.cell)
-        gg = ogg.all_speckle_gen_of_ele(self.nmax, self.ele, self.speckle)
+        g = ogg.gen_nodup_trinary_alloy(Specie(self.s1), self.n1,
+                                        Specie(self.s2), self.n2)
 
         if self.tr is not None:
             tr = (Specie(self.tr[0]), self.tr[1])
@@ -93,26 +90,30 @@ class App(AppModel):
         # For diff outmode
         if self.outmode == 'vasp':
             Output = VaspPOSCAR
-            prefix = 'POSCAR_S{:}_'
+            prefix = 'POSCAR_A{:}B{:}C{:}_'
             suffix = '.vasp'
         else:
             Output = YamlOutput
-            prefix = 'STRUCTURE_S{:}_'
+            prefix = 'STRUCTURE_A{:}B{:}C{:}_'
             suffix = '.yaml'
 
-        for i, outer_gen in enumerate(gg):
-            # print("Processing: {0:3}s substitue {1:2d}...".format(speckle, i+1))
-            for n_count, c in enumerate(outer_gen):
+        for n_count, c in enumerate(g):
+            if self.mpr:
                 if self.tr is not None:
                     condition = c.is_primitive() and applied_restriction.is_satisfied(c)
                 else:
                     condition = c.is_primitive()
+            else:
+                if self.tr is not None:
+                    condition = applied_restriction.is_satisfied(c)
+                else:
+                    condition = True
 
-                if condition:
-                    if self.refined:
-                        c = c.get_refined_pcell()
-                    poscar = Output(c, 1)
-                    tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
-                                                     prefix=prefix.format(i+1),
-                                                     suffix=suffix, delete=False)
-                    poscar.write(tf.name)
+            if condition:
+                if self.refined:
+                    c = c.get_refined_pcell()
+                poscar = Output(c, 1)
+                tf = tempfile.NamedTemporaryFile(mode='w+b', dir=poscars_dir,
+                                                 prefix=prefix.format(self.n0, self.n1, self.n2),
+                                                 suffix=suffix, delete=False)
+                poscar.write(tf.name)
