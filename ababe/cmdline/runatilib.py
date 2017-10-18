@@ -21,6 +21,20 @@ def exec_from_cmdline():
 
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
+@click.option('--center-element', '-c', 'cenele', required=True)
+@click.option('--radius', '-r', type=float, default=0)
+@click.option('--element-remove', '-e', 'ele', required=True)
+@click.option('--refined/--no-refined', default=True)
+def atclear(input, cenele, radius, ele, refined):
+    infile = click.format_filename(input)
+    filename = infile
+    y = yaml.load(open(infile, "r"))
+
+    appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
+    appatomclarifier.run()
+    
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)
 @click.option('--zoom', type=float, default=None)
 @click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')

@@ -25,9 +25,11 @@ def exec_from_cmdline():
 ## ababe/cmdline/command
 #######################################################################
 
-## supcell is moving to runatilib
-## this function will be remove in
-## the future
+"""
+supcell is moving to runatilib
+this function will be remove in
+the future
+"""
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)
@@ -73,6 +75,11 @@ def ocumaker(input, comment, element, speckle, nspeckle, zoom, trs, refined, out
                                      nspeckle, zoom, trs, refined, outmode)
     appoccupymaker.run()
 
+"""
+atclear is moving to runatilib
+this function will be remove in
+the future
+"""
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--center-element', '-c', 'cenele', required=True)

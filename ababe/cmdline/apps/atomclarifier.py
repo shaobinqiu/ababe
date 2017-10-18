@@ -12,7 +12,10 @@ import numpy as np
 class App(AppModel):
 
     def __init__(self, settings, filename, cenele, radius, ele, refined):
-        zoom = settings['zoom']
+        try:
+            zoom = settings['zoom']
+        except:
+            zoom = 1
         latt = np.array(settings['lattice'])*zoom
         pos = np.array(settings['positions'])
         numbers = np.array(settings['numbers'])
@@ -34,7 +37,7 @@ class App(AppModel):
             gcell = gcell.get_refined_pcell()
 
         out = VaspPOSCAR(gcell, 1)
-        tf = tempfile.NamedTemporaryFile(mode='w+b', dir=working_path, prefix='STRU_',
+        tf = tempfile.NamedTemporaryFile(mode='w+b', dir=working_path, prefix='POSCAR_',
                                          suffix='.MOD.vasp', delete=False)
         print("PROCESSING: {:}".format(self.fname))
         out.write(tf.name)
