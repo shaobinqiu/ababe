@@ -336,6 +336,57 @@ class testModifiedCell(unittest.TestCase):
         new_gcell = modcell.to_gcell()
         self.assertTrue(np.allclose(new_gcell.positions, gcell.positions))
 
+    def test_get_cartesian_from_frac(self):
+        expect_coor = np.array([[  0.,   0.,   0.],
+                                 [  2.,   0.,   2.],
+                                 [  4.,   0.,   4.],
+                                 [  6.,   0.,   6.],
+                                 [  8.,   0.,   8.],
+                                 [ 10.,   0.,  10.],
+                                 [ 12.,   0.,  12.],
+                                 [ 14.,   0.,  14.],
+                                 [  5.,   1.,   5.],
+                                 [  7.,   1.,   7.],
+                                 [  9.,   1.,   9.],
+                                 [ 11.,   1.,  11.],
+                                 [ 13.,   1.,  13.],
+                                 [ 15.,   1.,  15.],
+                                 [  1.,   1.,   1.],
+                                 [  3.,   1.,   3.]])
+
+        cart_coor = self.full_initzb.get_cartesian_from_frac(self.pos)
+        self.assertTrue(np.allclose(cart_coor, expect_coor))
+
+    def test_get_frac_from_cart(self):
+        """
+        change a to b and then b to a
+        make sure that a equals a
+        """
+        expect_coor = self.pos
+        cart_coor = self.full_initzb.get_cartesian_from_frac(self.pos)
+        frac_coor = self.full_initzb.get_frac_from_cart(cart_coor)
+        self.assertTrue(np.allclose(frac_coor, expect_coor))
+
+    def test_translate_sites(self):
+        def get_rand_vec():
+            # deals with zero vectors.
+            vector = np.random.randn(3)
+            vnorm = np.linalg.norm(vector)
+            return vector / vnorm * 0.2 if vnorm != 0 else get_rand_vec()
+
+        stru = self.full_initzb.copy()
+        stru.translate_sites(0, get_rand_vec())
+        gcell = stru.to_gcell()
+        # This is a runabal passive test TODO!!!!
+        self.assertFalse(np.array_equal(gcell.positions, self.pos))
+
+    def test_perturb(self):
+        stru = self.full_initzb.copy()
+        stru.perturb(0.1)
+        gcell = stru.to_gcell()
+        # This is a runabal passive test TODO!!!!
+        self.assertFalse(np.array_equal(gcell.positions, self.pos))
+
     def test_get_points_in_sphere(self):
         latt = np.array([[4.898979, 0.000000, 0.000000],
                          [2.449490,  4.242641, 0.000000],

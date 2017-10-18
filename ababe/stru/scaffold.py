@@ -552,6 +552,36 @@ class ModifiedCell(MutableSequence):
         cart_coor = np.matmul(frac_coor, self.lattice)
         return cart_coor
 
+    def get_frac_from_cart(self, cart_coor):
+        frac_coor = np.matmul(cart_coor, np.linalg.inv(self.lattice))
+        return frac_coor
+
+    def perturb(self, distance=0.2):
+        """
+        Performs a random perturbation of the sites in a structure to break
+        symmetries.
+
+        Args:
+            distance (float): Distance in angstroms by which to perturb each
+                site.
+        """
+
+        def get_rand_vec():
+            # deals with zero vectors.
+            vector = np.random.randn(3)
+            vnorm = np.linalg.norm(vector)
+            return vector / vnorm * distance if vnorm != 0 else get_rand_vec()
+
+        for i in range(len(self._sites)):
+            self.translate_sites(i, get_rand_vec())
+
+    def translate_sites(self, idx, vector):
+        target_site = self._sites[idx]
+        o_frac_coor = np.array(target_site.position)
+        new_cart = self.get_cartesian_from_frac(o_frac_coor) + vector
+        new_frac = self.get_frac_from_cart(new_cart)
+        target_site.position = tuple(new_frac)
+
     def in_euclidean_discance(self, pos, center, r):
         """
             A helper function to return true or false.
