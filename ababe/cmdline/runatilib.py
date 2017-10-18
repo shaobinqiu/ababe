@@ -32,7 +32,18 @@ def atclear(input, cenele, radius, ele, refined):
 
     appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
     appatomclarifier.run()
-    
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--radius', '-r', type=float, default=0)
+def perturb(input, radius):
+    infile = click.format_filename(input)
+    filename = infile
+    y = yaml.load(open(infile, "r"))
+
+    appperturb = atomperturb.App(y, filename, radius)
+    appperturb.run()
+
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
 @click.option('--scale-matrix', prompt=True)

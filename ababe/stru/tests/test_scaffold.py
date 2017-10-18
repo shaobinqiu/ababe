@@ -387,6 +387,12 @@ class testModifiedCell(unittest.TestCase):
         # This is a runabal passive test TODO!!!!
         self.assertFalse(np.array_equal(gcell.positions, self.pos))
 
+        stru = self.full_initzb.copy()
+        stru.perturb(0.0)
+        gcell = stru.to_gcell()
+        # This is a runabal passive test TODO!!!!
+        self.assertTrue(np.array_equal(gcell.positions, self.pos))
+
     def test_get_points_in_sphere(self):
         latt = np.array([[4.898979, 0.000000, 0.000000],
                          [2.449490,  4.242641, 0.000000],
