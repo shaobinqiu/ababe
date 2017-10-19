@@ -26,7 +26,7 @@ lattice:
   - [ 0.5, 0.5,  0.0]
 positions:
   - [0., 0., 0.]
-  - [0.25, 0.25, 0.25]
+  - [0.25666666, 0.25, 0.25]
 numbers: [30, 16]
 zoom: 4
 """
@@ -35,7 +35,7 @@ zoom: 4
                                 [2., 0., 2.],
                                 [2., 2., 0.]])
         expect_positions = np.array([[0., 0., 0.],
-                                     [0.25, 0.25, 0.25]])
+                                     [0.2567, 0.25, 0.25]])
         expect_numbers = np.array([30, 16])
 
         self.assertTrue(np.allclose(latt, expect_latt))
@@ -62,8 +62,8 @@ zoom: 4
 class TestYamlOutput(unittest.TestCase):
 
     def setUp(self):
-        latt = np.array([[0., 0.5, 0.5],
-                         [0.5, 0., 0.5],
+        latt = np.array([[0., 0.5, 0.53333333333],
+                         [0.5, 0., 0.56666666667],
                          [0.5, 0.5, 0.]])
         positions = np.array([[0., 0., 0.],
                               [0.25, 0.25, 0.25]])
@@ -74,8 +74,8 @@ class TestYamlOutput(unittest.TestCase):
     def test_get_string(self):
         expected_str = '''comment: S1Zn1
 lattice:
-- [0.0, 0.5, 0.5]
-- [0.5, 0.0, 0.5]
+- [0.0, 0.5, 0.533333]
+- [0.5, 0.0, 0.566667]
 - [0.5, 0.5, 0.0]
 numbers: [30, 16]
 positions:
@@ -86,12 +86,6 @@ zoom: 3
         self.assertEqual(str(self.yaml_out), expected_str)
 
     def test_write_file(self):
-        """.
-        The function is tested by save structure
-        to a POSCAR file, and then read from it.
-        Compare the parameters read from to the
-        origin input parameter. Using almostEqual
-        """
         tmp_file = os.path.join(testdata_dir, "testing.yaml")
         self.yaml_out.write_file(tmp_file)
 

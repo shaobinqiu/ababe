@@ -27,15 +27,16 @@ class YamlInput(object):
 
         self.latt, self.pos, self.numbers = self.from_string(content)
 
-    def from_string(self, content):
+    @staticmethod
+    def from_string(content):
         """
         The content is a string read from file and convert to
         this function. To get the lattice positions and numbers.
         """
         yaml = YAML(typ='safe')
         dicty = yaml.load(content)
-        latt = np.array(dicty['lattice']) * dicty['zoom']
-        pos = np.array(dicty['positions'])
+        latt = np.around(np.array(dicty['lattice']) * dicty['zoom'], decimals=4)
+        pos = np.around(np.array(dicty['positions']), decimals=4)
         numbers = np.array(dicty['numbers'])
 
         return latt, pos, numbers
@@ -46,8 +47,8 @@ class YamlInput(object):
 class YamlOutput(object):
 
     def __init__(self, gcell, comment=None, zoom=1):
-        self.lattice = gcell.lattice
-        self.positions = gcell.positions
+        self.lattice = np.around(gcell.lattice, decimals=6)
+        self.positions = np.around(gcell.positions, decimals=6)
         self.numbers = gcell.numbers
 
         atoms_name_list = list(map(lambda x: Specie.to_name(x),

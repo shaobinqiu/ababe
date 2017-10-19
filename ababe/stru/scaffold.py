@@ -343,6 +343,8 @@ class GeneralCell(object):
             pos_new = np.transpose(np.matmul(r, self._positions.T)) + t
             perm = self._get_new_id_seq(pos_new, numbers)
             sym_perm.append(perm)
+
+        print(np.array(sym_perm))
         return sym_perm
 
     def get_wyckoffs(self):
