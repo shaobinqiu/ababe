@@ -19,14 +19,33 @@ class VaspInput(object):
     @staticmethod
     def from_string(content):
         # move empty line
-        lines = [l for l in content.rstrip.split('\n') if l.rstrip()]
+        lines = [l for l in content.split('\n') if l.rstrip()]
 
         comment = lines[0]
         zoom = float(lines[1])
         lattice = np.around(np.array([[float(i) for i in line.split()]
                                                      for line in lines[2:5]]),
                                      decimals=4)
+        if zoom < 0:
+            # In vasp, a negative scale factor is treated as a volume. We need
+            # to translate this to a proper lattice vector scaling.
+            vol = abs(np.linalg.det(lattice))
+            lattice *= (-zoom / vol) ** (1 / 3)
+        else:
+            lattice *= zoom
 
+        nsymbols = [Specie(s).Z for s in lines[5].split()]
+        natoms = [int(i) for i in lines[6].split()]
+        numbers = []
+        for i, s in enumerate(natoms):
+            numbers += s * [nsymbols[i]]
+        numbers = np.array(numbers)
+
+        positions = np.around(np.array([[float(i) for i in line.split()[0:3]]
+                                                     for line in lines[8:]]),
+                              decimals=4)
+
+        return lattice, positions, numbers
 
     def get_cell(self):
         return GeneralCell(self.latt, self.pos, self.numbers)
@@ -34,16 +53,13 @@ class VaspInput(object):
 
 class VaspOutput(object):
 
-    def __init__(self, gcell, comment=None, zoom=1):
+    def __init__(self, gcell):
         self.lattice = gcell.lattice
         self.positions = gcell.positions
         self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
                                         list(self.numbers)))
-
-        self.zoom = zoom
-        self.comment = comment
 
     def get_string(self, direct=True):
         """
@@ -61,7 +77,7 @@ class VaspOutput(object):
         comment = ''.join(['{}{}'.format(k, v)
                            for k, v in ordered_atoms.items()])
 
-        lines = [comment, str(self.zoom)]
+        lines = [comment, str(1)]
         # lattice string
         for c in self.lattice:
             line = " ".join("{:10.6f}".format(p) for p in c)

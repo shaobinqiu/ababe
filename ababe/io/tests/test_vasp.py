@@ -60,19 +60,20 @@ direct
         expect_latt = np.array([[2.8284, 0.0000, 0.0000],
                                 [0.0000, 2.8284, 0.0000],
                                 [0.0000, 0.0000, 12.0000]])
-        expect_positions = np.array([[0.0000,   0.5000,   0.2500],
-                                     [0.0000,   0.5000,   0.5833],
-                                     [0.0000,   0.5000,   0.9167],
-                                     [0.5000,   0.0000,   0.0833],
-                                     [0.5000,   0.0000,   0.4167],
-                                     [0.5000,   0.0000,   0.7500],
-                                     [0.0000,   0.0000,   0.6667],
-                                     [0.5000,   0.5000,   0.8333]])
-        expect_numbers = [16, 16, 16, 16, 16, 16, 30, 30]
+        expect_positions = np.array([[ 0.    ,  0.    ,  0.6667],
+                                     [ 0.    ,  0.5   ,  0.25  ],
+                                     [ 0.    ,  0.5   ,  0.5833],
+                                     [ 0.    ,  0.5   ,  0.9167],
+                                     [ 0.5   ,  0.    ,  0.0833],
+                                     [ 0.5   ,  0.    ,  0.4167],
+                                     [ 0.5   ,  0.    ,  0.75  ],
+                                     [ 0.5   ,  0.5   ,  0.8333]])
 
-        self.assertTrue(np.allclose(latt, expect_latt))
-        self.assertTrue(np.allclose(pos, expect_positions))
-        self.assertTrue(np.allclose(numbers, expect_numbers))
+        expect_numbers = [30, 16, 16, 16, 16, 16, 16, 30]
+
+        self.assertTrue(np.allclose(gcell.lattice, expect_latt))
+        self.assertTrue(np.allclose(gcell.positions, expect_positions))
+        self.assertTrue(np.allclose(gcell.numbers, expect_numbers))
 
 
 class TestVaspOutput(unittest.TestCase):
@@ -85,11 +86,11 @@ class TestVaspOutput(unittest.TestCase):
                               [0.25, 0.25, 0.25]])
         numbers = np.array([30, 16])
         cell = GeneralCell(latt, positions, numbers)
-        self.vasp_out = VaspOutput(cell, comment=None, zoom=3)
+        self.vasp_out = VaspOutput(cell)
 
     def test_get_string(self):
         expected_str = '''S1Zn1
-3
+1
   0.000000   0.500000   0.533333
   0.500000   0.000000   0.566667
   0.500000   0.500000   0.000000
@@ -99,7 +100,6 @@ direct
   0.250000   0.250000   0.250000 S
   0.000000   0.000000   0.000000 Zn
 '''
-        import pdb; pdb.set_trace()
         self.assertEqual(str(self.vasp_out), expected_str)
 
     def test_write_file(self):

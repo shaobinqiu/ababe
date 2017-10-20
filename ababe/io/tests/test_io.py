@@ -7,164 +7,121 @@ import unittest
 import numpy as np
 from math import sqrt
 from ababe.stru.scaffold import CStru
-from ababe.stru.io import VaspPOSCAR, YamlOutput
 from ababe.stru.scaffold import GeneralCell
+from ababe.io.io import GeneralIO
+from ababe.io.vasp import VaspOutput
+from ababe.io.yaml import YamlOutput
 
+testdata_dir = os.path.join(os.path.dirname(__file__), "test_files")
 
-class testYamlOutput(unittest.TestCase):
+class TestGeneralIO(unittest.TestCase):
 
     def setUp(self):
-        a_latt = np.array([[0.5, 0.5, -0.5],
-                           [-0.5, 0.5, 0.5],
-                           [0.5, -0.5, 0.5]])
-        a_pos = np.array([[0, 0, 0]])
-        a_num = np.array([16])
-        a_cell = GeneralCell(a_latt, a_pos, a_num)
-        self.a_yaml = YamlOutput(a_cell, zoom=3)
+        latt = np.array([[0., 0.5, 0.53333333333], [0.5, 0., 0.56666666667],
+                        [0.5, 0.5, 0.]])
+        pos = np.array([[0., 0., 0.],
+                             [0.25, 0.25, 0.25]])
+        numbers = np.array([30, 16])
+        gcell = GeneralCell(latt, pos, numbers)
+        self.vasp_out = VaspOutput(gcell)
+        self.yaml_out = YamlOutput(gcell)
+        self.io_s = GeneralIO(gcell)
 
-    def test_get_string(self):
+    def test_vasp_from_file(self):
+        filename = os.path.join(testdata_dir, "POSCAR_")
+        gcell = GeneralIO.from_file(filename)
+        expect_latt = np.array([[2.8284, 0.0000, 0.0000],
+                                [0.0000, 2.8284, 0.0000],
+                                [0.0000, 0.0000, 12.0000]])
+        expect_positions = np.array([[ 0.    ,  0.    ,  0.6667],
+                                     [ 0.    ,  0.5   ,  0.25  ],
+                                     [ 0.    ,  0.5   ,  0.5833],
+                                     [ 0.    ,  0.5   ,  0.9167],
+                                     [ 0.5   ,  0.    ,  0.0833],
+                                     [ 0.5   ,  0.    ,  0.4167],
+                                     [ 0.5   ,  0.    ,  0.75  ],
+                                     [ 0.5   ,  0.5   ,  0.8333]])
 
-        expected_str = '''comment: S1
-lattice:
-- [0.5, 0.5, -0.5]
-- [-0.5, 0.5, 0.5]
-- [0.5, -0.5, 0.5]
-numbers: [16]
-positions:
-- [0, 0, 0]
-zoom: 3
-'''
-        self.assertEqual(str(self.a_yaml), expected_str)
+        expect_numbers = [30, 16, 16, 16, 16, 16, 16, 30]
 
-    def test_write_file(self):
-        """.
-        The function is tested by save structure
-        to a POSCAR file, and then read from it.
-        Compare the parameters read from to the
-        origin input parameter. Using almostEqual
-        """
-        tmp_file = "YAML.testing"
-        self.a_yaml.write(tmp_file)
+        self.assertTrue(np.allclose(gcell.lattice, expect_latt))
+        self.assertTrue(np.allclose(gcell.positions, expect_positions))
+        self.assertTrue(np.allclose(gcell.numbers, expect_numbers))
+
+    def test_yaml_from_file(self):
+        filename = os.path.join(testdata_dir, "zns.yaml")
+        gcell = GeneralIO.from_file(filename)
+
+        expect_latt = np.array([[0., 2., 2.],
+                                [2., 0., 2.],
+                                [2., 2., 0.]])
+        expect_positions = np.array([[0., 0., 0.],
+                                     [0.25, 0.25, 0.25]])
+        expect_numbers = np.array([30, 16])
+        self.assertTrue(np.allclose(gcell.lattice, expect_latt))
+        self.assertTrue(np.allclose(gcell.positions, expect_positions))
+        self.assertTrue(np.allclose(gcell.numbers, expect_numbers))
+
+    def test_vasp_write_file(self):
+        ##################################################
+        # vasp POSCAR write test
+        ##################################################
+        tmp_file = os.path.join(testdata_dir, "testing.vasp")
+        self.io_s.write_file(tmp_file)
 
         with open(tmp_file, 'r') as testing_file:
             data = testing_file.read()
 
-        self.assertEqual(data, str(self.a_yaml))
+        self.assertEqual(data, str(self.vasp_out))
         os.remove(tmp_file)
 
-
-class testVaspPOSCAR(unittest.TestCase):
-
-    def test_get_string(self):
-        boron_arr = np.array([[[5, 0, 5, 5, 5, 5],
-                               [5, 5, 5, 5, 5, 5],
-                               [5, 5, 0, 5, 5, 5]]])
-        latt = [[0, 0, 20],
-                [1, 0, 0],
-                [0.5, sqrt(3)/2, 0]]
-        boron_stru = CStru.from_array(latt, boron_arr)
-        poscar = VaspPOSCAR(boron_stru.get_gcell(), zoom=4)
-
-        expected_str = '''B16
-4
-  0.000000   0.000000  20.000000
-  3.000000   0.000000   0.000000
-  3.000000   5.196152   0.000000
-B
-16
-direct
-  0.000000   0.000000   0.000000 B
-  0.000000   0.000000   0.333333 B
-  0.000000   0.000000   0.500000 B
-  0.000000   0.000000   0.666667 B
-  0.000000   0.000000   0.833333 B
-  0.000000   0.333333   0.000000 B
-  0.000000   0.333333   0.166667 B
-  0.000000   0.333333   0.333333 B
-  0.000000   0.333333   0.500000 B
-  0.000000   0.333333   0.666667 B
-  0.000000   0.333333   0.833333 B
-  0.000000   0.666667   0.000000 B
-  0.000000   0.666667   0.166667 B
-  0.000000   0.666667   0.500000 B
-  0.000000   0.666667   0.666667 B
-  0.000000   0.666667   0.833333 B
-'''
-        self.assertEqual(str(poscar), expected_str)
-
-        bcu_arr = np.array([[[5, 29, 5, 5, 5, 5],
-                             [5, 5, 5, 5, 5, 5],
-                             [5, 5, 29, 5, 5, 5]]])
-        latt = [[0, 0, 20],
-                [1, 0, 0],
-                [0.5, sqrt(3)/2, 0]]
-        bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru.get_gcell(), zoom=4)
-
-        expected_str_bcu = '''B16Cu2
-4
-  0.000000   0.000000  20.000000
-  3.000000   0.000000   0.000000
-  3.000000   5.196152   0.000000
-B Cu
-16 2
-direct
-  0.000000   0.000000   0.000000 B
-  0.000000   0.000000   0.333333 B
-  0.000000   0.000000   0.500000 B
-  0.000000   0.000000   0.666667 B
-  0.000000   0.000000   0.833333 B
-  0.000000   0.333333   0.000000 B
-  0.000000   0.333333   0.166667 B
-  0.000000   0.333333   0.333333 B
-  0.000000   0.333333   0.500000 B
-  0.000000   0.333333   0.666667 B
-  0.000000   0.333333   0.833333 B
-  0.000000   0.666667   0.000000 B
-  0.000000   0.666667   0.166667 B
-  0.000000   0.666667   0.500000 B
-  0.000000   0.666667   0.666667 B
-  0.000000   0.666667   0.833333 B
-  0.000000   0.000000   0.166667 Cu
-  0.000000   0.666667   0.333333 Cu
-'''
-        self.assertEqual(str(poscar_bcu), expected_str_bcu)
-
-    def test_write_file(self):
-        """.
-        The function is tested by save structure
-        to a POSCAR file, and then read from it.
-        Compare the parameters read from to the
-        origin input parameter. Using almostEqual
-        """
-        bcu_arr = np.array([[[5, 29, 5, 5, 5, 5],
-                             [5, 5, 5, 5, 5, 5],
-                             [5, 5, 29, 5, 5, 5]]])
-        latt = [[0, 0, 20],
-                [1, 0, 0],
-                [0.5, sqrt(3)/2, 0]]
-        bcu_stru = CStru.from_array(latt, bcu_arr)
-        poscar_bcu = VaspPOSCAR(bcu_stru.get_gcell(), zoom=4)
-
-        tmp_file = "POSCAR.testing"
-        poscar_bcu.write(tmp_file)
+        #################
+        tmp_file = os.path.join(testdata_dir, "POSCAR______")
+        self.io_s.write_file(tmp_file)
 
         with open(tmp_file, 'r') as testing_file:
             data = testing_file.read()
 
-        self.assertEqual(data, str(poscar_bcu))
+        self.assertEqual(data, str(self.vasp_out))
         os.remove(tmp_file)
 
-class TestGeneralCellInput(unittest.TestCase):
+        ###################
+        tmp_file = os.path.join(testdata_dir, "i_have_noname")
+        self.io_s.write_file(tmp_file, fmt='vasp')
 
-    def setUp(self):
+        with open(tmp_file, 'r') as testing_file:
+            data = testing_file.read()
+
+        self.assertEqual(data, str(self.vasp_out))
+        os.remove(tmp_file)
+
+    def test_yaml_write_file(self):
+        ##################################################
+        # yaml write test
+        ##################################################
+        tmp_file = os.path.join(testdata_dir, "testing.yaml")
+        self.io_s.write_file(tmp_file)
+
+        with open(tmp_file, 'r') as testing_file:
+            data = testing_file.read()
+
+        self.assertEqual(data, str(self.yaml_out))
+        os.remove(tmp_file)
+
+        ########################3
+        tmp_file = os.path.join(testdata_dir, "testing")
+        self.io_s.write_file(tmp_file, fmt='yaml')
+
+        with open(tmp_file, 'r') as testing_file:
+            data = testing_file.read()
+
+        self.assertEqual(data, str(self.yaml_out))
+        os.remove(tmp_file)
+
+    def test_noname_write_file(self):
+        self.io_s.write_file(fmt="vasp")
         pass
 
-    def test_init(self):
-        pass
-
-    def test_get_gcell(self):
-        pass
 
 if __name__ == "__main__":
     import nose2

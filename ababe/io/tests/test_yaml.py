@@ -69,7 +69,7 @@ class TestYamlOutput(unittest.TestCase):
                               [0.25, 0.25, 0.25]])
         numbers = np.array([30, 16])
         cell = GeneralCell(latt, positions, numbers)
-        self.yaml_out = YamlOutput(cell, comment=None, zoom=3)
+        self.yaml_out = YamlOutput(cell)
 
     def test_get_string(self):
         expected_str = '''comment: S1Zn1
@@ -81,7 +81,7 @@ numbers: [30, 16]
 positions:
 - [0.0, 0.0, 0.0]
 - [0.25, 0.25, 0.25]
-zoom: 3
+zoom: 1
 '''
         self.assertEqual(str(self.yaml_out), expected_str)
 

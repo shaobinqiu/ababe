@@ -46,7 +46,7 @@ class YamlInput(object):
 
 class YamlOutput(object):
 
-    def __init__(self, gcell, comment=None, zoom=1):
+    def __init__(self, gcell):
         self.lattice = np.around(gcell.lattice, decimals=6)
         self.positions = np.around(gcell.positions, decimals=6)
         self.numbers = gcell.numbers
@@ -63,8 +63,6 @@ class YamlOutput(object):
         self.comment = ''.join(['{}{}'.format(k, v)
                                for k, v in ordered_atoms.items()])
 
-        self.zoom = zoom
-
     def get_string(self):
         """
         Returns:
@@ -74,7 +72,7 @@ class YamlOutput(object):
                   'lattice':    self.lattice.tolist(),
                   'positions':  self.positions.tolist(),
                   'numbers':    self.numbers.tolist(),
-                  'zoom':       self.zoom}
+                  'zoom':       1}
 
         yaml = MyYAML(typ='safe')
         return yaml.dump(output)

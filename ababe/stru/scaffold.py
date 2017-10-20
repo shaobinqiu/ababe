@@ -344,7 +344,6 @@ class GeneralCell(object):
             perm = self._get_new_id_seq(pos_new, numbers)
             sym_perm.append(perm)
 
-        print(np.array(sym_perm))
         return sym_perm
 
     def get_wyckoffs(self):
