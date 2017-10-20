@@ -4,24 +4,18 @@ from .model import AppModel
 from ababe.stru.scaffold import ModifiedCell
 from ababe.stru.clarifier import VerboseAtomRemoveClarifier
 from ababe.stru.element import Specie
-from ababe.stru.io import VaspPOSCAR
+from ababe.io.io import GeneralIO
 
 import os
 import numpy as np
 
 class App(AppModel):
 
-    def __init__(self, settings, filename, cenele, radius, ele, refined):
-        try:
-            zoom = settings['zoom']
-        except:
-            zoom = 1
-        latt = np.array(settings['lattice'])*zoom
-        pos = np.array(settings['positions'])
-        numbers = np.array(settings['numbers'])
-        self.mcell = ModifiedCell(latt, pos, numbers)
+    def __init__(self, infile, processname, cenele, radius, ele, refined):
+        gcell = GeneralIO.from_file(infile)
+        self.mcell = ModifiedCell.from_gcell(gcell)
 
-        self.fname = filename
+        self.pname = processname
 
         self.clarifier = VerboseAtomRemoveClarifier(Specie(cenele), radius, Specie(ele))
         self.refined = refined
@@ -36,8 +30,8 @@ class App(AppModel):
         if self.refined:
             gcell = gcell.get_refined_pcell()
 
-        out = VaspPOSCAR(gcell, 1)
-        tf = tempfile.NamedTemporaryFile(mode='w+b', dir=working_path, prefix='POSCAR_',
-                                         suffix='.MOD.vasp', delete=False)
-        print("PROCESSING: {:}".format(self.fname))
-        out.write(tf.name)
+        out = GeneralIO(gcell)
+        ofname = "{:}_ACLR.vasp".format(self.pname.split('.')[0])
+
+        print("PROCESSING: {:}".format(self.pname))
+        out.write_file(ofname)

@@ -27,10 +27,9 @@ def exec_from_cmdline():
 @click.option('--refined/--no-refined', default=True)
 def atclear(input, cenele, radius, ele, refined):
     infile = click.format_filename(input)
-    filename = infile
-    y = yaml.load(open(infile, "r"))
+    processname = infile
 
-    appatomclarifier = atomclarifier.App(y, filename, cenele, radius, ele, refined)
+    appatomclarifier = atomclarifier.App(infile, processname, cenele, radius, ele, refined)
     appatomclarifier.run()
 
 @exec_from_cmdline.command()
@@ -39,44 +38,49 @@ def atclear(input, cenele, radius, ele, refined):
 def perturb(input, radius):
     infile = click.format_filename(input)
     filename = infile
-    y = yaml.load(open(infile, "r"))
 
-    appperturb = atomperturb.App(y, filename, radius)
+    appperturb = atomperturb.App(infile, filename, radius)
     appperturb.run()
 
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
-@click.option('--scale-matrix', prompt=True)
-@click.option('--zoom', type=float, default=None)
-@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')
-def supcell(input, scale_matrix, zoom, outmode):
-    infile = click.format_filename(input)
-    y = yaml.load(open(infile, "r"))
+@click.option('--scale', '-s', nargs=3, type=int)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml', 'stdio']), default='stdio')
+def supcell(input, scale, outmode):
+    from ababe.io.io import GeneralIO
+    import numpy as np
 
-    l = ast.literal_eval(scale_matrix)
-    appsupercell = supercell.App(y, l, zoom, outmode)
-    appsupercell.run()
+    infile = click.format_filename(input)
+
+    gcell = GeneralIO.from_file(infile)
+
+    scale_matrix = np.diag(np.array(scale))
+    sc = gcell.supercell(scale_matrix)
+
+    out = GeneralIO(sc)
+
+    print("PROCESSING: {:}".format(infile))
+    if outmode == 'stdio':
+        out.write_file(fname=None, fmt='vasp')
+    else:
+        ofname = "{:}_PRIMC.{:}".format(infile.split('.')[0], outmode)
+        out.write_file(ofname)
 
 @exec_from_cmdline.command()
 @click.argument('input', type=click.Path(exists=True))
-@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='yaml')
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml', 'stdio']), default='stdio')
 def pcell(input, outmode):
+    from ababe.io.io import GeneralIO
     infile = click.format_filename(input)
-    settings = yaml.load(open(infile, "r"))
 
-    from ababe.stru.scaffold import GeneralCell
-    from ababe.stru.sogen import OccupyGenerator
-    from ababe.stru.io import VaspPOSCAR, YamlOutput
-    import numpy as np
+    gcell = GeneralIO.from_file(infile)
+    pcell = gcell.get_refined_pcell()
 
-    lat = np.array(settings['lattice'])
-    pos = np.array(settings['positions'])
-    num = np.array(settings['numbers'])
-    cell = GeneralCell(lat, pos, num)
-    pcell = cell.get_refined_pcell()
-    if outmode == 'yaml':
-        beprint = YamlOutput(pcell, 1)
-    elif outmode == 'vasp':
-        beprint = VaspPOSCAR(pcell, 1)
+    out = GeneralIO(pcell)
 
-    print(beprint)
+    print("PROCESSING: {:}".format(infile))
+    if outmode == 'stdio':
+        out.write_file(fname=None, fmt='vasp')
+    else:
+        ofname = "{:}_PRIMC.{:}".format(infile.split('.')[0], outmode)
+        out.write_file(ofname)
