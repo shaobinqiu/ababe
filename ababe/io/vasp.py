@@ -53,13 +53,16 @@ class VaspInput(object):
 
 class VaspOutput(object):
 
-    def __init__(self, gcell):
+    def __init__(self, gcell, comment=None, zoom=1):
         self.lattice = gcell.lattice
         self.positions = gcell.positions
         self.numbers = gcell.numbers
 
         self.atoms_name_list = list(map(lambda x: Specie.to_name(x),
                                         list(self.numbers)))
+
+        self.zoom = zoom
+        self.comment = comment
 
     def get_string(self, direct=True):
         """
@@ -77,7 +80,7 @@ class VaspOutput(object):
         comment = ''.join(['{}{}'.format(k, v)
                            for k, v in ordered_atoms.items()])
 
-        lines = [comment, str(1)]
+        lines = [comment, str(self.zoom)]
         # lattice string
         for c in self.lattice:
             line = " ".join("{:10.6f}".format(p) for p in c)

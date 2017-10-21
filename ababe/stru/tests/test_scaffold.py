@@ -214,6 +214,8 @@ class testGeneralCell(unittest.TestCase):
 
     def test_property(self):
         np.testing.assert_equal(self.cell.numbers, np.array([6]*12))
+        self.assertEqual(self.cell.comment, 'C12')
+
 
     def test_get_symmetry(self):
         sym = self.cell.get_spacegroup()

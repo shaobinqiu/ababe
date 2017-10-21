@@ -11,11 +11,12 @@ import numpy as np
 
 class App(AppModel):
 
-    def __init__(self, infile, processname, cenele, radius, ele, refined):
+    def __init__(self, infile, cenele, radius, ele, refined):
         gcell = GeneralIO.from_file(infile)
-        self.mcell = ModifiedCell.from_gcell(gcell)
+        self.infile = infile
+        self.basefname = os.path.basename(infile)
 
-        self.pname = processname
+        self.mcell = ModifiedCell.from_gcell(gcell)
 
         self.clarifier = VerboseAtomRemoveClarifier(Specie(cenele), radius, Specie(ele))
         self.refined = refined
@@ -31,7 +32,7 @@ class App(AppModel):
             gcell = gcell.get_refined_pcell()
 
         out = GeneralIO(gcell)
-        ofname = "{:}_ACLR.vasp".format(self.pname.split('.')[0])
+        ofname = "{:}_ACLR.vasp".format(self.basefname.split('.')[0])
 
-        print("PROCESSING: {:}".format(self.pname))
+        print("PROCESSING: {:}".format(self.infile))
         out.write_file(ofname)

@@ -10,13 +10,13 @@ import numpy as np
 
 class App(AppModel):
 
-    def __init__(self, infile, processname, radius):
+    def __init__(self, infile, radius):
         gcell = GeneralIO.from_file(infile)
-        import pdb; pdb.set_trace()
+        self.infile = infile
+        self.basefname = os.path.basename(infile)
         self.mcell = ModifiedCell.from_gcell(gcell)
 
         self.radius = radius
-        self.pname = processname
 
     def run(self):
         import tempfile
@@ -26,7 +26,7 @@ class App(AppModel):
         gcell = self.mcell.to_gcell()
 
         out = GeneralIO(gcell)
-        ofname = "{:}_PURB.vasp".format(self.pname.split('.')[0])
+        ofname = "{:}_PURB.vasp".format(self.basefname.split('.')[0])
 
-        print("PROCESSING: {:}".format(self.pname))
+        print("PROCESSING: {:}".format(self.infile))
         out.write_file(ofname)

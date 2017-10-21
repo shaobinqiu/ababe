@@ -304,6 +304,21 @@ class GeneralCell(object):
         self._numbers = arr_numbers
 
     @property
+    def comment(self):
+        from collections import Counter, OrderedDict
+        atoms_name_list = list(map(lambda x: Specie.to_name(x),
+                                   list(self.numbers)))
+        d = Counter(atoms_name_list)
+        ordered_atoms = OrderedDict(sorted(d.items(),
+                                           key=lambda x: Specie(x[0]).Z))
+        if 'G' in ordered_atoms:
+            del ordered_atoms['G']
+
+        comment = ''.join(['{}{}'.format(k, v)
+                           for k, v in ordered_atoms.items()])
+        return comment
+
+    @property
     def num_count(self):
         """
         number of atoms
