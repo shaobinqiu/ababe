@@ -4,7 +4,8 @@
 import unittest
 
 import numpy as np
-import yaml
+import ruamel.yaml as yaml
+#import yaml
 from spglib import get_symmetry
 import ababe.stru.sogen as sogen
 from ababe.stru.sogen import OccupyGenerator
@@ -213,7 +214,7 @@ class testOccupyGeneratorCell(unittest.TestCase):
 class testAlgorithomSog(unittest.TestCase):
 
     # def setUp(self):
-    #     pos_01 = 
+    #     pos_01 =
 
     def test_get_id_seq(self):
         pos_0 = np.array([[ 0.        ,  0.        ,  0.        ],
@@ -339,11 +340,11 @@ class testAlgorithomSog(unittest.TestCase):
 
         gen_02 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 3)
         nodup_02 = [stru for stru in gen_02]
-        self.assertEqual(len(nodup_02), 4)  
+        self.assertEqual(len(nodup_02), 4)
 
         gen_03 = sogen.gen_nodup_cstru(m_tri, c, (1,5,5), t, 2)
         nodup_03 = [stru for stru in gen_03]
-        self.assertEqual(len(nodup_03), 4)  
+        self.assertEqual(len(nodup_03), 4)
 
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()

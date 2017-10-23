@@ -6,8 +6,6 @@ from collections import Counter, OrderedDict
 from operator import itemgetter
 from fnmatch import fnmatch
 
-# import ruamel.yaml as yaml
-import yaml
 
 class GeneralIO(object):
 
