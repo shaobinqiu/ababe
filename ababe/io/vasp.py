@@ -25,7 +25,7 @@ class VaspInput(object):
         zoom = float(lines[1])
         lattice = np.around(np.array([[float(i) for i in line.split()]
                                                      for line in lines[2:5]]),
-                                     decimals=4)
+                                     decimals=6)
         if zoom < 0:
             # In vasp, a negative scale factor is treated as a volume. We need
             # to translate this to a proper lattice vector scaling.
@@ -43,7 +43,7 @@ class VaspInput(object):
 
         positions = np.around(np.array([[float(i) for i in line.split()[0:3]]
                                                      for line in lines[8:]]),
-                              decimals=4)
+                              decimals=6)
 
         return lattice, positions, numbers
 

@@ -3,7 +3,6 @@
 import ababe
 import click
 import sys, ast
-import yaml
 from ababe.cmdline.apps import *
 
 def run():
