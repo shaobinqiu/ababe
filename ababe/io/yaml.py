@@ -35,8 +35,8 @@ class YamlInput(object):
         """
         yaml = YAML(typ='safe')
         dicty = yaml.load(content)
-        latt = np.around(np.array(dicty['lattice']) * dicty['zoom'], decimals=4)
-        pos = np.around(np.array(dicty['positions']), decimals=4)
+        latt = np.around(np.array(dicty['lattice']) * dicty['zoom'], decimals=6)
+        pos = np.around(np.array(dicty['positions']), decimals=6)
         numbers = np.array(dicty['numbers'])
 
         return latt, pos, numbers

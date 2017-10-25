@@ -35,7 +35,7 @@ zoom: 4
                                 [2., 0., 2.],
                                 [2., 2., 0.]])
         expect_positions = np.array([[0., 0., 0.],
-                                     [0.2567, 0.25, 0.25]])
+                                     [0.256667, 0.25, 0.25]])
         expect_numbers = np.array([30, 16])
 
         self.assertTrue(np.allclose(latt, expect_latt))
