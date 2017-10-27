@@ -143,6 +143,62 @@ class testOccupyGeneratorCell(unittest.TestCase):
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 4)
 
+    def test_gen_dup_exch(self):
+        lattice = np.array([[5.0, 0.0000000000, 0.0000000000],
+                            [2.5, 4.330127, 0.0000000000],
+                            [0.0000000000, 0.0000000000, 20]])
+        positions = np.array([[0.666667, 0.000000, 0.5281],
+                              [0.000000, 0.333333, 0.5281],
+                              [0.333333, 0.666667, 0.5281],
+                              [0.000000, 0.000000, 0.6115],
+                              [0.500000, 0.000000, 0.6115],
+                              [0.000000, 0.500000, 0.6115],
+                              [0.500000, 0.500000, 0.6115]])
+        numbers = np.array([12, 12, 12, 28, 28, 28, 28])
+        gcell = GeneralCell(lattice, positions, numbers)
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 1)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 12)
+
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 2)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 18)
+
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 3)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 4)
+
+    def test_gen_nodup_exch(self):
+        lattice = np.array([[5.0, 0.0000000000, 0.0000000000],
+                            [2.5, 4.330127, 0.0000000000],
+                            [0.0000000000, 0.0000000000, 20]])
+        positions = np.array([[0.666667, 0.000000, 0.5281],
+                              [0.000000, 0.333333, 0.5281],
+                              [0.333333, 0.666667, 0.5281],
+                              [0.000000, 0.000000, 0.6115],
+                              [0.500000, 0.000000, 0.6115],
+                              [0.000000, 0.500000, 0.6115],
+                              [0.500000, 0.500000, 0.6115]])
+        numbers = np.array([12, 12, 12, 28, 28, 28, 28])
+        gcell = GeneralCell(lattice, positions, numbers)
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 1)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 3)
+
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 2)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 4)
+
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 3)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 2)
+
     def test_gen_dup_trinary_alloy(self):
         # dup_gen = self.ocu_gen._gen_dup_trinary_alloy(Specie('Ti'), 4,
         #                                              Specie('Cu'), 3)

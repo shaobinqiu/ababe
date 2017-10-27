@@ -105,3 +105,20 @@ def ocumakert(input, comment, element, speckle, trs, refined, outmode):
     appoccupymakert = occupymakert.App(infile, comment, element, speckle,
                                        trs, refined, outmode)
     appoccupymakert.run()
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--comment', default=None)
+@click.option('--exch', nargs=2)
+@click.option('--number-exchange', '-n', 'nexch', type=int)
+@click.option('--dist-restrict', '-r', 'trs', nargs=2, type=click.Tuple([str, float]), multiple=True)
+@click.option('--refined/--no-refined', default=True)
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml']), default='vasp')
+@click.option('--move-supercell/--no-move-supercell', '-S/-N', 'mpr', default=False,
+              help='Whether move no primitive structures')
+def exch(input, comment, exch, nexch, trs, refined, outmode, mpr):
+    infile=click.format_filename(input)
+
+    appoccupyexch = occupyexch.App(infile, comment, exch, nexch,
+                                   trs, refined, outmode, mpr)
+    appoccupyexch.run()
