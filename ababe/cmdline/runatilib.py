@@ -85,3 +85,24 @@ def pcell(input, outmode):
         print("PROCESSING: {:}".format(infile))
         ofname = "{:}_PRIMC.{:}".format(basefname.split('.')[0], outmode)
         out.write_file(ofname)
+
+@exec_from_cmdline.command()
+@click.argument('input', type=click.Path(exists=True))
+@click.option('--outmode', type=click.Choice(['vasp', 'yaml', 'stdio']), default='stdio')
+def concell(input, outmode):
+    from ababe.io.io import GeneralIO
+    import os
+    infile = click.format_filename(input)
+    basefname = os.path.basename(infile)
+
+    gcell = GeneralIO.from_file(infile)
+    pcell = gcell.get_refined_cell()
+
+    out = GeneralIO(pcell)
+
+    if outmode == 'stdio':
+        out.write_file(fname=None, fmt='vasp')
+    else:
+        print("PROCESSING: {:}".format(infile))
+        ofname = "{:}_PRIMC.{:}".format(basefname.split('.')[0], outmode)
+        out.write_file(ofname)
