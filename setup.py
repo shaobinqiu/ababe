@@ -13,7 +13,7 @@ setup(
     include_package_data=True,
     package_data={"ababe.stru": ["*.json"]},
     install_requires=["nose2", "numpy==1.12", "aenum", "hat-trie",
-                      "spglib==1.9.9.18", "PyYAML==3.11",
+                      "spglib==1.9.9.18", "ruamel.yaml",
                       "scipy==0.18.1", "progressbar2", "xxhash",
                       "click"],
     classifiers=[

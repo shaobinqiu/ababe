@@ -108,6 +108,26 @@ class OccupyGenerator(object):
         dup = self.gen_dup_of_ele(ele, n, sp)
         return self.gen_2nodup_gen(dup)
 
+    def gen_dup_exch(self, sp1, sp2, n):
+        init_numbers = self.init_cell.numbers
+        n_sp1 = sp1.Z
+        n_sp2 = sp2.Z
+        sp1_ind = [i for i, e in enumerate(init_numbers) if e == n_sp1]
+        sp2_ind = [i for i, e in enumerate(init_numbers) if e == n_sp2]
+
+        for ex_sp1 in combinations(sp1_ind, n):
+            for ex_sp2 in combinations(sp2_ind, n):
+                numbers = init_numbers.copy()
+                for ind_sp1, ind_sp2 in zip(ex_sp1, ex_sp2):
+                    numbers[ind_sp1] = n_sp2
+                    numbers[ind_sp2] = n_sp1
+                yield GeneralCell(self.lattice, self.positions, numbers)
+
+
+    def gen_nodup_exch(self, sp1, sp2, n):
+        dup = self.gen_dup_exch(sp1, sp2, n)
+        return self.gen_2nodup_gen(dup)
+
     def _gen_dup_trinary_alloy(self, sp1, n1, sp2, n2):
         init_numbers = self.init_cell.numbers
         isp1 = sp1.Z

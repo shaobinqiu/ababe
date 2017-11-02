@@ -4,7 +4,8 @@
 import unittest
 
 import numpy as np
-import yaml
+import ruamel.yaml as yaml
+#import yaml
 from spglib import get_symmetry
 import ababe.stru.sogen as sogen
 from ababe.stru.sogen import OccupyGenerator
@@ -142,6 +143,62 @@ class testOccupyGeneratorCell(unittest.TestCase):
         l = [i for i in nodup_gen]
         self.assertEqual(len(l), 4)
 
+    def test_gen_dup_exch(self):
+        lattice = np.array([[5.0, 0.0000000000, 0.0000000000],
+                            [2.5, 4.330127, 0.0000000000],
+                            [0.0000000000, 0.0000000000, 20]])
+        positions = np.array([[0.666667, 0.000000, 0.5281],
+                              [0.000000, 0.333333, 0.5281],
+                              [0.333333, 0.666667, 0.5281],
+                              [0.000000, 0.000000, 0.6115],
+                              [0.500000, 0.000000, 0.6115],
+                              [0.000000, 0.500000, 0.6115],
+                              [0.500000, 0.500000, 0.6115]])
+        numbers = np.array([12, 12, 12, 28, 28, 28, 28])
+        gcell = GeneralCell(lattice, positions, numbers)
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 1)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 12)
+
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 2)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 18)
+
+        ocu_gen = OccupyGenerator(gcell)
+        dup_gen = ocu_gen.gen_dup_exch(Specie('Mg'), Specie('Ni'), 3)
+        l = [i for i in dup_gen]
+        self.assertEqual(len(l), 4)
+
+    def test_gen_nodup_exch(self):
+        lattice = np.array([[5.0, 0.0000000000, 0.0000000000],
+                            [2.5, 4.330127, 0.0000000000],
+                            [0.0000000000, 0.0000000000, 20]])
+        positions = np.array([[0.666667, 0.000000, 0.5281],
+                              [0.000000, 0.333333, 0.5281],
+                              [0.333333, 0.666667, 0.5281],
+                              [0.000000, 0.000000, 0.6115],
+                              [0.500000, 0.000000, 0.6115],
+                              [0.000000, 0.500000, 0.6115],
+                              [0.500000, 0.500000, 0.6115]])
+        numbers = np.array([12, 12, 12, 28, 28, 28, 28])
+        gcell = GeneralCell(lattice, positions, numbers)
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 1)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 3)
+
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 2)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 4)
+
+        ocu_gen = OccupyGenerator(gcell)
+        nodup_gen = ocu_gen.gen_nodup_exch(Specie('Mg'), Specie('Ni'), 3)
+        l = [i for i in nodup_gen]
+        self.assertEqual(len(l), 2)
+
     def test_gen_dup_trinary_alloy(self):
         # dup_gen = self.ocu_gen._gen_dup_trinary_alloy(Specie('Ti'), 4,
         #                                              Specie('Cu'), 3)
@@ -213,7 +270,7 @@ class testOccupyGeneratorCell(unittest.TestCase):
 class testAlgorithomSog(unittest.TestCase):
 
     # def setUp(self):
-    #     pos_01 = 
+    #     pos_01 =
 
     def test_get_id_seq(self):
         pos_0 = np.array([[ 0.        ,  0.        ,  0.        ],
@@ -339,11 +396,11 @@ class testAlgorithomSog(unittest.TestCase):
 
         gen_02 = sogen.gen_nodup_cstru(m_tri, c, (1,3,3), t, 3)
         nodup_02 = [stru for stru in gen_02]
-        self.assertEqual(len(nodup_02), 4)  
+        self.assertEqual(len(nodup_02), 4)
 
         gen_03 = sogen.gen_nodup_cstru(m_tri, c, (1,5,5), t, 2)
         nodup_03 = [stru for stru in gen_03]
-        self.assertEqual(len(nodup_03), 4)  
+        self.assertEqual(len(nodup_03), 4)
 
     def test_is_speckle_disjunct(self):
         g = GhostSpecie()

@@ -5,8 +5,8 @@ from ababe.stru.element import Specie
 from collections import Counter, OrderedDict
 from operator import itemgetter
 
-# import ruamel.yaml as yaml
-import yaml
+import ruamel.yaml as yaml
+# import yaml
 
 
 class YamlOutput(object):
